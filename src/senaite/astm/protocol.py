@@ -2,8 +2,12 @@
 
 import asyncio
 
+from senaite.astm import logger
 from senaite.astm.constants import ACK
 from senaite.astm.constants import ENQ
+from senaite.astm.constants import EOT
+from senaite.astm.constants import NAK
+from senaite.astm.constants import STX
 
 instruments = []
 
@@ -26,21 +30,29 @@ class ASTMProtocol(asyncio.Protocol):
     def data_received(self, data):
         """Called when some data is received.
         """
-        message = data.decode()
-        print('Data received: {!r}'.format(message))
+        print('Data received: {!r}'.format(data))
+        # remove trailing newline
+        data = data.rstrip(b"\n")
+        self.dispatch(data)
 
-        if data.startswith(ENQ):
-            print('ENQ received: {!r}'.format(data))
-            self.transport.write(ACK)
+    def dispatch(self, data):
+        """Dispatcher for received data
+        """
+        if data == ENQ:
+            resp = self.on_enq(data)
+        elif data == ACK:
+            resp = self.on_ack(data)
+        elif data == NAK:
+            resp = self.on_nak(data)
+        elif data == EOT:
+            resp = self.on_eot(data)
+        elif data.startswith(STX):
+            resp = self.on_message(data)
+        else:
+            resp = self.default_handler(data)
 
-        # if data.startswith(ENQ):
-        #     self.transport.write(ACK)
-        # else:
-        #     print('Send: {!r}'.format(message))
-        #     self.transport.write(data)
-
-        # print('Close the client socket')
-        # self.transport.close()
+        if resp is not None:
+            self.transport.write(resp)
 
     def connection_lost(self, ex):
         """Called when the connection is lost or closed.
@@ -48,3 +60,34 @@ class ASTMProtocol(asyncio.Protocol):
         print("connection_lost: {}".format(self.instrument))
         # remove the instrument
         instruments.remove(self)
+
+    def default_handler(self, data):
+        raise ValueError('Unable to dispatch data: %r', data)
+
+    def on_enq(self, data):
+        """Calls on <ENQ> message receiving."""
+        logger.warning('on_enq: %r', data)
+        return ACK
+
+    def on_ack(self, data):
+        """Calls on <ACK> message receiving."""
+        logger.warning('on_ack: %r', data)
+
+    def on_nak(self, data):
+        """Calls on <NAK> message receiving."""
+        logger.warning('on_nak: %r', data)
+
+    def on_eot(self, data):
+        """Calls on <EOT> message receiving."""
+        logger.warning('on_eot: %r', data)
+
+    def on_message(self, data):
+        """Calls on ASTM message receiving."""
+        logger.warning('on_message: %r', data)
+        return ACK
+
+    def on_timeout(self, data):
+        """Calls when timeout event occurs. Used to limit waiting time for
+        response data."""
+        logger.warning('Communication timeout: %r', data)
+        return NAK
