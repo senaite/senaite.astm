@@ -1,19 +1,54 @@
 # -*- coding: utf-8 -*-
 
+import argparse
 import asyncio
+import logging
 
+from senaite.astm import logger
 from senaite.astm.protocol import ASTMProtocol
 
 
 def main():
-    print("starting up ...")
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+    parser.add_argument(
+        '-l',
+        '--listen',
+        type=str,
+        default='0.0.0.0',
+        help='Listen IP address')
+
+    parser.add_argument(
+        '-p',
+        '--port',
+        type=str,
+        default='4010',
+        help='Port to connect')
+
+    parser.add_argument(
+        '-v',
+        '--verbose',
+        action='store_true',
+        help='Verbose logging')
+
+    args = parser.parse_args()
+
+    # Set logging
+    if args.verbose:
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.INFO)
+    logger.addHandler(logging.StreamHandler())
 
     loop = asyncio.get_event_loop()
-    coro = loop.create_server(ASTMProtocol, '0.0.0.0', 4010)
+    coro = loop.create_server(ASTMProtocol, host=args.listen, port=args.port)
     server = loop.run_until_complete(coro)
 
     for socket in server.sockets:
-        print("serving on {}".format(socket.getsockname()))
+        ip, port = socket.getsockname()
+        logger.info('Starting server on {}:{}'.format(ip, port))
+        logger.info('ASTM server ready to handle requests...')
     loop.run_forever()
 
 
