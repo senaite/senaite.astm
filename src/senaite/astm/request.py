@@ -73,8 +73,6 @@ class Request(object):
         logger.debug('on_eot: %r', data)
         if self._is_transfer_state:
             self._is_transfer_state = False
-        else:
-            raise InvalidState('Server is not ready to accept EOT message.')
 
     def on_message(self, data):
         """Calls on ASTM message receiving."""
