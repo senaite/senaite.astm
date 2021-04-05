@@ -209,7 +209,7 @@ def iter_encode(records, encoding=ENCODING, size=None, seq=1):
             yield msg
 
 
-def encode_message(seq, records, encoding):
+def encode_message(seq, records, encoding=ENCODING):
     """Encodes ASTM message.
 
     :param seq: Frame sequence number.
@@ -260,8 +260,9 @@ def encode_record(record, encoding):
     return FIELD_SEP.join(fields)
 
 
-def encode_component(component, encoding):
-    """Encodes ASTM record field components."""
+def encode_component(component, encoding=ENCODING):
+    """Encodes ASTM record field components.
+    """
     items = []
     _append = items.append
     for item in component:
@@ -279,7 +280,8 @@ def encode_component(component, encoding):
     return COMPONENT_SEP.join(items).rstrip(COMPONENT_SEP)
 
 
-def encode_repeated_component(components, encoding):
-    """Encodes repeated components."""
+def encode_repeated_component(components, encoding=ENCODING):
+    """Encodes repeated components.
+    """
     return REPEAT_SEP.join(encode_component(item, encoding)
                            for item in components)
