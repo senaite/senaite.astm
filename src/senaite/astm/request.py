@@ -19,7 +19,7 @@ class Request(object):
         self.data = data
         self.response = None
         self.dispatcher = Dispatcher()
-        self._is_transfer_state = False
+        self._is_transfer_state = True
         self._chunks = []
 
     def __call__(self):
@@ -82,10 +82,11 @@ class Request(object):
             return NAK
         else:
             try:
-                self.handle_message(self._last_recv_data)
+                self.handle_message(data)
                 return ACK
-            except Exception:
-                logger.error('Error occurred on message handling.')
+            except Exception as exc:
+                logger.error('Error occurred on message handling. {!r}'
+                             .format(exc))
                 return NAK
 
     def on_timeout(self, data):

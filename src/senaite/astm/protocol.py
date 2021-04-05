@@ -22,7 +22,7 @@ class ASTMProtocol(asyncio.Protocol):
         peername = transport.get_extra_info('peername')
         self.instrument = "{:s}:{:d}".format(*peername)
 
-        print('Connection from {}'.format(peername))
+        logger.debug('Connection from {}'.format(peername))
         # remember the connected instrument
         instruments.append(self)
 
@@ -39,6 +39,6 @@ class ASTMProtocol(asyncio.Protocol):
     def connection_lost(self, ex):
         """Called when the connection is lost or closed.
         """
-        print('Collection lost: {!s}'.format(self.instrument))
+        logger.debug('Collection lost: {!s}'.format(self.instrument))
         # remove the instrument
         instruments.remove(self)

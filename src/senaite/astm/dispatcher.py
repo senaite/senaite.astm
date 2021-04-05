@@ -2,6 +2,8 @@
 
 from senaite.astm import logger
 from senaite.astm.codecs import decode_message
+from senaite.astm.mapping import Mapping
+from senaite.astm.records import HeaderRecord
 
 
 class Dispatcher(object):
@@ -12,13 +14,18 @@ class Dispatcher(object):
             'H': self.on_header,
         }
         self.wrappers = {
+            'H': HeaderRecord,
         }
 
     def __call__(self, message):
         # sequence, records, checksum
         seq, records, cs = decode_message(message)
         for record in records:
-            self.dispatch.get(record[0], self.on_unknown)(self.wrap(record))
+            func = self.dispatch.get(record[0], self.on_unknown)
+            wrapped = self.wrap(record)
+            if isinstance(wrapped, Mapping):
+                wrapped._raw_message = message
+            func(wrapped)
 
     def wrap(self, record):
         rtype = record[0]
