@@ -4,6 +4,7 @@ from senaite.astm import logger
 from senaite.astm.codecs import decode_message
 from senaite.astm.mapping import Mapping
 from senaite.astm.records import HeaderRecord
+from senaite.astm.records import PatientRecord
 
 
 class Dispatcher(object):
@@ -12,9 +13,11 @@ class Dispatcher(object):
     def __init__(self):
         self.dispatch = {
             'H': self.on_header,
+            'P': self.on_patient,
         }
         self.wrappers = {
             'H': HeaderRecord,
+            'P': PatientRecord,
         }
 
     def __call__(self, message):
@@ -38,6 +41,10 @@ class Dispatcher(object):
 
     def on_header(self, record):
         """Header record handler."""
+        self._default_handler(record)
+
+    def on_patient(self, record):
+        """Patient record handler."""
         self._default_handler(record)
 
     def on_unknown(self, record):

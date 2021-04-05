@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
 
 from senaite.astm import logger
+from senaite.astm.codecs import is_chunked_message
+from senaite.astm.codecs import join
 from senaite.astm.constants import ACK
 from senaite.astm.constants import ENQ
 from senaite.astm.constants import EOT
 from senaite.astm.constants import NAK
 from senaite.astm.constants import STX
-from senaite.astm.exceptions import NotAccepted
-from senaite.astm.exceptions import InvalidState
 from senaite.astm.dispatcher import Dispatcher
+from senaite.astm.exceptions import InvalidState
+from senaite.astm.exceptions import NotAccepted
 
 
 class Request(object):
@@ -19,7 +21,7 @@ class Request(object):
         self.data = data
         self.response = None
         self.dispatcher = Dispatcher()
-        self._is_transfer_state = True
+        self._is_transfer_state = False
         self._chunks = []
 
     def __call__(self):
@@ -100,4 +102,12 @@ class Request(object):
         self._chunks = []
 
     def handle_message(self, message):
-        self.dispatcher(message)
+        self.is_chunked_transfer = is_chunked_message(message)
+        if self.is_chunked_transfer:
+            self._chunks.append(message)
+        elif self._chunks:
+            self._chunks.append(message)
+            self.dispatcher(join(self._chunks))
+            self._chunks = []
+        else:
+            self.dispatcher(message)

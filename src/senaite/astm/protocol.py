@@ -39,6 +39,6 @@ class ASTMProtocol(asyncio.Protocol):
     def connection_lost(self, ex):
         """Called when the connection is lost or closed.
         """
-        logger.debug('Collection lost: {!s}'.format(self.instrument))
+        logger.debug('Connection lost: {!s}'.format(self.instrument))
         # remove the instrument
         instruments.remove(self)

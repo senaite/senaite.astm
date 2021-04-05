@@ -4,12 +4,12 @@ from datetime import datetime
 
 from senaite.astm.fields import ConstantField
 from senaite.astm.fields import DateTimeField
+from senaite.astm.fields import IntegerField
 from senaite.astm.fields import NotUsedField
 from senaite.astm.fields import RepeatedComponentField
 from senaite.astm.fields import TextField
 from senaite.astm.mapping import Component
 from senaite.astm.mapping import Record
-
 
 HeaderRecord = Record.build(
     # ASTM 6.1: Record Type ID
@@ -45,4 +45,46 @@ HeaderRecord = Record.build(
     NotUsedField(name='version'),
     # ASTM 6.14: Date and Time of Message
     DateTimeField(name='timestamp', default=datetime.now, required=True),
+)
+
+
+PatientRecord = Record.build(
+    # ASTM 7.1: Record Type ID
+    ConstantField(name='type', default='P'),
+    # ASTM 7.2: Sequence Number
+    IntegerField(name='seq', default=1, required=True),
+    # ASTM 7.3: Practice Assigned Patient ID
+    NotUsedField(name='practice_id'),
+    NotUsedField(name='laboratory_id'),
+    NotUsedField(name='id'),
+    NotUsedField(name='name'),
+    NotUsedField(name='maiden_name'),
+    NotUsedField(name='birthdate'),
+    NotUsedField(name='sex'),
+    NotUsedField(name='race'),
+    NotUsedField(name='address'),
+    NotUsedField(name='reserved'),
+    NotUsedField(name='phone'),
+    NotUsedField(name='physician_id'),
+    NotUsedField(name='special_1'),
+    NotUsedField(name='special_2'),
+    NotUsedField(name='height'),
+    NotUsedField(name='weight'),
+    NotUsedField(name='diagnosis'),
+    NotUsedField(name='medication'),
+    NotUsedField(name='diet'),
+    NotUsedField(name='practice_field_1'),
+    NotUsedField(name='practice_field_2'),
+    NotUsedField(name='admission_date'),
+    NotUsedField(name='admission_status'),
+    NotUsedField(name='location'),
+    NotUsedField(name='diagnostic_code_nature'),
+    NotUsedField(name='diagnostic_code'),
+    NotUsedField(name='religion'),
+    NotUsedField(name='martial_status'),
+    NotUsedField(name='isolation_status'),
+    NotUsedField(name='language'),
+    NotUsedField(name='hospital_service'),
+    NotUsedField(name='hospital_institution'),
+    NotUsedField(name='dosage_category'),
 )

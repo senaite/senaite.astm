@@ -127,6 +127,27 @@ def make_chunks(s, n):
             for item in zip_longest(*[iter_bytes] * n, fillvalue=b'')]
 
 
+def is_chunked_message(message):
+    """Checks plain message for chunked byte.
+    """
+    length = len(message)
+    if len(message) < 5:
+        return False
+    if ETB not in message:
+        return False
+    return message.index(ETB) == length - 5
+
+
+def join(chunks):
+    """Merges ASTM message `chunks` into single message.
+
+    :param chunks: List of chunks as `bytes`.
+    :type chunks: iterable
+    """
+    msg = b'1' + b''.join(c[2:-5] for c in chunks) + ETX
+    return b''.join([STX, msg, make_checksum(msg), CRLF])
+
+
 def split(msg, size):
     """Split `msg` into chunks with specified `size`.
 

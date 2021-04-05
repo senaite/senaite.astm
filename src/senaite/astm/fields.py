@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+import decimal
 import inspect
 import time
 import warnings
@@ -76,6 +77,33 @@ class TextField(Field):
         if not isinstance(value, str):
             raise TypeError('String value expected, got %r' % value)
         return super(TextField, self)._set_value(value)
+
+
+class IntegerField(Field):
+    """Mapping field for integer values.
+    """
+    def _get_value(self, value):
+        return int(value)
+
+    def _set_value(self, value):
+        if not isinstance(value, (int)):
+            try:
+                value = self._get_value(value)
+            except Exception:
+                raise TypeError('Integer value expected, got %r' % value)
+        return super(IntegerField, self)._set_value(value)
+
+
+class DecimalField(Field):
+    """Mapping field for decimal values.
+    """
+    def _get_value(self, value):
+        return decimal.Decimal(value)
+
+    def _set_value(self, value):
+        if not isinstance(value, (int, float, decimal.Decimal)):
+            raise TypeError('Decimal value expected, got %r' % value)
+        return super(DecimalField, self)._set_value(value)
 
 
 class DateField(Field):
