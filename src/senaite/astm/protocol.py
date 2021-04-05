@@ -16,6 +16,9 @@ class ASTMProtocol(asyncio.Protocol):
     """ASTM Protocol
     """
 
+    def __init__(self):
+        pass
+
     def connection_made(self, transport):
         """Called when a connection is made.
         """
@@ -30,21 +33,21 @@ class ASTMProtocol(asyncio.Protocol):
     def data_received(self, data):
         """Called when some data is received.
         """
-        print('Data received: {!r}'.format(data))
-        # remove trailing newline
-        data = data.rstrip(b"\n")
+        logger.debug('Data received: {!r}'.format(data))
         self.dispatch(data)
 
     def dispatch(self, data):
         """Dispatcher for received data
+
+        Lookup dispatcher for the connected IP from the config
         """
-        if data == ENQ:
+        if data.startswith(ENQ):
             resp = self.on_enq(data)
-        elif data == ACK:
+        elif data.startswith(ACK):
             resp = self.on_ack(data)
-        elif data == NAK:
+        elif data.startswith(NAK):
             resp = self.on_nak(data)
-        elif data == EOT:
+        elif data.startswith(EOT):
             resp = self.on_eot(data)
         elif data.startswith(STX):
             resp = self.on_message(data)
@@ -57,7 +60,7 @@ class ASTMProtocol(asyncio.Protocol):
     def connection_lost(self, ex):
         """Called when the connection is lost or closed.
         """
-        print("connection_lost: {}".format(self.instrument))
+        print('Collection lost: {!s}'.format(self.instrument))
         # remove the instrument
         instruments.remove(self)
 

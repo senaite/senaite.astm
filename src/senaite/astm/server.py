@@ -41,14 +41,19 @@ def main():
         logger.setLevel(logging.INFO)
     logger.addHandler(logging.StreamHandler())
 
+    # Get the current event loop.
     loop = asyncio.get_event_loop()
+    # Create a TCP server listening on port of the host address.
     coro = loop.create_server(ASTMProtocol, host=args.listen, port=args.port)
+    # Run until the future (an instance of Future) has completed.
     server = loop.run_until_complete(coro)
 
     for socket in server.sockets:
         ip, port = socket.getsockname()
         logger.info('Starting server on {}:{}'.format(ip, port))
-        logger.info('ASTM server ready to handle requests...')
+        logger.info('ASTM server ready to handle connections ...')
+
+    # Run the event loop until stop() is called.
     loop.run_forever()
 
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 #: ASTM specification base encoding.
-ENCODING = 'latin-1'
+ENCODING = 'utf-8'
 
 #: Message start token.
 STX = b'\x02'
