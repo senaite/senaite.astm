@@ -2,11 +2,12 @@
 
 import asyncio
 from collections import defaultdict
+from datetime import datetime
 
 from senaite.astm import logger
 from senaite.astm.codecs import is_chunked_message
-from senaite.astm.codecs import make_checksum
 from senaite.astm.codecs import join
+from senaite.astm.codecs import make_checksum
 from senaite.astm.constants import ACK
 from senaite.astm.constants import ENQ
 from senaite.astm.constants import EOT
@@ -17,6 +18,21 @@ from senaite.astm.exceptions import NotAccepted
 
 clients = []
 envs = defaultdict(dict)
+TIMEOUT = 1
+
+
+async def timeout(timeout=15, callback=None):
+    loop = asyncio.get_running_loop()
+    try:
+        now = loop.time()
+        logger.info("timeout in {} seconds".format(timeout))
+        await asyncio.sleep(timeout, loop=loop)
+    except asyncio.CancelledError:
+        logger.debug("timeout cancelled after {:.2f} seconds"
+                     .format(loop.time() - now))
+        return
+    if callable(callback):
+        callback()
 
 
 class ASTMProtocol(asyncio.Protocol):
@@ -26,6 +42,7 @@ class ASTMProtocol(asyncio.Protocol):
     """
     def __init__(self):
         logger.debug("ASTMProtocol:constructor")
+        self.timer = asyncio.create_task(timeout(TIMEOUT, self.on_timeout))
 
     def connection_made(self, transport):
         """Called when a connection is made.
@@ -70,6 +87,11 @@ class ASTMProtocol(asyncio.Protocol):
     def data_received(self, data):
         """Called when some data is received.
         """
+        import time
+        time.sleep(2)
+        if self.timer.done():
+            return
+        self.timer.cancel()
         logger.debug('-> Data received: {!r}'.format(data))
         response = self.handle_data(data)
         if response is not None:
@@ -123,15 +145,16 @@ class ASTMProtocol(asyncio.Protocol):
         """Calls on <EOT> message receiving."""
         logger.debug('on_eot: %r', data)
         if self.in_transfer_state:
-            logger.info("".join(self.messages))
+            self.write_messages(self.messages)
             self.discard_env()
         else:
             raise InvalidState('Server is not ready to accept EOT message.')
 
-    def on_timeout(self, data):
+    def on_timeout(self):
         """Calls when timeout event occurs. Used to limit waiting time for
         response data."""
-        logger.debug('on_timeout: %r', data)
+        logger.debug("on_timeout")
+        self.transport.close()
 
     def on_message(self, data):
         """Calls on ASTM message receiving."""
@@ -167,6 +190,15 @@ class ASTMProtocol(asyncio.Protocol):
         messages = self.messages
         messages.append(message)
         self.messages = messages
+
+    def write_messages(self, messages):
+        """Write message to file
+        """
+        now = datetime.now()
+        ts = now.strftime("%Y%m%d%H%M%S")
+        filename = "{}.txt".format(ts)
+        with open(filename, "wb") as f:
+            f.writelines(messages)
 
     def validate_checksum(self, message):
         frame_cs = message[1:-2]
