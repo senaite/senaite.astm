@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import asyncio
+from collections import defaultdict
 
 from senaite.astm import logger
 from senaite.astm.request import Request
 
-instruments = []
+clients = []
+envs = defaultdict(dict)
 
 
 class ASTMProtocol(asyncio.Protocol):
@@ -13,24 +15,26 @@ class ASTMProtocol(asyncio.Protocol):
     """
 
     def __init__(self):
-        pass
+        logger.debug("ASTMProtocol:constructor")
 
     def connection_made(self, transport):
         """Called when a connection is made.
         """
         self.transport = transport
         peername = transport.get_extra_info('peername')
-        self.instrument = "{:s}:{:d}".format(*peername)
-
+        self.ip, self.port = peername
+        self.client = "{:s}:{:d}".format(*peername)
+        self.env = envs[self.ip]
         logger.debug('Connection from {}'.format(peername))
-        # remember the connected instrument
-        instruments.append(self)
+        # remember the connected client
+        clients.append(self)
 
     def data_received(self, data):
         """Called when some data is received.
         """
         logger.debug('-> Data received: {!r}'.format(data))
-        request = Request(data, transport=self.transport)
+        self.log(data)
+        request = Request(data, self.env, transport=self.transport)
         response = request()
         if response is not None:
             logger.debug('<- Sending response: {!r}'.format(response))
@@ -39,6 +43,10 @@ class ASTMProtocol(asyncio.Protocol):
     def connection_lost(self, ex):
         """Called when the connection is lost or closed.
         """
-        logger.debug('Connection lost: {!s}'.format(self.instrument))
-        # remove the instrument
-        instruments.remove(self)
+        logger.debug('Connection lost: {!s}'.format(self.client))
+        # remove the connected client
+        clients.remove(self)
+
+    def log(self, data):
+        with open("{}.log".format(self.ip), "ab") as f:
+            f.write(data)

@@ -17,16 +17,44 @@ class Request(object):
     """ASTM data wrapper
     """
 
-    def __init__(self, data, **kw):
+    def __init__(self, data, env, **kw):
         self.data = data
+        self.env = env
         self.response = None
         self.dispatcher = Dispatcher()
-        self._is_transfer_state = False
-        self._chunks = []
 
     def __call__(self):
         self.response = self.handle_data(self.data)
         return self.response
+
+    def getenv(self, name, default=None):
+        """Return a value from the environment
+        """
+        return self.env.get(name, default)
+
+    def setenv(self, name, value):
+        """Set a value to the environment
+        """
+        self.env[name] = value
+
+    @property
+    def chunks(self):
+        chunks = self.getenv("_chunks")
+        if chunks is None:
+            self.setenv("_chunks", [])
+        return self.getenv("_chunks")
+
+    @chunks.setter
+    def chunks(self, value):
+        self.set("_chunks", value)
+
+    @property
+    def in_transfer_state(self):
+        return self.getenv("_in_transfer_state", False)
+
+    @in_transfer_state.setter
+    def in_transfer_state(self, value):
+        self.setenv("_in_transfer_state", value)
 
     def handle_data(self, data):
         """Process incoming data
@@ -46,13 +74,14 @@ class Request(object):
         self.response = resp
 
     def default_handler(self, data):
-        raise ValueError('Unable to dispatch data: %r', data)
+        # raise ValueError('Unable to dispatch data: %r', data)
+        logger.error('Unable to dispatch data: %r', data)
 
     def on_enq(self, data):
         """Calls on <ENQ> message receiving."""
         logger.debug('on_enq: %r', data)
-        if not self._is_transfer_state:
-            self._is_transfer_state = True
+        if not self.in_transfer_state:
+            self.in_transfer_state = True
             return ACK
         else:
             logger.error('ENQ is not expected')
@@ -71,13 +100,15 @@ class Request(object):
     def on_eot(self, data):
         """Calls on <EOT> message receiving."""
         logger.debug('on_eot: %r', data)
-        if self._is_transfer_state:
-            self._is_transfer_state = False
+        if self.in_transfer_state:
+            self.in_transfer_state = False
+        else:
+            raise InvalidState('Server is not ready to accept EOT message.')
 
     def on_message(self, data):
         """Calls on ASTM message receiving."""
         logger.debug('on_message: %r', data)
-        if not self._is_transfer_state:
+        if not self.in_transfer_state:
             self.discard_input_buffers()
             return NAK
         else:
@@ -97,15 +128,15 @@ class Request(object):
     def discard_input_buffers(self):
         """Flush input buffers
         """
-        self._chunks = []
+        self.chunks = []
 
     def handle_message(self, message):
-        self.is_chunked_transfer = is_chunked_message(message)
-        if self.is_chunked_transfer:
-            self._chunks.append(message)
-        elif self._chunks:
-            self._chunks.append(message)
-            self.dispatcher(join(self._chunks))
-            self._chunks = []
+        is_chunked_transfer = is_chunked_message(message)
+        if is_chunked_transfer:
+            self.chunks.append(message)
+        elif self.chunks:
+            self.chunks.append(message)
+            self.dispatcher(join(self.chunks))
+            self.chunks = []
         else:
             self.dispatcher(message)
