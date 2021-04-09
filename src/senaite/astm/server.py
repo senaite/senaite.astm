@@ -3,7 +3,10 @@
 import argparse
 import asyncio
 import logging
+import os
+from argparse import ArgumentError
 
+from senaite.astm import CONFIG
 from senaite.astm import logger
 from senaite.astm.protocol import ASTMProtocol
 
@@ -27,6 +30,13 @@ def main():
         help='Port to connect')
 
     parser.add_argument(
+        '-o',
+        '--output',
+        type=str,
+        default=CONFIG['output'],
+        help='Output directory to write ASTM files')
+
+    parser.add_argument(
         '-v',
         '--verbose',
         action='store_true',
@@ -40,6 +50,10 @@ def main():
     else:
         logger.setLevel(logging.INFO)
     logger.addHandler(logging.StreamHandler())
+
+    if not os.path.isdir(args.output):
+        raise ArgumentError("Output path must be an existing directory")
+    CONFIG['output'] = args.output
 
     # Get the current event loop.
     loop = asyncio.get_event_loop()

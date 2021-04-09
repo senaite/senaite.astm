@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import asyncio
+import os
 from collections import defaultdict
 from datetime import datetime
 
+from senaite.astm import CONFIG
 from senaite.astm import logger
 from senaite.astm.codecs import is_chunked_message
 from senaite.astm.codecs import join
@@ -182,7 +184,8 @@ class ASTMProtocol(asyncio.Protocol):
         now = datetime.now()
         ts = now.strftime("%Y%m%d%H%M%S")
         filename = "{}.txt".format(ts)
-        with open(filename, "wb") as f:
+        filepath = os.path.join(CONFIG['output'], filename)
+        with open(filepath, "wb") as f:
             f.writelines(messages)
 
     def validate_checksum(self, message):
