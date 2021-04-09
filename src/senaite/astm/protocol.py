@@ -7,9 +7,6 @@ from datetime import datetime
 
 from senaite.astm import CONFIG
 from senaite.astm import logger
-from senaite.astm.codecs import is_chunked_message
-from senaite.astm.codecs import join
-from senaite.astm.codecs import make_checksum
 from senaite.astm.constants import ACK
 from senaite.astm.constants import ENQ
 from senaite.astm.constants import EOT
@@ -17,6 +14,9 @@ from senaite.astm.constants import NAK
 from senaite.astm.constants import STX
 from senaite.astm.exceptions import InvalidState
 from senaite.astm.exceptions import NotAccepted
+from senaite.astm.utils import is_chunked_message
+from senaite.astm.utils import join
+from senaite.astm.utils import make_checksum
 
 clients = []
 envs = defaultdict(dict)
