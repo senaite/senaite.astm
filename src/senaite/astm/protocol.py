@@ -18,21 +18,7 @@ from senaite.astm.exceptions import NotAccepted
 
 clients = []
 envs = defaultdict(dict)
-TIMEOUT = 1
-
-
-async def timeout(timeout=15, callback=None):
-    loop = asyncio.get_running_loop()
-    try:
-        now = loop.time()
-        logger.info("timeout in {} seconds".format(timeout))
-        await asyncio.sleep(timeout, loop=loop)
-    except asyncio.CancelledError:
-        logger.debug("timeout cancelled after {:.2f} seconds"
-                     .format(loop.time() - now))
-        return
-    if callable(callback):
-        callback()
+TIMEOUT = 15
 
 
 class ASTMProtocol(asyncio.Protocol):
@@ -42,7 +28,10 @@ class ASTMProtocol(asyncio.Protocol):
     """
     def __init__(self):
         logger.debug("ASTMProtocol:constructor")
-        self.timer = asyncio.create_task(timeout(TIMEOUT, self.on_timeout))
+        # get the current running loop
+        loop = asyncio.get_running_loop()
+        # Invoke on_timeout callback *after* the given time.
+        self.timer = loop.call_later(TIMEOUT, self.on_timeout)
 
     def connection_made(self, transport):
         """Called when a connection is made.
@@ -87,10 +76,6 @@ class ASTMProtocol(asyncio.Protocol):
     def data_received(self, data):
         """Called when some data is received.
         """
-        import time
-        time.sleep(2)
-        if self.timer.done():
-            return
         self.timer.cancel()
         logger.debug('-> Data received: {!r}'.format(data))
         response = self.handle_data(data)

@@ -54,7 +54,14 @@ def main():
         logger.info('ASTM server ready to handle connections ...')
 
     # Run the event loop until stop() is called.
-    loop.run_forever()
+    try:
+        loop.run_forever()
+    except KeyboardInterrupt:
+        logger.info("Shutting down server...")
+    finally:
+        loop.run_until_complete(loop.shutdown_asyncgens())
+        loop.close()
+        logger.info("Server down...")
 
 
 if __name__ == '__main__':
