@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from senaite.astm.fields import ComponentField
-from senaite.astm.fields import RawField
+from senaite.astm.fields import ReadonlyField
 from senaite.astm.fields import SetField
+from senaite.astm.fields import NotUsedField
 from senaite.astm.fields import TextField
 from senaite.astm.mapping import Component
 from senaite.astm.records import CommentRecord
@@ -28,6 +29,32 @@ Data = Component.build(
     TextField(name='data', default='')
 )
 
+#: Test :class:`~astm.mapping.Component` also known as Universal Test ID.
+#:
+#: :param _: Reserved. Not used.
+#: :type _: None
+#:
+#: :param __: Reserved. Not used.
+#: :type __: None
+#:
+#: :param ___: Reserved. Not used.
+#: :type ___: None
+#:
+#:
+Test = Component.build(
+    NotUsedField(name='_'),
+    NotUsedField(name='__'),
+    NotUsedField(name='___'),
+    TextField(name='result_name'),
+    TextField(name='assay_code', required=True),
+    TextField(name='dilution'),
+)
+
+ReferenceRange = Component.build(
+    TextField(name='range'),
+    TextField(name='range_name'),
+)
+
 
 class Header(HeaderRecord):
     """ASTM header record.
@@ -47,6 +74,14 @@ class Order(OrderRecord):
 class Result(ResultRecord):
     """ASTM result record.
     """
+    test = ComponentField(Test)
+    value = TextField()
+    units = TextField()
+    references = ComponentField(ReferenceRange)
+    abnormal_flag = SetField(
+        field=TextField(),
+        length=4,
+        values=("HH", "H", "N", "L", "LL"))
 
 
 class ManufacturerInfo(ManufacturerInfoRecord):
@@ -55,8 +90,8 @@ class ManufacturerInfo(ManufacturerInfoRecord):
     message_type = SetField(
         name='message_type',
         values=('MATRIX', 'HISTOGRAM', 'REAGENT'))
-    measurement_type = RawField(name='measurement_type')
-    graphic_name = RawField(name='graphic_name')
+    measurement_type = ReadonlyField(name='measurement_type')
+    graphic_name = ReadonlyField(name='graphic_name')
     thresholds = ComponentField(Data)
     points = ComponentField(Data)
 

@@ -358,17 +358,17 @@ class SetField(Field):
         return self.field._set_value(value)
 
 
-class RawField(Field):
-    """Field for raw values
+class ReadonlyField(Field):
+    """Field for readonly values
     """
     def __init__(self, name=None):
-        super(RawField, self).__init__(name)
+        super(ReadonlyField, self).__init__(name)
 
     def _get_value(self, value):
         return value
 
     def _set_value(self, value):
-        return value
+        return None
 
 
 class NotUsedField(Field):
