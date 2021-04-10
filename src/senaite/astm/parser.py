@@ -71,8 +71,6 @@ def main():
     wrapper = wrappers[parser](messages)
     records = wrapper.get_records()
 
-    import pdb; pdb.set_trace()
-
 
 if __name__ == '__main__':
     main()
