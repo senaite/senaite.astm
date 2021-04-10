@@ -43,6 +43,9 @@ setup(
         ]
     },
     entry_points={
-        "console_scripts": ["server=senaite.astm.server:main"]
+        "console_scripts": [
+            "astm-server=senaite.astm.server:main",
+            "astm-parser=senaite.astm.parser:main",
+        ]
     }
 )
