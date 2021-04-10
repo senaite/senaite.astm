@@ -4,7 +4,6 @@ import datetime
 import decimal
 import inspect
 import time
-import warnings
 from itertools import islice
 
 
@@ -324,8 +323,8 @@ class RepeatedComponentField(Field):
 
     # update docstrings from list
     for name, obj in inspect.getmembers(Proxy):
-        if getattr(list, name, None) is None\
-        or name in ['__module__', '__doc__']:
+        if getattr(list, name, None) is None \
+           or name in ['__module__', '__doc__']:
             continue
         if not inspect.isfunction(obj):
             continue
@@ -383,6 +382,4 @@ class NotUsedField(Field):
         return None
 
     def _set_value(self, value):
-        warnings.warn('Field %r is not used, any assignments are omitted'
-                      '' % self.name, UserWarning)
         return None
