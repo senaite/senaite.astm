@@ -69,7 +69,7 @@ def main():
         return sys.exit(1)
 
     wrapper = wrappers[parser](messages)
-    records = wrapper.get_records()
+    print(wrapper.to_json())
 
 
 if __name__ == '__main__':

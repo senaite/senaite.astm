@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from senaite.astm.fields import ComponentField
+from senaite.astm.fields import NotUsedField
 from senaite.astm.fields import ReadonlyField
 from senaite.astm.fields import SetField
-from senaite.astm.fields import NotUsedField
 from senaite.astm.fields import TextField
 from senaite.astm.mapping import Component
 from senaite.astm.records import CommentRecord
@@ -14,7 +14,6 @@ from senaite.astm.records import PatientRecord
 from senaite.astm.records import ResultRecord
 from senaite.astm.records import TerminatorRecord
 from senaite.astm.wrapper import ASTMWrapper
-
 
 #: Data structure.
 #:
@@ -112,6 +111,7 @@ class H500(ASTMWrapper):
 
     def __init__(self, *args, **kwargs):
         super(H500, self).__init__(*args, **kwargs)
+
         self.wrappers = {
             'H': Header,
             'P': Patient,
@@ -121,3 +121,12 @@ class H500(ASTMWrapper):
             'C': Comment,
             'L': Terminator
         }
+
+        self.json_format = {
+            'P': {},
+            'O': {},
+            'M': [],
+            'R': [],
+        }
+
+        self.skip_keys = ['type', 'seq']
