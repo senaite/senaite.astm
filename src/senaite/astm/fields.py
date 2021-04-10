@@ -339,6 +339,39 @@ class RepeatedComponentField(Field):
         return [self.field._set_value(item) for item in value]
 
 
+class SetField(Field):
+    """Mapping field for predefined set of values.
+    """
+    def __init__(self, name=None, default=None,
+                 required=False, length=None,
+                 values=None, field=Field()):
+        super(SetField, self).__init__(name, default, required, length)
+        self.field = field
+        self.values = values and set(values) or set([])
+
+    def _get_value(self, value):
+        return self.field._get_value(value)
+
+    def _set_value(self, value):
+        value = self.field._get_value(value)
+        if value not in self.values:
+            raise ValueError('Unexpectable value %r' % value)
+        return self.field._set_value(value)
+
+
+class RawField(Field):
+    """Field for raw values
+    """
+    def __init__(self, name=None):
+        super(RawField, self).__init__(name)
+
+    def _get_value(self, value):
+        return value
+
+    def _set_value(self, value):
+        return value
+
+
 class NotUsedField(Field):
     """Mapping field for value that should be used. Acts as placeholder.
     On attempt to assign something to it raises :exc:`UserWarning` and rejects
