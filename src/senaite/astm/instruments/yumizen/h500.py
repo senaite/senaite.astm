@@ -4,6 +4,8 @@ from senaite.astm.fields import ComponentField
 from senaite.astm.fields import NotUsedField
 from senaite.astm.fields import ReadonlyField
 from senaite.astm.fields import SetField
+from senaite.astm.fields import IntegerField
+from senaite.astm.fields import DateField
 from senaite.astm.fields import TextField
 from senaite.astm.mapping import Component
 from senaite.astm.records import CommentRecord
@@ -15,31 +17,26 @@ from senaite.astm.records import ResultRecord
 from senaite.astm.records import TerminatorRecord
 from senaite.astm.wrapper import ASTMWrapper
 
+#: Patient name structure.
+PatientName = Component.build(
+    TextField(name='Name', length=20),
+    TextField(name='First Name', length=20)
+)
+
+# Patient Birthdate
+PatientBirthDate = Component.build(
+    DateField(name="birthdate"),
+    TextField(name="age"),
+    TextField(name="unit"),
+)
+
 #: Data structure.
-#:
-#: :param encode: data encoding
-#: :type encode: str
-#:
-#: :param data: Base64 encoded data
-#: :type first: str
-#:
 Data = Component.build(
     TextField(name='encode', default='FLOATLE-stream/deflate:base64'),
     TextField(name='data', default='')
 )
 
-#: Test :class:`~astm.mapping.Component` also known as Universal Test ID.
-#:
-#: :param _: Reserved. Not used.
-#: :type _: None
-#:
-#: :param __: Reserved. Not used.
-#: :type __: None
-#:
-#: :param ___: Reserved. Not used.
-#: :type ___: None
-#:
-#:
+#: Test structure.
 Test = Component.build(
     NotUsedField(name='_'),
     NotUsedField(name='__'),
@@ -63,6 +60,9 @@ class Header(HeaderRecord):
 class Patient(PatientRecord):
     """ASTM patient record.
     """
+    name = ComponentField(PatientName)
+    birthdate = ComponentField(PatientBirthDate)
+    sex = SetField(values=('M', 'F', None, 'U'))
 
 
 class Order(OrderRecord):
