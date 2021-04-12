@@ -19,22 +19,22 @@ __all__ = ['HeaderRecord', 'PatientRecord', 'OrderRecord',
 
 # Message Header Record
 #
-# | ASTM Field # | ASTM Name                       | Python Alias          |
-# |--------------+---------------------------------+-----------------------|
-# |          6.1 | Record Type ID                  | Record Type           |
-# |          6.2 | Delimiter Definition            | DelimiterDefinition   |
-# |          6.3 | Message Control ID              | MessageControlID      |
-# |          6.4 | Access Password                 | AccessPassword        |
-# |          6.5 | Sender Namer or ID              | SenderName            |
-# |          6.6 | Sender Street Address           | SenderStreetAddress   |
-# |          6.7 | Reserved Field                  | ReservedField         |
-# |          6.8 | Sender Telephone Number         | SenderTelephoneNumber |
-# |          6.9 | Characteristics of Sender       | SenderCharacteristics |
-# |         6.10 | Receiver ID                     | ReceiverID            |
-# |         6.11 | Comment or Special Instructions | Comment               |
-# |         6.12 | Processing ID                   | ProcessingID          |
-# |         6.13 | Version Number                  | VersionNumber         |
-# |         6.14 | Date and Time of Message        | DateTime              |
+# | ASTM # | ASTM Name                       | Python Alias          |
+# |--------+---------------------------------+-----------------------|
+# |    6.1 | Record Type ID                  | Record Type           |
+# |    6.2 | Delimiter Definition            | DelimiterDefinition   |
+# |    6.3 | Message Control ID              | MessageControlID      |
+# |    6.4 | Access Password                 | AccessPassword        |
+# |    6.5 | Sender Namer or ID              | SenderName            |
+# |    6.6 | Sender Street Address           | SenderStreetAddress   |
+# |    6.7 | Reserved Field                  | ReservedField         |
+# |    6.8 | Sender Telephone Number         | SenderTelephoneNumber |
+# |    6.9 | Characteristics of Sender       | SenderCharacteristics |
+# |   6.10 | Receiver ID                     | ReceiverID            |
+# |   6.11 | Comment or Special Instructions | Comment               |
+# |   6.12 | Processing ID                   | ProcessingID          |
+# |   6.13 | Version Number                  | VersionNumber         |
+# |   6.14 | Date and Time of Message        | DateTime              |
 #
 HeaderRecord = Record.build(
     ConstantField(name='RecordType', default='H'),
@@ -61,43 +61,43 @@ HeaderRecord = Record.build(
 
 # Message Patient Record
 #
-# | ASTM | ASTM Name                                             | Python Alias                    |
-# |------+-------------------------------------------------------+---------------------------------|
-# |  7.1 | Record Type                                           | RecordType                      |
-# |  7.2 | Sequence Number                                       | SequenceNumber                  |
-# |  7.3 | Practice-Assigned Patient ID                          | PracticeAssignedPatientID       |
-# |  7.4 | Laboratory-Assigned Patient ID                        | LaboratoryAssignedPatientID     |
-# |  7.5 | Patient ID Number 3                                   | PatientIDNo3                    |
-# |  7.6 | Patient Name                                          | Name                            |
-# |  7.7 | Mother’s Maiden Name                                  | MothersMaidenName               |
-# |  7.8 | Birthdate                                             | BirthDate                       |
-# |  7.9 | Patient Sex                                           | Sex                             |
-# | 7.10 | Patient Race-Ethnic Origin                            | RaceEthnicOrigin                |
-# | 7.11 | Patient Address                                       | Address                         |
-# | 7.12 | Reserved Field                                        | ReservedField                   |
-# | 7.13 | Patient Telephone Number                              | TelephoneNumber                 |
-# | 7.14 | Attending Physician ID                                | AttendingPhysicianID            |
-# | 7.15 | Special Field 1                                       | SpecialField1                   |
-# | 7.16 | Special Field 2                                       | SpecialField2                   |
-# | 7.17 | Patient Height                                        | Height                          |
-# | 7.18 | Patient Weight                                        | Weight                          |
-# | 7.19 | Patient’s Known or Suspected Diagnosis                | KnownDiagnosis                  |
-# | 7.20 | Patient Active Medications                            | ActiveMedications               |
-# | 7.21 | Patient’s Diet                                        | Diet                            |
-# | 7.22 | Practice Field Number 1                               | PracticeFieldNumber1            |
-# | 7.23 | Practice Field Number 2                               | PracticeFieldNumber2            |
-# | 7.24 | Admission and Discharge Dates                         | AdmissionDischargeDates         |
-# | 7.25 | Admission Status                                      | AdmissionStatus                 |
-# | 7.26 | Location                                              | Location                        |
-# | 7.27 | Nature of Alternative Diagnostic Code and Classifiers | NatureAlternativeDiagnosticCode |
-# | 7.28 | Alternative Diagnostic Code and Classification        | AlternativeDiagnosticCode       |
-# | 7.29 | Patient Religion                                      | Religion                        |
-# | 7.30 | Marital Status                                        | MaritalStatus                   |
-# | 7.31 | Isolation Status                                      | IsolationStatus                 |
-# | 7.32 | Language                                              | Language                        |
-# | 7.33 | Hospital Service                                      | HospitalService                 |
-# | 7.34 | Hospital Institution                                  | HospitalInstitution             |
-# | 7.35 | Dosage Category                                       | DosageCategory                  |
+# | ASTM # | ASTM Name                                             | Python Alias                    |
+# |--------+-------------------------------------------------------+---------------------------------|
+# |    7.1 | Record Type                                           | RecordType                      |
+# |    7.2 | Sequence Number                                       | SequenceNumber                  |
+# |    7.3 | Practice-Assigned Patient ID                          | PracticeAssignedPatientID       |
+# |    7.4 | Laboratory-Assigned Patient ID                        | LaboratoryAssignedPatientID     |
+# |    7.5 | Patient ID Number 3                                   | PatientIDNo3                    |
+# |    7.6 | Patient Name                                          | Name                            |
+# |    7.7 | Mother’s Maiden Name                                  | MothersMaidenName               |
+# |    7.8 | Birthdate                                             | BirthDate                       |
+# |    7.9 | Patient Sex                                           | Sex                             |
+# |   7.10 | Patient Race-Ethnic Origin                            | RaceEthnicOrigin                |
+# |   7.11 | Patient Address                                       | Address                         |
+# |   7.12 | Reserved Field                                        | ReservedField                   |
+# |   7.13 | Patient Telephone Number                              | TelephoneNumber                 |
+# |   7.14 | Attending Physician ID                                | AttendingPhysicianID            |
+# |   7.15 | Special Field 1                                       | SpecialField1                   |
+# |   7.16 | Special Field 2                                       | SpecialField2                   |
+# |   7.17 | Patient Height                                        | Height                          |
+# |   7.18 | Patient Weight                                        | Weight                          |
+# |   7.19 | Patient’s Known or Suspected Diagnosis                | KnownDiagnosis                  |
+# |   7.20 | Patient Active Medications                            | ActiveMedications               |
+# |   7.21 | Patient’s Diet                                        | Diet                            |
+# |   7.22 | Practice Field Number 1                               | PracticeFieldNumber1            |
+# |   7.23 | Practice Field Number 2                               | PracticeFieldNumber2            |
+# |   7.24 | Admission and Discharge Dates                         | AdmissionDischargeDates         |
+# |   7.25 | Admission Status                                      | AdmissionStatus                 |
+# |   7.26 | Location                                              | Location                        |
+# |   7.27 | Nature of Alternative Diagnostic Code and Classifiers | NatureAlternativeDiagnosticCode |
+# |   7.28 | Alternative Diagnostic Code and Classification        | AlternativeDiagnosticCode       |
+# |   7.29 | Patient Religion                                      | Religion                        |
+# |   7.30 | Marital Status                                        | MaritalStatus                   |
+# |   7.31 | Isolation Status                                      | IsolationStatus                 |
+# |   7.32 | Language                                              | Language                        |
+# |   7.33 | Hospital Service                                      | HospitalService                 |
+# |   7.34 | Hospital Institution                                  | HospitalInstitution             |
+# |   7.35 | Dosage Category                                       | DosageCategory                  |
 #
 PatientRecord = Record.build(
     ConstantField(name='RecordType', default='P'),
