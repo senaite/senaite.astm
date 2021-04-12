@@ -15,7 +15,9 @@ from senaite.astm.mapping import Record
 __all__ = ['HeaderRecord', 'PatientRecord', 'OrderRecord',
            'ResultRecord', 'CommentRecord', 'TerminatorRecord']
 
-# Message Header Record (ASTM Sectin 6)
+# flake8: noqa: E501
+
+# Message Header Record
 #
 # | ASTM Field # | ASTM Name                       | Python Alias          |
 # |--------------+---------------------------------+-----------------------|
@@ -57,98 +59,82 @@ HeaderRecord = Record.build(
 )
 
 
-#: +-----+--------------+---------------------------------+-------------------+
-#: |  #  | ASTM Field # | ASTM Name                       | Python alias      |
-#: +=====+==============+=================================+===================+
-#: |   1 |        8.1.1 |                  Record Type ID |              type |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |   2 |        8.1.2 |                 Sequence Number |               seq |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |   3 |        8.1.3 |    Practice Assigned Patient ID |       practice_id |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |   4 |        8.1.4 |  Laboratory Assigned Patient ID |     laboratory_id |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |   5 |        8.1.5 |                      Patient ID |                id |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |   6 |        8.1.6 |                    Patient Name |              name |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |   7 |        8.1.7 |            Mother’s Maiden Name |       maiden_name |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |   8 |        8.1.8 |                       Birthdate |         birthdate |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |   9 |        8.1.9 |                     Patient Sex |               sex |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |  10 |       8.1.10 |      Patient Race-Ethnic Origin |              race |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |  11 |       8.1.11 |                 Patient Address |           address |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |  12 |       8.1.12 |                  Reserved Field |          reserved |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |  13 |       8.1.13 |        Patient Telephone Number |             phone |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |  14 |       8.1.14 |          Attending Physician ID |      physician_id |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |  15 |       8.1.15 |                Special Field #1 |         special_1 |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |  16 |       8.1.16 |                Special Field #2 |         special_2 |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |  17 |       8.1.17 |                  Patient Height |            height |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |  18 |       8.1.18 |                  Patient Weight |            weight |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |  19 |       8.1.19 |       Patient’s Known Diagnosis |         diagnosis |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |  20 |       8.1.20 |     Patient’s Active Medication |        medication |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |  21 |       8.1.21 |                  Patient’s Diet |              diet |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |  22 |       8.1.22 |            Practice Field No. 1 |  practice_field_1 |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |  23 |       8.1.23 |            Practice Field No. 2 |  practice_field_2 |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |  24 |       8.1.24 |       Admission/Discharge Dates |    admission_date |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |  25 |       8.1.25 |                Admission Status |  admission_status |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |  26 |       8.1.26 |                        Location |          location |
-#: +-----+--------------+---------------------------------+-------------------+
-#:
+# Message Patient Record
+#
+# | ASTM | ASTM Name                                             | Python Alias                    |
+# |------+-------------------------------------------------------+---------------------------------|
+# |  7.1 | Record Type                                           | RecordType                      |
+# |  7.2 | Sequence Number                                       | SequenceNumber                  |
+# |  7.3 | Practice-Assigned Patient ID                          | PracticeAssignedPatientID       |
+# |  7.4 | Laboratory-Assigned Patient ID                        | LaboratoryAssignedPatientID     |
+# |  7.5 | Patient ID Number 3                                   | PatientIDNo3                    |
+# |  7.6 | Patient Name                                          | Name                            |
+# |  7.7 | Mother’s Maiden Name                                  | MothersMaidenName               |
+# |  7.8 | Birthdate                                             | BirthDate                       |
+# |  7.9 | Patient Sex                                           | Sex                             |
+# | 7.10 | Patient Race-Ethnic Origin                            | RaceEthnicOrigin                |
+# | 7.11 | Patient Address                                       | Address                         |
+# | 7.12 | Reserved Field                                        | ReservedField                   |
+# | 7.13 | Patient Telephone Number                              | TelephoneNumber                 |
+# | 7.14 | Attending Physician ID                                | AttendingPhysicianID            |
+# | 7.15 | Special Field 1                                       | SpecialField1                   |
+# | 7.16 | Special Field 2                                       | SpecialField2                   |
+# | 7.17 | Patient Height                                        | Height                          |
+# | 7.18 | Patient Weight                                        | Weight                          |
+# | 7.19 | Patient’s Known or Suspected Diagnosis                | KnownDiagnosis                  |
+# | 7.20 | Patient Active Medications                            | ActiveMedications               |
+# | 7.21 | Patient’s Diet                                        | Diet                            |
+# | 7.22 | Practice Field Number 1                               | PracticeFieldNumber1            |
+# | 7.23 | Practice Field Number 2                               | PracticeFieldNumber2            |
+# | 7.24 | Admission and Discharge Dates                         | AdmissionDischargeDates         |
+# | 7.25 | Admission Status                                      | AdmissionStatus                 |
+# | 7.26 | Location                                              | Location                        |
+# | 7.27 | Nature of Alternative Diagnostic Code and Classifiers | NatureAlternativeDiagnosticCode |
+# | 7.28 | Alternative Diagnostic Code and Classification        | AlternativeDiagnosticCode       |
+# | 7.29 | Patient Religion                                      | Religion                        |
+# | 7.30 | Marital Status                                        | MaritalStatus                   |
+# | 7.31 | Isolation Status                                      | IsolationStatus                 |
+# | 7.32 | Language                                              | Language                        |
+# | 7.33 | Hospital Service                                      | HospitalService                 |
+# | 7.34 | Hospital Institution                                  | HospitalInstitution             |
+# | 7.35 | Dosage Category                                       | DosageCategory                  |
+#
 PatientRecord = Record.build(
-    ConstantField(name='type', default='P'),
-    IntegerField(name='seq', default=1, required=True),
-    NotUsedField(name='practice_id'),
-    NotUsedField(name='laboratory_id'),
-    NotUsedField(name='id'),
-    NotUsedField(name='name'),
-    NotUsedField(name='maiden_name'),
-    NotUsedField(name='birthdate'),
-    NotUsedField(name='sex'),
-    NotUsedField(name='race'),
-    NotUsedField(name='address'),
-    NotUsedField(name='reserved'),
-    NotUsedField(name='phone'),
-    NotUsedField(name='physician_id'),
-    NotUsedField(name='special_1'),
-    NotUsedField(name='special_2'),
-    NotUsedField(name='height'),
-    NotUsedField(name='weight'),
-    NotUsedField(name='diagnosis'),
-    NotUsedField(name='medication'),
-    NotUsedField(name='diet'),
-    NotUsedField(name='practice_field_1'),
-    NotUsedField(name='practice_field_2'),
-    NotUsedField(name='admission_date'),
-    NotUsedField(name='admission_status'),
-    NotUsedField(name='location'),
-    NotUsedField(name='diagnostic_code_nature'),
-    NotUsedField(name='diagnostic_code'),
-    NotUsedField(name='religion'),
-    NotUsedField(name='martial_status'),
-    NotUsedField(name='isolation_status'),
-    NotUsedField(name='language'),
-    NotUsedField(name='hospital_service'),
-    NotUsedField(name='hospital_institution'),
-    NotUsedField(name='dosage_category'),
+    ConstantField(name='RecordType', default='P'),
+    IntegerField(name='SequenceNumber', default=1, required=True),
+    NotUsedField(name='PracticeAssignedPatientID'),
+    NotUsedField(name='LaboratoryAssignedPatientID'),
+    NotUsedField(name='PatientIDNo3'),
+    NotUsedField(name='Name'),
+    NotUsedField(name='MothersMaidenName'),
+    NotUsedField(name='BirthDate'),
+    NotUsedField(name='Sex'),
+    NotUsedField(name='RaceEthnicOrigin'),
+    NotUsedField(name='Address'),
+    NotUsedField(name='ReservedField'),
+    NotUsedField(name='TelephoneNumber'),
+    NotUsedField(name='AttendingPhysicianID'),
+    NotUsedField(name='SpecialField1'),
+    NotUsedField(name='SpecialField2'),
+    NotUsedField(name='Height'),
+    NotUsedField(name='Weight'),
+    NotUsedField(name='KnownDiagnosis'),
+    NotUsedField(name='ActiveMedications'),
+    NotUsedField(name='Diet'),
+    NotUsedField(name='PracticeFieldNumber1'),
+    NotUsedField(name='PracticeFieldNumber2'),
+    NotUsedField(name='AdmissionDischargeDates'),
+    NotUsedField(name='AdmissionStatus'),
+    NotUsedField(name='Location'),
+    NotUsedField(name='NatureAlternativeDiagnosticCode'),
+    NotUsedField(name='AlternativeDiagnosticCode'),
+    NotUsedField(name='Religion'),
+    NotUsedField(name='MaritalStatus'),
+    NotUsedField(name='IsolationStatus'),
+    NotUsedField(name='Language'),
+    NotUsedField(name='HospitalService'),
+    NotUsedField(name='HospitalInstitution'),
+    NotUsedField(name='DosageCategory'),
 )
 
 
