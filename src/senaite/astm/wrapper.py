@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import collections
 import json
-import copy
 
 from senaite.astm.decode import decode_message
 from senaite.astm.mapping import Mapping
-from senaite.astm.fields import NotUsedField
 
 
 class ASTMWrapper(object):
@@ -14,8 +13,6 @@ class ASTMWrapper(object):
     def __init__(self, messages, *args, **kwargs):
         self.messages = messages
         self.wrappers = {}
-        self.skip_keys = []
-        self.json_format = {}
 
     @property
     def records(self):
@@ -34,14 +31,10 @@ class ASTMWrapper(object):
         return record
 
     def to_json(self):
-        out = copy.deepcopy(self.json_format)
+        out = collections.defaultdict(list)
 
         def values(obj):
             for key, field in obj._fields:
-                if isinstance(field, NotUsedField):
-                    continue
-                if key in self.skip_keys:
-                    continue
                 value = obj._data[key]
                 if isinstance(value, Mapping):
                     yield (key, list(values(value)))
@@ -60,13 +53,6 @@ class ASTMWrapper(object):
 
         for record in self.records:
             rtype = record.type
-            jtype = out.get(rtype)
-            if jtype is None:
-                continue
             data = dict(values(record))
-            if isinstance(jtype, (list, tuple)):
-                out[rtype].append(data)
-            else:
-                out[rtype] = data
-
+            out[rtype].append(data)
         return json.dumps(out, indent=2)
