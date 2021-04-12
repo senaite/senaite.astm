@@ -4,7 +4,6 @@ from senaite.astm.fields import ComponentField
 from senaite.astm.fields import NotUsedField
 from senaite.astm.fields import ReadonlyField
 from senaite.astm.fields import SetField
-from senaite.astm.fields import IntegerField
 from senaite.astm.fields import DateField
 from senaite.astm.fields import TextField
 from senaite.astm.mapping import Component
