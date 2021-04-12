@@ -15,58 +15,45 @@ from senaite.astm.mapping import Record
 __all__ = ['HeaderRecord', 'PatientRecord', 'OrderRecord',
            'ResultRecord', 'CommentRecord', 'TerminatorRecord']
 
-#: +-----+--------------+---------------------------------+-------------------+
-#: |  #  | ASTM Field # | ASTM Name                       | Python alias      |
-#: +=====+==============+=================================+===================+
-#: |   1 |        7.1.1 |             ASTM Record Type ID |              type |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |   2 |        7.1.2 |            Delimiter Definition |         delimeter |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |   3 |        7.1.3 |              Message Control ID |        message_id |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |   4 |        7.1.4 |                 Access Password |          password |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |   5 |        7.1.5 |               Sender Name or ID |            sender |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |   6 |        7.1.6 |           Sender Street Address |           address |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |   7 |        7.1.7 |                  Reserved Field |          reserved |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |   8 |        7.1.8 |         Sender Telephone Number |             phone |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |   9 |        7.1.9 |       Characteristics of Sender |              caps |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |  10 |       7.1.10 |                     Receiver ID |          receiver |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |  11 |       7.1.11 |                        Comments |          comments |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |  12 |       7.1.12 |                   Processing ID |     processing_id |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |  13 |       7.1.13 |                  Version Number |           version |
-#: +-----+--------------+---------------------------------+-------------------+
-#: |  14 |       7.1.14 |            Date/Time of Message |         timestamp |
-#: +-----+--------------+---------------------------------+-------------------+
-#:
+# Message Header Record (ASTM Sectin 6)
+#
+# | ASTM Field # | ASTM Name                       | Python Alias          |
+# |--------------+---------------------------------+-----------------------|
+# |          6.1 | Record Type ID                  | Record Type           |
+# |          6.2 | Delimiter Definition            | DelimiterDefinition   |
+# |          6.3 | Message Control ID              | MessageControlID      |
+# |          6.4 | Access Password                 | AccessPassword        |
+# |          6.5 | Sender Namer or ID              | SenderName            |
+# |          6.6 | Sender Street Address           | SenderStreetAddress   |
+# |          6.7 | Reserved Field                  | ReservedField         |
+# |          6.8 | Sender Telephone Number         | SenderTelephoneNumber |
+# |          6.9 | Characteristics of Sender       | SenderCharacteristics |
+# |         6.10 | Receiver ID                     | ReceiverID            |
+# |         6.11 | Comment or Special Instructions | Comment               |
+# |         6.12 | Processing ID                   | ProcessingID          |
+# |         6.13 | Version Number                  | VersionNumber         |
+# |         6.14 | Date and Time of Message        | DateTime              |
+#
 HeaderRecord = Record.build(
-    ConstantField(name='type', default='H'),
+    ConstantField(name='RecordType', default='H'),
     RepeatedComponentField(Component.build(
         ConstantField(name='_', default=''),
         TextField(name='__')
-    ), name='delimeter', default=[[], ['', '&']]),
+    ), name='DelimiterDefinition', default=[[], ['', '&']]),
     # ^^^ workaround to define field:
     # ConstantField(name='delimeter', default='\^&'),
-    NotUsedField(name='message_id'),
-    NotUsedField(name='password'),
-    NotUsedField(name='sender'),
-    NotUsedField(name='address'),
-    NotUsedField(name='reserved'),
-    NotUsedField(name='phone'),
-    NotUsedField(name='caps'),
-    NotUsedField(name='receiver'),
-    NotUsedField(name='comments'),
-    ConstantField(name='processing_id', default='P'),
-    NotUsedField(name='version'),
-    DateTimeField(name='timestamp', default=datetime.now, required=True),
+    NotUsedField(name='MessageControlID'),
+    NotUsedField(name='AccessPassword'),
+    NotUsedField(name='SenderName'),
+    NotUsedField(name='SenderStreetAddress'),
+    NotUsedField(name='Reserved'),
+    NotUsedField(name='SenderTelephoneNumber'),
+    NotUsedField(name='SenderCharacteristics'),
+    NotUsedField(name='ReceiverID'),
+    NotUsedField(name='Comment'),
+    ConstantField(name='ProcessingID', default='P'),
+    NotUsedField(name='VersionNumber'),
+    DateTimeField(name='DateTime', default=datetime.now, required=True),
 )
 
 
