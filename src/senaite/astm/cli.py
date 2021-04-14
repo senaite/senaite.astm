@@ -52,10 +52,10 @@ def get_instrument_sender_name(message):
     return sender_name[0]
 
 
-def post_message_to_lims(message, session):
+def post_message_to_lims(message, session, retries=3, delay=5):
     attempt = 1
-    retries = 3
-    delay = 5
+    retries = retries
+    delay = delay
     success = False
     # Build the POST payload
     payload = {
