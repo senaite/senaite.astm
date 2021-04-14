@@ -6,9 +6,11 @@ import contextlib
 import logging
 import os
 import sys
+from datetime import datetime
 from argparse import ArgumentError
 
 from senaite.astm import logger
+from senaite.astm.decode import decode_message
 from senaite.astm.protocol import ASTMProtocol
 
 
@@ -19,6 +21,33 @@ async def consume(queue, callback=None):
         message = await queue.get()
         if callable(callback):
             callback(message)
+
+
+def write_message(message, path, ext=".txt"):
+    """Write ASTM Message to file
+    """
+    now = datetime.now()
+    sender_name = get_instrument_sender_name(message)
+    timestamp = now.strftime("%Y-%m-%d_%H:%M:%S")
+    filename = "{}".format(timestamp)
+    if sender_name:
+        filename = "{}-{}".format(sender_name, timestamp)
+    filename = "{}{}".format(filename, ext)
+    with open(os.path.join(path, filename), "wb") as f:
+        f.writelines(message)
+
+
+def get_instrument_sender_name(message):
+    """Extract the instrument sender name from the message
+
+    See Section 6: Header Record
+    """
+    header = message[0]
+    seq, records, cs = decode_message(header)
+    sender_name = records[0][4]
+    if not sender_name:
+        return ""
+    return sender_name[0]
 
 
 def main():
@@ -43,7 +72,6 @@ def main():
         '-o',
         '--output',
         type=str,
-        default=os.getcwd(),
         help='Output directory to write ASTM files')
 
     parser.add_argument(
@@ -61,13 +89,17 @@ def main():
         logger.setLevel(logging.INFO)
     logger.addHandler(logging.StreamHandler())
 
-    if not os.path.isdir(args.output):
+    output = args.output
+    if output and not os.path.isdir(args.output):
         raise ArgumentError("Output path must be an existing directory")
 
     def dispatch_astm_message(message):
         """Dispatch astm message
         """
-        print("DISPATCH ASTM MESSAGE!")
+        logger.info("Dispatching ASTM Message")
+        if output:
+            path = os.path.abspath(output)
+            write_message(message, path)
 
     # Get the current event loop.
     loop = asyncio.get_event_loop()
