@@ -30,6 +30,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
+        "requests",
     ],
     test_suite='senaite.astm.tests',
     # List additional groups of dependencies here (e.g. development
@@ -44,8 +45,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "astm-server=senaite.astm.server:main",
-            "astm-parser=senaite.astm.parser:main",
+            "senaite-astm=senaite.astm.cli:main",
         ]
     }
 )

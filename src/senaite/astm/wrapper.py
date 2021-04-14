@@ -37,12 +37,14 @@ class ASTMWrapper(object):
             for key, field in obj._fields:
                 value = obj._data[key]
                 if isinstance(value, Mapping):
-                    yield (key, list(values(value)))
+                    # yield (key, list(values(value)))
+                    yield (key, dict(zip(value.keys(), value.values())))
                 elif isinstance(value, list):
                     stack = []
                     for item in value:
                         if isinstance(item, Mapping):
-                            stack.append(list(values(item)))
+                            # stack.append(list(values(item)))
+                            stack.append(dict(zip(item.keys(), item.values())))
                         else:
                             stack.append(item)
                     yield (key, stack)
@@ -52,7 +54,7 @@ class ASTMWrapper(object):
                     yield (key, value)
 
         for record in self.records:
-            rtype = record.type
+            rtype = record.RecordType
             data = dict(values(record))
             out[rtype].append(data)
         return json.dumps(out, indent=2)

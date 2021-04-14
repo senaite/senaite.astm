@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import asyncio
-import os
 from collections import defaultdict
-from datetime import datetime
 
-from senaite.astm import CONFIG
 from senaite.astm import logger
 from senaite.astm.constants import ACK
 from senaite.astm.constants import ENQ
@@ -28,12 +25,12 @@ class ASTMProtocol(asyncio.Protocol):
 
     Responsible for communication and collecting complete and valid messages.
     """
-    def __init__(self):
+    def __init__(self, loop, queue):
         logger.debug("ASTMProtocol:constructor")
-        # get the current running loop
-        loop = asyncio.get_running_loop()
         # Invoke on_timeout callback *after* the given time.
         self.timer = loop.call_later(TIMEOUT, self.on_timeout)
+        self.loop = loop
+        self.queue = queue
 
     def connection_made(self, transport):
         """Called when a connection is made.
@@ -48,20 +45,25 @@ class ASTMProtocol(asyncio.Protocol):
 
     @property
     def chunks(self):
-        return self.env.get("chunks", [])
+        try:
+            return self.env["chunks"]
+        except KeyError:
+            chunks = []
+            self.env["chunks"] = chunks
+            return chunks
 
     @chunks.setter
     def chunks(self, value):
         self.env["chunks"] = value
 
-    def append_chunk(self, chunk):
-        chunks = self.chunks
-        chunks.append(chunk)
-        self.chunks = chunks
-
     @property
     def messages(self):
-        return self.env.get("messages", [])
+        try:
+            return self.env["messages"]
+        except KeyError:
+            messages = []
+            self.env["messages"] = messages
+            return messages
 
     @messages.setter
     def messages(self, value):
@@ -69,7 +71,11 @@ class ASTMProtocol(asyncio.Protocol):
 
     @property
     def in_transfer_state(self):
-        return self.env.get("in_transfer_state", False)
+        try:
+            return self.env["in_transfer_state"]
+        except KeyError:
+            self.env["in_transfer_state"] = False
+            return False
 
     @in_transfer_state.setter
     def in_transfer_state(self, value):
@@ -132,7 +138,7 @@ class ASTMProtocol(asyncio.Protocol):
         """Calls on <EOT> message receiving."""
         logger.debug('on_eot: %r', data)
         if self.in_transfer_state:
-            self.write_messages(self.messages)
+            self.queue.put_nowait(self.messages)
             self.discard_env()
         else:
             raise InvalidState('Server is not ready to accept EOT message.')
@@ -151,42 +157,34 @@ class ASTMProtocol(asyncio.Protocol):
             return NAK
         else:
             try:
-                self.process_message(data)
+                self.handle_message(data)
                 return ACK
             except Exception as exc:
                 logger.error('Error occurred on message handling. {!r}'
                              .format(exc))
                 return NAK
 
-    def process_message(self, message):
-        """Process message chunks
+    def handle_message(self, message):
+        """Handle message data
         """
+        full_message = None
         is_chunked_transfer = is_chunked_message(message)
+
+        # message is splitted
         if is_chunked_transfer:
-            self.append_chunk(message)
+            self.chunks.append(message)
+        # join splitted message
         elif self.chunks:
-            self.append_chunk(message)
-            self.dispatch_message(join(self.chunks))
+            self.chunks.append(message)
+            full_message = join(self.chunks)
             self.discard_chunked_messages()
         else:
-            self.dispatch_message(message)
+            full_message = message
 
-    def dispatch_message(self, message):
-        logger.info('Complete Message: {!s}'.format(message))
-        self.validate_checksum(message)
-        messages = self.messages
-        messages.append(message)
-        self.messages = messages
-
-    def write_messages(self, messages):
-        """Write message to file
-        """
-        now = datetime.now()
-        ts = now.strftime("%Y%m%d%H%M%S")
-        filename = "{}.txt".format(ts)
-        filepath = os.path.join(CONFIG['output'], filename)
-        with open(filepath, "wb") as f:
-            f.writelines(messages)
+        # validate message if any
+        if full_message is not None:
+            self.validate_checksum(full_message)
+            self.messages.append(message)
 
     def validate_checksum(self, message):
         frame_cs = message[1:-2]
@@ -206,7 +204,9 @@ class ASTMProtocol(asyncio.Protocol):
     def discard_env(self):
         """Flush environment
         """
-        self.env = {}
+        self.chunks = []
+        self.messages = []
+        self.in_transfer_state = False
 
     def connection_lost(self, ex):
         """Called when the connection is lost or closed.
