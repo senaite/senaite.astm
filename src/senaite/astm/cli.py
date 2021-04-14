@@ -6,9 +6,11 @@ import contextlib
 import logging
 import os
 import sys
-from datetime import datetime
 from argparse import ArgumentError
+from datetime import datetime
+from time import sleep
 
+from senaite.astm import lims
 from senaite.astm import logger
 from senaite.astm.decode import decode_message
 from senaite.astm.protocol import ASTMProtocol
@@ -50,6 +52,39 @@ def get_instrument_sender_name(message):
     return sender_name[0]
 
 
+def post_message_to_lims(message, session):
+    attempt = 1
+    retries = 3
+    delay = 5
+    success = False
+    # Build the POST payload
+    payload = {
+        "consumer": "senaite.lis2a.import",
+        "messages": message,
+    }
+    while attempt < retries:
+
+        # Open a session with SENAITE and authenticate
+        authenticated = session.auth()
+        if authenticated:
+            # Send the message
+            response = session.post("push", payload)
+            success = response.get("success")
+            if success:
+                break
+
+        attempt += 1
+
+        logger.warn("Could not push. Retrying {}/{}".format(
+            attempt, retries))
+
+        # Sleep before we retry
+        sleep(delay)
+
+    if not success:
+        logger.error("Could not push the message")
+
+
 def main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -75,11 +110,22 @@ def main():
         help='Output directory to write ASTM files')
 
     parser.add_argument(
+        "-u",
+        "--url",
+        type=str,
+        help="SENAITE full URL address, with username and password: "
+             "'http(s)://<user>:<password>@<senaite_url>'")
+
+    parser.add_argument(
         '-v',
         '--verbose',
         action='store_true',
         help='Verbose logging')
 
+    # Get the current event loop.
+    loop = asyncio.get_event_loop()
+
+    # Parse Arguments
     args = parser.parse_args()
 
     # Set logging
@@ -91,7 +137,15 @@ def main():
 
     output = args.output
     if output and not os.path.isdir(args.output):
-        raise ArgumentError("Output path must be an existing directory")
+        logger.error("Output path must be an existing directory")
+        return sys.exit(-1)
+
+    url = args.url
+    if url:
+        session = lims.Session(url)
+        logger.info("Checking connection to SENAITE ...")
+        if not session.auth():
+            return sys.exit(-1)
 
     def dispatch_astm_message(message):
         """Dispatch astm message
@@ -100,9 +154,11 @@ def main():
         if output:
             path = os.path.abspath(output)
             write_message(message, path)
-
-    # Get the current event loop.
-    loop = asyncio.get_event_loop()
+        if url:
+            session = lims.Session(url)
+            loop.create_task(
+                asyncio.to_thread(
+                    lambda: post_message_to_lims(message, session)))
 
     # create a communication queue between the protocol and the server
     queue = asyncio.Queue()
