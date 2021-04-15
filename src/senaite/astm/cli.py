@@ -6,9 +6,9 @@ import contextlib
 import logging
 import os
 import sys
-from argparse import ArgumentError
 from datetime import datetime
 from time import sleep
+from senaite.astm.utils import get_astm_wrappers
 
 from senaite.astm import lims
 from senaite.astm import logger
@@ -25,26 +25,26 @@ async def consume(queue, callback=None):
             callback(message)
 
 
-def write_message(message, path, ext=".txt"):
-    """Write ASTM Message to file
+def write_messages(messages, path, ext=".txt"):
+    """Write ASTM Messages to file
     """
     now = datetime.now()
-    sender_name = get_instrument_sender_name(message)
+    sender_name = get_instrument_sender_name(messages)
     timestamp = now.strftime("%Y-%m-%d_%H:%M:%S")
     filename = "{}".format(timestamp)
     if sender_name:
         filename = "{}-{}".format(sender_name, timestamp)
     filename = "{}{}".format(filename, ext)
     with open(os.path.join(path, filename), "wb") as f:
-        f.writelines(message)
+        f.writelines(messages)
 
 
-def get_instrument_sender_name(message):
+def get_instrument_sender_name(messages):
     """Extract the instrument sender name from the message
 
     See Section 6: Header Record
     """
-    header = message[0]
+    header = messages[0]
     seq, records, cs = decode_message(header)
     sender_name = records[0][4]
     if not sender_name:
@@ -52,21 +52,30 @@ def get_instrument_sender_name(message):
     return sender_name[0]
 
 
-def post_message_to_senaite(message, session, **kwargs):
+def post_to_senaite(messages, session, **kwargs):
     """POST ASTM message to SENAITE
     """
     attempt = 1
     retries = kwargs.get('retries', 3)
     delay = kwargs.get('delay', 5)
     consumer = kwargs.get('consumer', 'senaite.lis2a.import')
+    name = get_instrument_sender_name(messages)
+    wrappers = kwargs.get('wrappers', {})
+    parsed = None
+    wrapper_cls = wrappers.get(name.lower())
+    if wrapper_cls:
+        wrapper = wrapper_cls(messages)
+        parsed = wrapper.to_json()
+
     success = False
     # Build the POST payload
     payload = {
         'consumer': consumer,
-        'messages': message,
+        'messages': messages,
+        'json': parsed,
     }
-    while attempt < retries:
 
+    while True:
         # Open a session with SENAITE and authenticate
         authenticated = session.auth()
         if authenticated:
@@ -76,6 +85,11 @@ def post_message_to_senaite(message, session, **kwargs):
             if success:
                 break
 
+        # the break here ensures that at least one time is tried
+        if attempt >= retries:
+            break
+
+        # increase attempts
         attempt += 1
 
         logger.warn('Could not push. Retrying {}/{}'.format(
@@ -182,25 +196,28 @@ def main():
         if not session.auth():
             return sys.exit(-1)
 
-    def dispatch_astm_message(message):
-        """Dispatch astm message
+    astm_wrappers = get_astm_wrappers(directories=["instruments"])
+
+    def dispatch_astm_messages(messages):
+        """Dispatch astm messages
         """
-        logger.debug('Dispatching ASTM Message')
+        logger.debug('Dispatching ASTM Messages')
         if output:
             path = os.path.abspath(output)
             loop.create_task(
                 asyncio.to_thread(
-                    write_message, message, path))
+                    write_messages, messages, path))
         if url:
             session = lims.Session(url)
             session_args = {
                 'delay': args.delay,
                 'retries': args.retries,
                 'consumer': args.consumer,
+                'wrappers': astm_wrappers
             }
             loop.create_task(
                 asyncio.to_thread(
-                    post_message_to_senaite, message, session, **session_args))
+                    post_to_senaite, messages, session, **session_args))
 
     # Bridges communication between the protocol and server
     queue = asyncio.Queue()
@@ -218,7 +235,7 @@ def main():
         logger.info('ASTM server ready to handle connections ...')
 
     # Create a ASTM message consumer task to be scheduled concurrently.
-    loop.create_task(consume(queue, callback=dispatch_astm_message))
+    loop.create_task(consume(queue, callback=dispatch_astm_messages))
 
     # Run the event loop until stop() is called.
     try:

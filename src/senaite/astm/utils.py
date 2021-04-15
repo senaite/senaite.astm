@@ -1,9 +1,30 @@
 # -*- coding: utf-8 -*-
 
+import importlib
+import os
+import pkgutil
+
 from senaite.astm.constants import CRLF
 from senaite.astm.constants import ETB
 from senaite.astm.constants import ETX
 from senaite.astm.constants import STX
+from senaite.astm.wrapper import ASTMWrapper
+
+
+def get_astm_wrappers(directories=None):
+    """Return ASTM wrappers
+    """
+    if not isinstance(directories, (tuple, list)):
+        directories = []
+    cwd = os.path.dirname(__file__)
+    for directory in directories:
+        pkg_dir = os.path.join(cwd, directory)
+        for (module_loader, name, ispkg) in pkgutil.iter_modules([pkg_dir]):
+            importlib.import_module(
+                'senaite.astm.instruments.' + name, __package__)
+    return {
+        cls.__name__.lower(): cls for cls in ASTMWrapper.__subclasses__()
+    }
 
 
 def is_chunked_message(message):
