@@ -17,7 +17,7 @@ from senaite.astm.protocol import ASTMProtocol
 
 
 async def consume(queue, callback=None):
-    """ASTM Message consumer
+    """ASTM Message consumer coroutine function
     """
     while True:
         message = await queue.get()
@@ -52,15 +52,18 @@ def get_instrument_sender_name(message):
     return sender_name[0]
 
 
-def post_message_to_lims(message, session, retries=3, delay=5):
+def post_message_to_senaite(message, session, **kwargs):
+    """POST ASTM message to SENAITE
+    """
     attempt = 1
-    retries = retries
-    delay = delay
+    retries = kwargs.get('retries', 3)
+    delay = kwargs.get('delay', 5)
+    consumer = kwargs.get('consumer', 'senaite.lis2a.import')
     success = False
     # Build the POST payload
     payload = {
-        "consumer": "senaite.lis2a.import",
-        "messages": message,
+        'consumer': consumer,
+        'messages': message,
     }
     while attempt < retries:
 
@@ -68,53 +71,83 @@ def post_message_to_lims(message, session, retries=3, delay=5):
         authenticated = session.auth()
         if authenticated:
             # Send the message
-            response = session.post("push", payload)
-            success = response.get("success")
+            response = session.post('push', payload)
+            success = response.get('success')
             if success:
                 break
 
         attempt += 1
 
-        logger.warn("Could not push. Retrying {}/{}".format(
+        logger.warn('Could not push. Retrying {}/{}'.format(
             attempt, retries))
 
         # Sleep before we retry
         sleep(delay)
 
     if not success:
-        logger.error("Could not push the message")
+        logger.error('Could not push the message')
 
 
 def main():
+    # Argument parser
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    parser.add_argument(
+    # Argument groups
+    astm_group = parser.add_argument_group('ASTM SERVER')
+    lims_group = parser.add_argument_group('SENAITE LIMS')
+
+    astm_group.add_argument(
         '-l',
         '--listen',
         type=str,
         default='0.0.0.0',
         help='Listen IP address')
 
-    parser.add_argument(
+    astm_group.add_argument(
         '-p',
         '--port',
         type=str,
         default='4010',
         help='Port to connect')
 
-    parser.add_argument(
+    astm_group.add_argument(
         '-o',
         '--output',
         type=str,
         help='Output directory to write ASTM files')
 
-    parser.add_argument(
-        "-u",
-        "--url",
+    lims_group.add_argument(
+        '-u',
+        '--url',
         type=str,
-        help="SENAITE full URL address, with username and password: "
-             "'http(s)://<user>:<password>@<senaite_url>'")
+        help='SENAITE URL address including username and password in the '
+             'format: http(s)://<user>:<password>@<senaite_url>')
+
+    lims_group.add_argument(
+        '-c',
+        '--consumer',
+        type=str,
+        default='senaite.lis2a.import',
+        help='SENAITE push consumer interface')
+
+    lims_group.add_argument(
+        '-r',
+        '--retries',
+        type=int,
+        default=3,
+        help='Number of attempts of reconnection when SENAITE '
+             'instance is not reachable. Only has effect when '
+             'argument --url is set')
+
+    lims_group.add_argument(
+        '-d',
+        '--delay',
+        type=int,
+        default=5,
+        help='Time delay in seconds between retries when '
+             'SENAITE instance is not reachable. Only has '
+             'effect when argument --url is set')
 
     parser.add_argument(
         '-v',
@@ -122,11 +155,11 @@ def main():
         action='store_true',
         help='Verbose logging')
 
-    # Get the current event loop.
-    loop = asyncio.get_event_loop()
-
     # Parse Arguments
     args = parser.parse_args()
+
+    # Get the current event loop.
+    loop = asyncio.get_event_loop()
 
     # Set logging
     if args.verbose:
@@ -135,41 +168,46 @@ def main():
         logger.setLevel(logging.INFO)
     logger.addHandler(logging.StreamHandler())
 
+    # Validate output path
     output = args.output
     if output and not os.path.isdir(args.output):
-        logger.error("Output path must be an existing directory")
+        logger.error('Output path must be an existing directory')
         return sys.exit(-1)
 
+    # Validate SENAITE URL
     url = args.url
     if url:
         session = lims.Session(url)
-        logger.info("Checking connection to SENAITE ...")
+        logger.info('Checking connection to SENAITE ...')
         if not session.auth():
             return sys.exit(-1)
 
     def dispatch_astm_message(message):
         """Dispatch astm message
         """
-        logger.info("Dispatching ASTM Message")
+        logger.debug('Dispatching ASTM Message')
         if output:
             path = os.path.abspath(output)
-            write_message(message, path)
-        if url:
-            session = lims.Session(url)
             loop.create_task(
                 asyncio.to_thread(
-                    lambda: post_message_to_lims(message, session)))
+                    write_message, message, path))
+        if url:
+            session = lims.Session(url)
+            session_args = {
+                'delay': args.delay,
+                'retries': args.retries,
+                'consumer': args.consumer,
+            }
+            loop.create_task(
+                asyncio.to_thread(
+                    post_message_to_senaite, message, session, **session_args))
 
-    # create a communication queue between the protocol and the server
+    # Bridges communication between the protocol and server
     queue = asyncio.Queue()
 
-    # Create a TCP server listening on port of the host address.
+    # Create a TCP server coroutine listening on port of the host address.
     server_coro = loop.create_server(
         lambda: ASTMProtocol(loop, queue), host=args.listen, port=args.port)
-
-    # ASTM message consumer coroutine
-    consumer = loop.create_task(
-        consume(queue, callback=dispatch_astm_message))
 
     # Run until the future (an instance of Future) has completed.
     server = loop.run_until_complete(server_coro)
@@ -179,11 +217,14 @@ def main():
         logger.info('Starting server on {}:{}'.format(ip, port))
         logger.info('ASTM server ready to handle connections ...')
 
+    # Create a ASTM message consumer task to be scheduled concurrently.
+    loop.create_task(consume(queue, callback=dispatch_astm_message))
+
     # Run the event loop until stop() is called.
     try:
         loop.run_forever()
     except KeyboardInterrupt:
-        logger.info("Shutting down server...")
+        logger.info('Shutting down server...')
         all_tasks = asyncio.gather(
             *asyncio.all_tasks(loop), return_exceptions=True)
         all_tasks.cancel()
@@ -192,7 +233,7 @@ def main():
         loop.run_until_complete(loop.shutdown_asyncgens())
     finally:
         loop.close()
-        logger.info("Server is now down...")
+        logger.info('Server is now down...')
 
 
 if __name__ == '__main__':
