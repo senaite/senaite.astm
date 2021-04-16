@@ -14,6 +14,7 @@ from senaite.astm.exceptions import NotAccepted
 from senaite.astm.utils import is_chunked_message
 from senaite.astm.utils import join
 from senaite.astm.utils import make_checksum
+from senaite.astm.utils import to_record
 
 clients = []
 envs = defaultdict(dict)
@@ -139,7 +140,7 @@ class ASTMProtocol(asyncio.Protocol):
         logger.debug('on_eot: %r', data)
         if self.in_transfer_state:
             # put the records together to a message
-            message = b"\n".join(self.messages)
+            message = b"\n".join(map(to_record, self.messages))
             self.queue.put_nowait(message)
             self.discard_env()
         else:

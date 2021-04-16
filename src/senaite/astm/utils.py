@@ -4,6 +4,7 @@ import importlib
 import os
 import pkgutil
 
+from senaite.astm.constants import CR
 from senaite.astm.constants import CRLF
 from senaite.astm.constants import ETB
 from senaite.astm.constants import ETX
@@ -60,3 +61,17 @@ def make_checksum(message):
     if not isinstance(message[0], int):
         message = map(ord, message)
     return hex(sum(message) & 0xFF)[2:].upper().zfill(2).encode()
+
+
+def to_record(message):
+    """Convert the message to a record
+    """
+    frame_cs = message[1:-2]
+    # split off checksum
+    frame = frame_cs[:-2]
+    if frame.endswith(CR + ETX):
+        frame = frame[:-2]
+    elif frame.endswith(ETB):
+        frame = frame[:-1]
+    # return frame w/o sequence
+    return frame[1:]
