@@ -25,11 +25,11 @@ class ASTMProtocol(asyncio.Protocol):
 
     Responsible for communication and collecting complete and valid messages.
     """
-    def __init__(self, loop, queue):
+    def __init__(self, loop, queue, **kwargs):
         logger.debug("ASTMProtocol:constructor")
         # Invoke on_timeout callback *after* the given time.
-        self.timer = loop.call_later(TIMEOUT, self.on_timeout)
-        self.loop = loop
+        timeout = kwargs.get("timeout", TIMEOUT)
+        self.timer = loop.call_later(timeout, self.on_timeout)
         self.queue = queue
 
     def connection_made(self, transport):
@@ -138,7 +138,9 @@ class ASTMProtocol(asyncio.Protocol):
         """Calls on <EOT> message receiving."""
         logger.debug('on_eot: %r', data)
         if self.in_transfer_state:
-            self.queue.put_nowait(self.messages)
+            # put the records together to a message
+            message = b"n".join(self.messages)
+            self.queue.put_nowait(message)
             self.discard_env()
         else:
             raise InvalidState('Server is not ready to accept EOT message.')
@@ -147,6 +149,7 @@ class ASTMProtocol(asyncio.Protocol):
         """Calls when timeout event occurs. Used to limit waiting time for
         response data."""
         logger.debug("on_timeout")
+        self.discard_env()
         self.transport.close()
 
     def on_message(self, data):
