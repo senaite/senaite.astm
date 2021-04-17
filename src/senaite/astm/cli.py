@@ -12,7 +12,6 @@ from time import sleep
 from senaite.astm import lims
 from senaite.astm import logger
 from senaite.astm.protocol import ASTMProtocol
-from senaite.astm.utils import get_astm_wrappers
 
 
 async def consume(queue, callback=None):
@@ -169,8 +168,6 @@ def main():
         if not session.auth():
             return sys.exit(-1)
 
-    astm_wrappers = get_astm_wrappers(directories=["instruments"])
-
     def dispatch_astm_message(message):
         """Dispatch astm message
         """
@@ -186,7 +183,6 @@ def main():
                 'delay': args.delay,
                 'retries': args.retries,
                 'consumer': args.consumer,
-                'wrappers': astm_wrappers
             }
             loop.create_task(
                 asyncio.to_thread(

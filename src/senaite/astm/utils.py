@@ -1,31 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import importlib
-import os
-import pkgutil
-
-from senaite.astm.constants import CR
 from senaite.astm.constants import CRLF
 from senaite.astm.constants import ETB
 from senaite.astm.constants import ETX
 from senaite.astm.constants import STX
-from senaite.astm.wrapper import ASTMWrapper
-
-
-def get_astm_wrappers(directories=None):
-    """Return ASTM wrappers
-    """
-    if not isinstance(directories, (tuple, list)):
-        directories = []
-    cwd = os.path.dirname(__file__)
-    for directory in directories:
-        pkg_dir = os.path.join(cwd, directory)
-        for (module_loader, name, ispkg) in pkgutil.iter_modules([pkg_dir]):
-            importlib.import_module(
-                'senaite.astm.instruments.' + name, __package__)
-    return {
-        cls.__name__.lower(): cls for cls in ASTMWrapper.__subclasses__()
-    }
 
 
 def is_chunked_message(message):
@@ -61,17 +39,3 @@ def make_checksum(message):
     if not isinstance(message[0], int):
         message = map(ord, message)
     return hex(sum(message) & 0xFF)[2:].upper().zfill(2).encode()
-
-
-def to_record(message):
-    """Convert the message to a record
-    """
-    frame_cs = message[1:-2]
-    # split off checksum
-    frame = frame_cs[:-2]
-    if frame.endswith(CR + ETX):
-        frame = frame[:-2]
-    elif frame.endswith(ETB):
-        frame = frame[:-1]
-    # return frame w/o sequence
-    return frame[1:]

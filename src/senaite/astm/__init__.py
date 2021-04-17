@@ -4,7 +4,3 @@ import os
 import logging
 
 logger = logging.getLogger("senaite.astm")
-
-CONFIG = {
-    "output": os.getcwd()
-}
