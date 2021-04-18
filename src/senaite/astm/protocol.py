@@ -139,8 +139,9 @@ class ASTMProtocol(asyncio.Protocol):
         logger.debug('on_eot: %r', data)
         if self.in_transfer_state:
             # put the records together to a message
-            message = b"".join(self.messages)
-            self.queue.put_nowait(message)
+            if self.messages:
+                message = b"".join(self.messages)
+                self.queue.put_nowait(message)
             self.discard_env()
         else:
             raise InvalidState('Server is not ready to accept EOT message.')
