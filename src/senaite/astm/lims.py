@@ -1,11 +1,54 @@
 # -*- coding: utf-8 -*-
 
+from time import sleep
+
 import requests
 
 from senaite.astm import logger
 
 # SENAITE.JSONAPI route
 API_BASE_URL = "@@API/senaite/v1"
+
+
+def post_to_senaite(messages, session, **kwargs):
+    """POST ASTM messages to SENAITE
+    """
+    attempt = 1
+    retries = kwargs.get('retries', 3)
+    delay = kwargs.get('delay', 5)
+    consumer = kwargs.get('consumer', 'senaite.lis2a.import')
+    success = False
+
+    while True:
+        # Open a session with SENAITE and authenticate
+        authenticated = session.auth()
+        # Build the POST payload
+        payload = {
+            'consumer': consumer,
+            'messages': messages,
+        }
+        if authenticated:
+            # Send the message
+            response = session.post('push', payload)
+            success = response.get('success')
+            if success:
+                break
+
+        # the break here ensures that at least one time is tried
+        if attempt >= retries:
+            break
+
+        # increase attempts
+        attempt += 1
+
+        logger.warn('Could not push. Retrying {}/{}'.format(
+            attempt, retries))
+
+        # Sleep before we retry
+        sleep(delay)
+
+    if not success:
+        logger.error('Could not push the message')
 
 
 class Session(object):

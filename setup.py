@@ -45,7 +45,8 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "senaite-astm=senaite.astm.cli:main",
+            "senaite-astm-server=senaite.astm.server:main",
+            "senaite-astm-send=senaite.astm.sender:main",
         ]
     }
 )

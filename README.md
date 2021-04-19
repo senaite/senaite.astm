@@ -18,11 +18,11 @@ This package can be installed with `pip` from the sources:
 
 ## Usage
 
-The script `senaite-astm` allows to start the server:
+The script `senaite-astm-server` allows to start the server:
 
-    $ senaite-astm --help
+    $ senaite-astm-server --help
 
-    usage: senaite-astm [-h] [-l LISTEN] [-p PORT] [-o OUTPUT] [-u URL] [-c CONSUMER] [-r RETRIES] [-d DELAY] [-v]
+    usage: senaite-astm-server [-h] [-l LISTEN] [-p PORT] [-o OUTPUT] [-u URL] [-c CONSUMER] [-r RETRIES] [-d DELAY] [-v]
 
     optional arguments:
       -h, --help            show this help message and exit
