@@ -14,6 +14,8 @@ from senaite.astm import logger
 from senaite.astm.lims import post_to_senaite
 from senaite.astm.protocol import ASTMProtocol
 
+LOGFILE = "senaite-astm-server.log"
+
 
 async def consume(queue, callback=None):
     """ASTM Message consumer coroutine function
@@ -101,8 +103,24 @@ def main():
         action='store_true',
         help='Verbose logging')
 
+    parser.add_argument(
+        '--logfile',
+        default=LOGFILE,
+        help='Path to store log files')
+
     # Parse Arguments
     args = parser.parse_args()
+
+    if args.logfile:
+        handler = logging.handlers.RotatingFileHandler(
+            args.logfile, maxBytes=5, backupCount=0)
+        # Format each log message like this
+        formatter = logging.Formatter(
+            '%(asctime)s %(levelname)-8s %(message)s')
+        # Attach the formatter to the handler
+        handler.setFormatter(formatter)
+        # Attach the handler to the logger
+        logger.addHandler(handler)
 
     # Get the current event loop.
     loop = asyncio.get_event_loop()
