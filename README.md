@@ -48,7 +48,7 @@ The script `senaite-astm` allows to start the server:
                             effect when argument --url is set (default: 5**
 
 
-**Note ☝️:***
+**Note ☝️:**
 The push consuer endpoint `senaite.lis2a.import` does currently not support the
 full messages (including control characters) sent by `senaite.astm`.
 Therefore, it requires to register a custom endpoint for doing the results import.
