@@ -188,7 +188,8 @@ class ASTMProtocol(asyncio.Protocol):
         # validate message if any
         if full_message is not None:
             self.validate_checksum(full_message)
-            self.messages.append(full_message)
+            # remove frame number and checksum from the final message
+            self.messages.append(message[1:-2])
 
     def validate_checksum(self, message):
         frame_cs = message[1:-2]
