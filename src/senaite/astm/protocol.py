@@ -185,13 +185,13 @@ class ASTMProtocol(asyncio.Protocol):
         else:
             full_message = message
 
-        # validate message if any
         if full_message is not None:
-            self.validate_checksum(full_message)
-            # remove frame number and checksum from the final message
-            self.messages.append(full_message[1:-2])
+            seq, msg, cs = self.split_message(full_message)
+            self.messages.append(msg)
 
-    def validate_checksum(self, message):
+    def split_message(self, message):
+        """Split the message into seqence, message and checksum
+        """
         frame_cs = message[1:-2]
         # split frame/checksum
         frame, cs = frame_cs[:-2], frame_cs[-2:]
@@ -199,7 +199,11 @@ class ASTMProtocol(asyncio.Protocol):
         if cs != ccs:
             raise NotAccepted(
                 'Checksum failure: expected %r, calculated %r' % (cs, ccs))
-        return True
+        seq = frame[:1]
+        if not seq.isdigit():
+            raise ValueError("Invalid frame sequence: {}".format(repr(seq)))
+        seq, msg = int(seq), frame[1:]
+        return seq, msg, cs
 
     def discard_chunked_messages(self):
         """Flush chunked messages
