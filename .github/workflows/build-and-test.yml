@@ -23,8 +23,8 @@ jobs:
 
       - name: lint
         run: |
-            bin/pip install flake8
-            bin/flake8 src/senaite/astm
+            pip install flake8
+            flake8 src/senaite/astm
 
       - name: test
         run: |
