@@ -16,10 +16,15 @@ jobs:
             3.10
           cache: 'pip'
 
+      - name: install
+        run: |
+          pip install -r requirements.txt
+          pip install -e .
+
       - name: lint
         run: |
-          bin/pip install flake8
-          bin/flake8 src/senaite/astm
+            bin/pip install flake8
+            bin/flake8 src/senaite/astm
 
       - name: test
         run: |
