@@ -165,12 +165,10 @@ def main():
                 asyncio.to_thread(
                     post_to_senaite, message, session, **session_args))
 
-    # Bridges communication between the protocol and server
-    queue = asyncio.Queue()
-
     # Create a TCP server coroutine listening on port of the host address.
+    protocol = ASTMProtocol()
     server_coro = loop.create_server(
-        lambda: ASTMProtocol(loop, queue), host=args.listen, port=args.port)
+        lambda: protocol, host=args.listen, port=args.port)
 
     # Run until the future (an instance of Future) has completed.
     server = loop.run_until_complete(server_coro)
@@ -181,6 +179,7 @@ def main():
         logger.info('ASTM server ready to handle connections ...')
 
     # Create a ASTM message consumer task to be scheduled concurrently.
+    queue = protocol.get_message_queue()
     loop.create_task(consume(queue, callback=dispatch_astm_message))
 
     # Run the event loop until stop() is called.

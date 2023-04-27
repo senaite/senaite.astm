@@ -25,12 +25,18 @@ class ASTMProtocol(asyncio.Protocol):
 
     Responsible for communication and collecting complete and valid messages.
     """
-    def __init__(self, loop, queue, **kwargs):
+    def __init__(self, **kwargs):
         logger.debug("ASTMProtocol:constructor")
         # Invoke on_timeout callback *after* the given time.
         timeout = kwargs.get("timeout", TIMEOUT)
-        self.timer = loop.call_later(timeout, self.on_timeout)
-        self.queue = queue
+        self.loop = asyncio.get_running_loop()
+        self.timer = self.loop.call_later(timeout, self.on_timeout)
+        self.queue = asyncio.Queue()
+
+    def get_message_queue(self):
+        """Queue used for message dispatching
+        """
+        return self.queue
 
     def connection_made(self, transport):
         """Called when a connection is made.
