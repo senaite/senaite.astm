@@ -1,7 +1,6 @@
 
 # -*- coding: utf-8 -*-
 
-import asyncio
 import os
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import MagicMock
