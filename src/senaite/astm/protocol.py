@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import asyncio
-from collections import defaultdict
 
 from senaite.astm import logger
 from senaite.astm.constants import ACK
@@ -11,12 +10,11 @@ from senaite.astm.constants import NAK
 from senaite.astm.constants import STX
 from senaite.astm.exceptions import InvalidState
 from senaite.astm.exceptions import NotAccepted
+from senaite.astm.utils import CleanupDict
 from senaite.astm.utils import is_chunked_message
 from senaite.astm.utils import join
 from senaite.astm.utils import make_checksum
 
-clients = []
-envs = defaultdict(dict)
 TIMEOUT = 15
 
 
@@ -27,27 +25,44 @@ class ASTMProtocol(asyncio.Protocol):
     """
     def __init__(self, **kwargs):
         logger.debug("ASTMProtocol:constructor")
-        # Invoke on_timeout callback *after* the given time.
-        timeout = kwargs.get("timeout", TIMEOUT)
-        self.loop = asyncio.get_running_loop()
-        self.timer = self.loop.call_later(timeout, self.on_timeout)
         self.queue = asyncio.Queue()
-
-    def get_message_queue(self):
-        """Queue used for message dispatching
-        """
-        return self.queue
+        self.environ = CleanupDict()
+        self.loop = asyncio.get_running_loop()
+        self.timeout = kwargs.get("timeout", TIMEOUT)
 
     def connection_made(self, transport):
         """Called when a connection is made.
         """
         self.transport = transport
-        peername = transport.get_extra_info('peername')
-        self.ip = peername[0]
-        self.client = "{:s}:{:d}".format(*peername)
-        logger.debug('Connection from {}'.format(peername))
-        clients.append(self)
-        self.env = envs[self.ip]
+        # Invoke on_timeout callback *after* the given time.
+        self.timer = self.loop.call_later(self.timeout, self.on_timeout)
+        logger.info("Connection from {!s}".format(self.client))
+
+    @property
+    def client(self):
+        peername = self.transport.get_extra_info("peername")
+        return "{:s}:{:d}".format(*peername)
+
+    @property
+    def env(self):
+        """Returns the environment for the current connected client
+        """
+        if self.client not in self.environ:
+            self.environ[self.client] = {
+                "chunks": [],
+                "messages": [],
+                "in_transfer_state": False,
+            }
+        return self.environ[self.client]
+
+    @env.setter
+    def env(self, value):
+        self.environ[self.client] = value
+
+    def get_message_queue(self):
+        """Queue used for message dispatching
+        """
+        return self.queue
 
     @property
     def chunks(self):
@@ -91,10 +106,11 @@ class ASTMProtocol(asyncio.Protocol):
         """Called when some data is received.
         """
         self.timer.cancel()
-        logger.debug('-> Data received: {!r}'.format(data))
+        logger.debug("-> Data received from {!s}: {!r}".format(
+            self.client, data))
         response = self.handle_data(data)
         if response is not None:
-            logger.debug('<- Sending response: {!r}'.format(response))
+            logger.debug("<- Sending response: {!r}".format(response))
             self.transport.write(response)
 
     def handle_data(self, data):
@@ -116,33 +132,33 @@ class ASTMProtocol(asyncio.Protocol):
         return response
 
     def default_handler(self, data):
-        # raise ValueError('Unable to dispatch data: %r', data)
-        logger.error('Unable to dispatch data: %r', data)
+        # raise ValueError("Unable to dispatch data: %r", data)
+        logger.error("Unable to dispatch data: %r", data)
 
     def on_enq(self, data):
         """Calls on <ENQ> message receiving.
         """
-        logger.debug('on_enq: %r', data)
+        logger.debug("on_enq: %r", data)
         if not self.in_transfer_state:
             self.in_transfer_state = True
             return ACK
         else:
-            logger.error('ENQ is not expected')
+            logger.error("ENQ is not expected")
             return NAK
 
     def on_ack(self, data):
         """Calls on <ACK> message receiving."""
-        logger.debug('on_ack: %r', data)
-        raise NotAccepted('Server should not be ACKed.')
+        logger.debug("on_ack: %r", data)
+        raise NotAccepted("Server should not be ACKed.")
 
     def on_nak(self, data):
         """Calls on <NAK> message receiving."""
-        logger.debug('on_nak: %r', data)
-        raise NotAccepted('Server should not be NAKed.')
+        logger.debug("on_nak: %r", data)
+        raise NotAccepted("Server should not be NAKed.")
 
     def on_eot(self, data):
         """Calls on <EOT> message receiving."""
-        logger.debug('on_eot: %r', data)
+        logger.debug("on_eot: %r", data)
         if self.in_transfer_state:
             # put the records together to a message
             if self.messages:
@@ -150,7 +166,7 @@ class ASTMProtocol(asyncio.Protocol):
                 self.queue.put_nowait(message)
             self.discard_env()
         else:
-            raise InvalidState('Server is not ready to accept EOT message.')
+            raise InvalidState("Server is not ready to accept EOT message.")
 
     def on_timeout(self):
         """Calls when timeout event occurs. Used to limit waiting time for
@@ -161,7 +177,7 @@ class ASTMProtocol(asyncio.Protocol):
 
     def on_message(self, data):
         """Calls on ASTM message receiving."""
-        logger.debug('on_message: %r', data)
+        logger.debug("on_message: %r", data)
         if not self.in_transfer_state:
             self.discard_chunked_messages()
             return NAK
@@ -170,7 +186,7 @@ class ASTMProtocol(asyncio.Protocol):
                 self.handle_message(data)
                 return ACK
             except Exception as exc:
-                logger.error('Error occurred on message handling. {!r}'
+                logger.error("Error occurred on message handling. {!r}"
                              .format(exc))
                 return NAK
 
@@ -206,7 +222,7 @@ class ASTMProtocol(asyncio.Protocol):
         ccs = make_checksum(frame)
         if cs != ccs:
             raise NotAccepted(
-                'Checksum failure: expected %r, calculated %r' % (cs, ccs))
+                "Checksum failure: expected %r, calculated %r" % (cs, ccs))
         # Get the sequence
         seq = frame[:1]
         if not seq.isdigit():
@@ -222,13 +238,11 @@ class ASTMProtocol(asyncio.Protocol):
     def discard_env(self):
         """Flush environment
         """
-        self.chunks = []
-        self.messages = []
-        self.in_transfer_state = False
+        self.environ.pop(self.client, None)
 
     def connection_lost(self, ex):
         """Called when the connection is lost or closed.
         """
-        logger.debug('Connection lost: {!s}'.format(self.client))
-        # remove the connected client
-        clients.remove(self)
+        logger.debug("Connection lost: {!s}".format(self.client))
+        self.discard_env()
+        self.transport.close()
