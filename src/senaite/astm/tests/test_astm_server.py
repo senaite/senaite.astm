@@ -8,7 +8,6 @@ from senaite.astm import logger
 from senaite.astm.constants import ACK
 from senaite.astm.constants import CRLF
 from senaite.astm.constants import ENQ
-from senaite.astm.constants import NAK
 from senaite.astm.protocol import ASTMProtocol
 
 HOST = "localhost"
