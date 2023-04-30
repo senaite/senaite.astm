@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import asyncio
+import os
 
 from senaite.astm import logger
 from senaite.astm.constants import ACK
@@ -14,6 +15,7 @@ from senaite.astm.utils import CleanupDict
 from senaite.astm.utils import is_chunked_message
 from senaite.astm.utils import join
 from senaite.astm.utils import make_checksum
+from senaite.astm.utils import write_message
 
 TIMEOUT = 15
 
@@ -160,13 +162,31 @@ class ASTMProtocol(asyncio.Protocol):
         """Calls on <EOT> message receiving."""
         logger.debug("on_eot: %r", data)
         if self.in_transfer_state:
-            # put the records together to a message
-            if self.messages:
-                message = b"".join(self.messages)
-                self.queue.put_nowait(message)
+            # LIS-2A compliant message
+            lis2a_message = b""
+            # Raw ASTM message (including STX, sequence and checksum)
+            astm_message = b""
+
+            for record in self.messages:
+                seq, msg, cs = self.split_message(record)
+                lis2a_message += msg
+                astm_message += record
+
+            # put the LIS-2A compliant message into the queue for dispatching
+            self.queue.put_nowait(lis2a_message)
+            # Store the raw message for debugging and development purposes
+            self.write_astm_message(astm_message)
             self.discard_env()
         else:
             raise InvalidState("Server is not ready to accept EOT message.")
+
+    def write_astm_message(self, message, directory="astm_messages"):
+        """Store the ASTM message if the folder exists in the CWD
+        """
+        cwd = os.getcwd()
+        path = os.path.join(cwd, directory)
+        if os.path.exists(path):
+            write_message(message, path)
 
     def on_timeout(self):
         """Calls when timeout event occurs. Used to limit waiting time for
