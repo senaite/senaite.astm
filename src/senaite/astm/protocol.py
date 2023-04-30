@@ -31,6 +31,7 @@ class ASTMProtocol(asyncio.Protocol):
         self.environ = CleanupDict()
         self.loop = asyncio.get_running_loop()
         self.timeout = kwargs.get("timeout", TIMEOUT)
+        self.message_format = kwargs.get("message_format", "lis2a")
 
     def connection_made(self, transport):
         """Called when a connection is made.
@@ -172,16 +173,20 @@ class ASTMProtocol(asyncio.Protocol):
                 lis2a_message += msg
                 astm_message += record
 
-            # put the LIS-2A compliant message into the queue for dispatching
-            self.queue.put_nowait(lis2a_message)
+            # Process either LIS-2A compliant or the raw message
+            if self.message_format == "astm":
+                self.queue.put_nowait(astm_message)
+            else:
+                self.queue.put_nowait(lis2a_message)
+
             # Store the raw message for debugging and development purposes
-            self.write_astm_message(astm_message)
+            self.log_message(astm_message)
             self.discard_env()
         else:
             raise InvalidState("Server is not ready to accept EOT message.")
 
-    def write_astm_message(self, message, directory="astm_messages"):
-        """Store the ASTM message if the folder exists in the CWD
+    def log_message(self, message, directory="astm_messages"):
+        """Store the raw ASTM message if the folder exists in the CWD
         """
         cwd = os.getcwd()
         path = os.path.join(cwd, directory)
