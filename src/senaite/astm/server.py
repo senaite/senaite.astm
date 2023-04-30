@@ -6,12 +6,12 @@ import contextlib
 import logging
 import os
 import sys
-from datetime import datetime
 
 from senaite.astm import lims
 from senaite.astm import logger
 from senaite.astm.lims import post_to_senaite
 from senaite.astm.protocol import ASTMProtocol
+from senaite.astm.utils import write_message
 
 LOGFILE = "senaite-astm-server.log"
 
@@ -23,16 +23,6 @@ async def consume(queue, callback=None):
         message = await queue.get()
         if callable(callback):
             callback(message)
-
-
-def write_message(message, path, ext=".txt"):
-    """Write ASTM Message to file
-    """
-    now = datetime.now()
-    timestamp = now.strftime("%Y-%m-%d_%H:%M:%S")
-    filename = "{}{}".format(timestamp, ext)
-    with open(os.path.join(path, filename), "wb") as f:
-        f.write(message)
 
 
 def main():
