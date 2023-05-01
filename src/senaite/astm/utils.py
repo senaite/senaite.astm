@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import time
+
 from senaite.astm.constants import CRLF
 from senaite.astm.constants import ETB
 from senaite.astm.constants import ETX
@@ -39,3 +41,35 @@ def make_checksum(message):
     if not isinstance(message[0], int):
         message = map(ord, message)
     return hex(sum(message) & 0xFF)[2:].upper().zfill(2).encode()
+
+
+class CleanupDict(dict):
+    """A dict that automatically cleans up items that haven't been
+    accessed in a given timespan on *set*.
+    """
+
+    cleanup_period = 60 * 5  # 5 minutes
+
+    def __init__(self, cleanup_period=None):
+        super(CleanupDict, self).__init__()
+        self._last_access = {}
+        if cleanup_period is not None:
+            self.cleanup_period = cleanup_period
+
+    def __getitem__(self, key):
+        value = super(CleanupDict, self).__getitem__(key)
+        self._last_access[key] = time.time()
+        return value
+
+    def __setitem__(self, key, value):
+        super(CleanupDict, self).__setitem__(key, value)
+        self._last_access[key] = time.time()
+        self._cleanup()
+
+    def _cleanup(self):
+        now = time.time()
+        okay = now - self.cleanup_period
+        for key, timestamp in list(self._last_access.items()):
+            if timestamp < okay:
+                del self._last_access[key]
+                super(CleanupDict, self).__delitem__(key)

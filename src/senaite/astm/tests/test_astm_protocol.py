@@ -1,7 +1,6 @@
 
 # -*- coding: utf-8 -*-
 
-import asyncio
 import os
 from unittest import IsolatedAsyncioTestCase
 from unittest.mock import MagicMock
@@ -19,10 +18,8 @@ class ASTMProtocolTest(IsolatedAsyncioTestCase):
     """Test ASTM Communication Protocol
     """
 
-    def setUp(self):
-        self.loop = asyncio.get_event_loop()
-        self.queue = asyncio.Queue()
-        self.protocol = ASTMProtocol(self.loop, self.queue)
+    async def asyncSetUp(self):
+        self.protocol = ASTMProtocol()
 
     def get_instrument_file_path(self, filename="yumizen_h500.txt"):
         """Returns the instrument file path
