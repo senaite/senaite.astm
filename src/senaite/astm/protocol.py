@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import asyncio
+import os
 
 from senaite.astm import logger
 from senaite.astm.constants import ACK
@@ -14,6 +15,7 @@ from senaite.astm.utils import CleanupDict
 from senaite.astm.utils import is_chunked_message
 from senaite.astm.utils import join
 from senaite.astm.utils import make_checksum
+from senaite.astm.utils import write_message
 
 TIMEOUT = 15
 
@@ -29,6 +31,7 @@ class ASTMProtocol(asyncio.Protocol):
         self.environ = CleanupDict()
         self.loop = asyncio.get_running_loop()
         self.timeout = kwargs.get("timeout", TIMEOUT)
+        self.message_format = kwargs.get("message_format", "lis2a")
 
     def connection_made(self, transport):
         """Called when a connection is made.
@@ -160,13 +163,35 @@ class ASTMProtocol(asyncio.Protocol):
         """Calls on <EOT> message receiving."""
         logger.debug("on_eot: %r", data)
         if self.in_transfer_state:
-            # put the records together to a message
-            if self.messages:
-                message = b"".join(self.messages)
-                self.queue.put_nowait(message)
+            # LIS-2A compliant message
+            lis2a_message = b""
+            # Raw ASTM message (including STX, sequence and checksum)
+            astm_message = b""
+
+            for record in self.messages:
+                seq, msg, cs = self.split_message(record)
+                lis2a_message += msg
+                astm_message += record
+
+            # Process either LIS-2A compliant or the raw message
+            if self.message_format == "astm":
+                self.queue.put_nowait(astm_message)
+            else:
+                self.queue.put_nowait(lis2a_message)
+
+            # Store the raw message for debugging and development purposes
+            self.log_message(astm_message)
             self.discard_env()
         else:
             raise InvalidState("Server is not ready to accept EOT message.")
+
+    def log_message(self, message, directory="astm_messages"):
+        """Store the raw ASTM message if the folder exists in the CWD
+        """
+        cwd = os.getcwd()
+        path = os.path.join(cwd, directory)
+        if os.path.exists(path):
+            write_message(message, path)
 
     def on_timeout(self):
         """Calls when timeout event occurs. Used to limit waiting time for
@@ -207,9 +232,34 @@ class ASTMProtocol(asyncio.Protocol):
         else:
             full_message = message
 
-        if full_message is not None:
-            seq, msg, cs = self.split_message(full_message)
-            self.messages.append(msg)
+        # message not yet complete
+        if not full_message:
+            return
+
+        # append the raw message to the messages
+        # NOTE: Conversion to LIS2-A2 format is done when EOT is received
+        if self.validate_checksum(full_message):
+            self.messages.append(full_message)
+
+    def validate_checksum(self, message):
+        """Validate the checksum of the message
+
+        :param message: The received message (line) of the instrument
+                        containing the STX at the beginning and the cecksum at
+                        the end.
+        :returns: True if the received message is valid or otherwise it raises
+                  a NotAccepted Exception.
+        """
+        # get the frame w/o STX and checksum
+        frame = message[1:-2]
+        # check if the checksum matches
+        cs = message[-2:]
+        # generate the checksum for the frame
+        ccs = make_checksum(frame)
+        if cs != ccs:
+            raise NotAccepted(
+                "Checksum failure: expected %r, calculated %r" % (cs, ccs))
+        return True
 
     def split_message(self, message):
         """Split the message into seqence, message and checksum
@@ -218,11 +268,6 @@ class ASTMProtocol(asyncio.Protocol):
         frame = message[1:-2]
         # Get the checksum
         cs = message[-2:]
-        # validate the checksum
-        ccs = make_checksum(frame)
-        if cs != ccs:
-            raise NotAccepted(
-                "Checksum failure: expected %r, calculated %r" % (cs, ccs))
         # Get the sequence
         seq = frame[:1]
         if not seq.isdigit():

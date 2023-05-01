@@ -1,11 +1,28 @@
 # -*- coding: utf-8 -*-
 
+import os
 import time
+from datetime import datetime
+from pathlib import Path
 
 from senaite.astm.constants import CRLF
 from senaite.astm.constants import ETB
 from senaite.astm.constants import ETX
 from senaite.astm.constants import STX
+
+
+def write_message(message, path, dateformat="%Y-%m-%d_%H:%M:%S", ext=".txt"):
+    """Write ASTM Message to file
+    """
+    path = Path(path)
+    if not path.exists():
+        # ensure the directory exists
+        path.mkdir(parents=True, exist_ok=True)
+    now = datetime.now()
+    timestamp = now.strftime(dateformat)
+    filename = "{}{}".format(timestamp, ext)
+    with open(os.path.join(path, filename), "wb") as f:
+        f.write(message)
 
 
 def is_chunked_message(message):

@@ -6,12 +6,12 @@ import contextlib
 import logging
 import os
 import sys
-from datetime import datetime
 
 from senaite.astm import lims
 from senaite.astm import logger
 from senaite.astm.lims import post_to_senaite
 from senaite.astm.protocol import ASTMProtocol
+from senaite.astm.utils import write_message
 
 LOGFILE = "senaite-astm-server.log"
 
@@ -23,16 +23,6 @@ async def consume(queue, callback=None):
         message = await queue.get()
         if callable(callback):
             callback(message)
-
-
-def write_message(message, path, ext=".txt"):
-    """Write ASTM Message to file
-    """
-    now = datetime.now()
-    timestamp = now.strftime("%Y-%m-%d_%H:%M:%S")
-    filename = "{}{}".format(timestamp, ext)
-    with open(os.path.join(path, filename), "wb") as f:
-        f.write(message)
 
 
 def main():
@@ -62,7 +52,7 @@ def main():
         '-o',
         '--output',
         type=str,
-        help='Output directory to write ASTM files')
+        help='Output directory to write full messages')
 
     lims_group.add_argument(
         '-u',
@@ -77,6 +67,13 @@ def main():
         type=str,
         default='senaite.lis2a.import',
         help='SENAITE push consumer interface')
+
+    lims_group.add_argument(
+        '-m',
+        '--message-format',
+        type=str,
+        default='lis2a',
+        help='Message format to send to SENAITE. Supports "astm" or "lis2a".')
 
     lims_group.add_argument(
         '-r',
@@ -166,7 +163,7 @@ def main():
                     post_to_senaite, message, session, **session_args))
 
     # Create a TCP server coroutine listening on port of the host address.
-    protocol = ASTMProtocol()
+    protocol = ASTMProtocol(message_format=args.message_format)
     server_coro = loop.create_server(
         lambda: protocol, host=args.listen, port=args.port)
 
