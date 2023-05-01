@@ -1,7 +1,5 @@
-
 # -*- coding: utf-8 -*-
 
-import os
 from unittest.mock import MagicMock
 from unittest.mock import Mock
 
