@@ -180,8 +180,6 @@ def main():
         logger.info('Starting server on {}:{}'.format(ip, port))
         logger.info('ASTM server ready to handle connections ...')
 
-
-    # Run the event loop until stop() is called.
     try:
         loop.run_forever()
     except KeyboardInterrupt:
