@@ -53,6 +53,7 @@ class ASTMProtocol(asyncio.Protocol):
     def start_timer(self):
         """Start the timeout timer
         """
+        # Closes the connection if no data was received after the given timeout
         self.timer = self.loop.call_later(self.timeout, self.on_timeout)
 
     def cancel_timer(self):
@@ -79,13 +80,14 @@ class ASTMProtocol(asyncio.Protocol):
         """
         logger.debug("-> Data received from {!s}: {!r}".format(
             self.client, data))
-        # Closes the connection if no data was received after the given timeout
-        self.restart_timer()
         # handle the data
         response = self.handle_data(data)
         if response is not None:
             logger.debug("<- Sending response: {!r}".format(response))
             self.transport.write(response)
+            # restart the timer
+            # -> this ensures the next data is received within the timeout
+            self.restart_timer()
 
     def handle_data(self, data):
         """Process incoming data
@@ -138,6 +140,9 @@ class ASTMProtocol(asyncio.Protocol):
         if not self.in_transfer_state:
             raise InvalidState("Server is not ready to accept EOT message.")
 
+        # stop any running timer
+        self.cancel_timer()
+
         # LIS-2A compliant message
         lis2a_message = b""
         # Raw ASTM message (including STX, sequence and checksum)
@@ -157,6 +162,7 @@ class ASTMProtocol(asyncio.Protocol):
         # Store the raw message for debugging and development purposes
         self.log_message(astm_message)
         self.discard_env()
+        self.transport.close()
 
     def log_message(self, message, directory="astm_messages"):
         """Store the raw ASTM message if the folder exists in the CWD
