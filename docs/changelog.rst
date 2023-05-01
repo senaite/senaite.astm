@@ -5,6 +5,7 @@ Changelog
 1.0.0 (unreleased)
 ------------------
 
+- #9 Add Cobas C311 Test
 - #7 Add Cobas C111 Test
 - #6 Add Pentra XLR test
 - #5 Allow to store the raw ASTM messages
