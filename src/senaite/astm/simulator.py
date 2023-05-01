@@ -67,39 +67,28 @@ def main():
     # Get the current event loop.
     loop = asyncio.get_event_loop()
 
-    messages = []
     for f in args.infile:
-        messages.append(f.readlines())
-
-    coro = send_messages(messages, args.address, args.port, delay=args.delay)
+        message = f.readlines()
+        task = send_message(message, args.address, args.port, delay=args.delay)
+        loop.create_task(task)
 
     try:
-        loop.run_until_complete(coro)
+        all_tasks = asyncio.gather(
+            *asyncio.all_tasks(loop), return_exceptions=True)
+        loop.run_until_complete(all_tasks)
     except KeyboardInterrupt:
         logger.info('Shutting down...')
-        coro.cancel()
     finally:
         loop.close()
         logger.info('Done')
 
 
-async def send_messages(messages, address, port, **kw):
-    """Send all given messages through a single connection
-    """
-    rport = random.randint(55000, 60000)
-    local_addr = ("127.0.0.1", rport, )
-    reader, writer = await asyncio.open_connection(
-        address, port, local_addr=local_addr)
-    logger.info("Connecting from {!r}".format(local_addr))
-    for message in messages:
-        await send_message(message, reader, writer, **kw)
-    writer.close()
-    await writer.wait_closed()
-
-
-async def send_message(message, reader, writer, **kw):
+async def send_message(message, address, port, **kw):
     """Send message to ASTM server
     """
+    # openm a new conection for every message
+    reader, writer = await asyncio.open_connection(address, port)
+
     # get the delay
     delay = kw.get('delay', 0.0)
 
