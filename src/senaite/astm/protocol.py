@@ -75,6 +75,24 @@ class ASTMProtocol(asyncio.Protocol):
         peername = transport.get_extra_info("peername")
         return "{:s}:{:d}".format(*peername)
 
+    def close_connection(self):
+        """Cleanup and close connection
+        """
+        self.discard_env()
+        self.transport.close()
+
+    def discard_chunked_messages(self):
+        """Flush chunked messages
+        """
+        self.chunks = []
+
+    def discard_env(self):
+        """Flush environment
+        """
+        self.chunks = []
+        self.messages = []
+        self.in_transfer_state = False
+
     def data_received(self, data):
         """Called when some data is received.
         """
@@ -137,7 +155,9 @@ class ASTMProtocol(asyncio.Protocol):
     def on_eot(self, data):
         """Calls on <EOT> message receiving."""
         logger.debug("on_eot: %r", data)
+
         if not self.in_transfer_state:
+            self.close_connection()
             raise InvalidState("Server is not ready to accept EOT message.")
 
         # stop any running timer
@@ -161,8 +181,8 @@ class ASTMProtocol(asyncio.Protocol):
 
         # Store the raw message for debugging and development purposes
         self.log_message(astm_message)
-        self.discard_env()
-        self.transport.close()
+        # Close connection
+        self.close_connection()
 
     def log_message(self, message, directory="astm_messages"):
         """Store the raw ASTM message if the folder exists in the CWD
@@ -177,8 +197,7 @@ class ASTMProtocol(asyncio.Protocol):
         """
         logger.warning("Connection for {!r} timed out after {!r}s: Closing..."
                        .format(self.client, self.timeout))
-        self.discard_env()
-        self.transport.close()
+        self.close_connection()
 
     def on_message(self, data):
         """Callback when a message was received
@@ -256,21 +275,8 @@ class ASTMProtocol(asyncio.Protocol):
         seq, msg = int(seq), frame[1:]
         return seq, msg, cs
 
-    def discard_chunked_messages(self):
-        """Flush chunked messages
-        """
-        self.chunks = []
-
-    def discard_env(self):
-        """Flush environment
-        """
-        self.chunks = []
-        self.messages = []
-        self.in_transfer_state = False
-
     def connection_lost(self, ex):
         """Called when the connection is lost or closed.
         """
         logger.warning("Lost connection for {!s}".format(self.client))
-        self.discard_env()
-        self.transport.close()
+        self.close_connection()
