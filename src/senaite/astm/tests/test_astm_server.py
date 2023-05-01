@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 import asyncio
 
 from senaite.astm import logger
@@ -38,6 +39,8 @@ class ASTMServerTest(ASTMTestBase):
         logger.info("\n------------> TEST: multi_connection")
 
         for path in self.instrument_files:
+            logger.info("Reading Instrument Data '%s'" %
+                        os.path.basename(path))
             data = self.read_file_lines(path)
             # communicate each instrument 5 times
             for i in range(5):
