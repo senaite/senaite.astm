@@ -3,7 +3,6 @@
 import argparse
 import asyncio
 import logging
-import random
 
 from senaite.astm import logger
 from senaite.astm.constants import CRLF
