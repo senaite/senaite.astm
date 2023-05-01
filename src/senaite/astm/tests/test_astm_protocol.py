@@ -1,8 +1,5 @@
-
 # -*- coding: utf-8 -*-
 
-import os
-from unittest import IsolatedAsyncioTestCase
 from unittest.mock import MagicMock
 from unittest.mock import Mock
 
@@ -12,32 +9,15 @@ from senaite.astm.constants import ENQ
 from senaite.astm.constants import EOT
 from senaite.astm.constants import NAK
 from senaite.astm.protocol import ASTMProtocol
+from senaite.astm.tests.base import ASTMTestBase
 
 
-class ASTMProtocolTest(IsolatedAsyncioTestCase):
+class ASTMProtocolTest(ASTMTestBase):
     """Test ASTM Communication Protocol
     """
 
     async def asyncSetUp(self):
         self.protocol = ASTMProtocol()
-
-    def get_instrument_file_path(self, filename="yumizen_h500.txt"):
-        """Returns the instrument file path
-        """
-        test_path = os.path.dirname(__file__)
-        return os.path.join(test_path, "data", filename)
-
-    def read_file(self, path, mode="rb"):
-        """Read the data of the file
-        """
-        with open(path, mode) as f:
-            return f.read()
-
-    def read_file_lines(self, path, mode="rb"):
-        """Read the lines of the file
-        """
-        with open(path, mode) as f:
-            return f.readlines()
 
     def get_mock_transport(self, ip="127.0.0.1", port=12345):
         transport = MagicMock()
@@ -82,7 +62,7 @@ class ASTMProtocolTest(IsolatedAsyncioTestCase):
         transport.write.assert_called_with(NAK)
 
         # read instrument file
-        path = self.get_instrument_file_path()
+        path = self.get_instrument_file_path("yumizen_h500.txt")
         lines = self.read_file_lines(path)
         for line in lines:
             # Test fixture: Remove trailing \r\n
