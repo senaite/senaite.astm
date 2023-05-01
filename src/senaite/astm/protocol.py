@@ -29,7 +29,7 @@ class ASTMProtocol(asyncio.Protocol):
         logger.debug("ASTMProtocol:constructor")
         self.queue = asyncio.Queue()
         self.environ = CleanupDict()
-        self.loop = asyncio.get_running_loop()
+        self.loop = asyncio.get_event_loop()
         self.timeout = kwargs.get("timeout", TIMEOUT)
         self.message_format = kwargs.get("message_format", "lis2a")
 
