@@ -47,6 +47,7 @@ setup(
         "console_scripts": [
             "senaite-astm-server=senaite.astm.server:main",
             "senaite-astm-send=senaite.astm.sender:main",
+            "senaite-astm-simulator=senaite.astm.simulator:main",
         ]
     }
 )
