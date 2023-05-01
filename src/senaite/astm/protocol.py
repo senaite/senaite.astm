@@ -48,9 +48,25 @@ class ASTMProtocol(asyncio.Protocol):
         self.transport = transport
         # Remember the connected client
         self.client = self.get_client_key(transport)
-        # Invoke on_timeout callback *after* the given time.
-        self.timer = self.loop.call_later(self.timeout, self.on_timeout)
         logger.debug("Connection from {!s}".format(self.client))
+
+    def start_timer(self):
+        """Start the timeout timer
+        """
+        self.timer = self.loop.call_later(self.timeout, self.on_timeout)
+
+    def cancel_timer(self):
+        """Cancel the timeout timer
+        """
+        if self.timer is None:
+            return
+        self.timer.cancel()
+
+    def restart_timer(self):
+        """Restart the timeout timer
+        """
+        self.cancel_timer()
+        self.start_timer()
 
     def get_client_key(self, transport):
         """Return the client key for the given transport
@@ -61,12 +77,11 @@ class ASTMProtocol(asyncio.Protocol):
     def data_received(self, data):
         """Called when some data is received.
         """
-        # restart the timer
-        self.timer.cancel()
-        self.timer = self.loop.call_later(self.timeout, self.on_timeout)
-
         logger.debug("-> Data received from {!s}: {!r}".format(
             self.client, data))
+        # Closes the connection if no data was received after the given timeout
+        self.restart_timer()
+        # handle the data
         response = self.handle_data(data)
         if response is not None:
             logger.debug("<- Sending response: {!r}".format(response))

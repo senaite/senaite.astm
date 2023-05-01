@@ -31,6 +31,9 @@ class ASTMServerTest(ASTMTestBase):
         self.timeout = 0.1
         reader, writer = await asyncio.open_connection(
             self.HOST, self.PORT)
+        writer.write(ENQ)
+        await writer.drain()
+        response = await reader.read(100)
         # wait until the timeout exceeded
         await asyncio.sleep(0.2)
         writer.write(ENQ)
