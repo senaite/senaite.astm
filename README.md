@@ -22,31 +22,30 @@ The script `senaite-astm-server` allows to start the server:
 
     $ senaite-astm-server --help
 
-    usage: senaite-astm-server [-h] [-l LISTEN] [-p PORT] [-o OUTPUT] [-u URL] [-c CONSUMER] [-r RETRIES] [-d DELAY] [-v]
+usage: senaite-astm-server [-h] [-l LISTEN] [-p PORT] [-o OUTPUT] [-u URL] [-c CONSUMER] [-m MESSAGE_FORMAT] [-r RETRIES] [-d DELAY] [-v] [--logfile LOGFILE]
 
-    optional arguments:
-      -h, --help            show this help message and exit
-      -v, --verbose         Verbose logging (default: False)
+optional arguments:
+  -h, --help            show this help message and exit
+  -v, --verbose         Verbose logging (default: False)
+  --logfile LOGFILE     Path to store log files (default: senaite-astm-server.log)
 
-    ASTM SERVER:
-      -l LISTEN, --listen LISTEN
-                            Listen IP address (default: 0.0.0.0)
-      -p PORT, --port PORT  Port to connect (default: 4010)
-      -o OUTPUT, --output OUTPUT
-                            Output directory to write ASTM files (default: None)
+ASTM SERVER:
+  -l LISTEN, --listen LISTEN
+                        Listen IP address (default: 0.0.0.0)
+  -p PORT, --port PORT  Port to connect (default: 4010)
+  -o OUTPUT, --output OUTPUT
+                        Output directory to write full messages (default: None)
 
-    SENAITE LIMS:
-      -u URL, --url URL     SENAITE URL address including username and password in the format:
-                            http(s)://<user>:<password>@<senaite_url> (default: None)
-      -c CONSUMER, --consumer CONSUMER
-                            SENAITE push consumer interface (default: senaite.lis2a.import)
-      -r RETRIES, --retries RETRIES
-                            Number of attempts of reconnection when SENAITE instance is not reachable. Only has effect
-                            when argument --url is set (default: 3)
-      -d DELAY, --delay DELAY
-                            Time delay in seconds between retries when SENAITE instance is not reachable. Only has
-                            effect when argument --url is set (default: 5**
-
+SENAITE LIMS:
+  -u URL, --url URL     SENAITE URL address including username and password in the format: http(s)://<user>:<password>@<senaite_url> (default: None)
+  -c CONSUMER, --consumer CONSUMER
+                        SENAITE push consumer interface (default: senaite.lis2a.import)
+  -m MESSAGE_FORMAT, --message-format MESSAGE_FORMAT
+                        Message format to send to SENAITE. Supports "astm" or "lis2a". (default: lis2a)
+  -r RETRIES, --retries RETRIES
+                        Number of attempts of reconnection when SENAITE instance is not reachable. Only has effect when argument --url is set (default: 3)
+  -d DELAY, --delay DELAY
+                        Time delay in seconds between retries when SENAITE instance is not reachable. Only has effect when argument --url is set (default: 5)
 
 **Note ☝️:**
 The push consuer endpoint `senaite.lis2a.import` does currently not support the
