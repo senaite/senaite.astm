@@ -192,13 +192,16 @@ class ASTMProtocol(asyncio.Protocol):
     def split_message(self, message):
         """Split the message into seqence, message and checksum
         """
-        frame_cs = message[1:-2]
-        # split frame/checksum
-        frame, cs = frame_cs[:-2], frame_cs[-2:]
+        # Remove the STX at the beginning and the checksum at the end
+        frame = message[1:-2]
+        # Get the checksum
+        cs = message[-2:]
+        # validate the checksum
         ccs = make_checksum(frame)
         if cs != ccs:
             raise NotAccepted(
                 'Checksum failure: expected %r, calculated %r' % (cs, ccs))
+        # Get the sequence
         seq = frame[:1]
         if not seq.isdigit():
             raise ValueError("Invalid frame sequence: {}".format(repr(seq)))

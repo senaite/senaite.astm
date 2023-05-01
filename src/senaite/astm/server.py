@@ -7,7 +7,6 @@ import logging
 import os
 import sys
 from datetime import datetime
-from time import sleep
 
 from senaite.astm import lims
 from senaite.astm import logger
