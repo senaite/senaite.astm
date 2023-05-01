@@ -47,11 +47,6 @@ The script `senaite-astm-server` allows to start the server:
       -d DELAY, --delay DELAY
                             Time delay in seconds between retries when SENAITE instance is not reachable. Only has effect when argument --url is set (default: 5)
 
-**Note ☝️:**
-The push consuer endpoint `senaite.lis2a.import` does currently not support the
-full messages (including control characters) sent by `senaite.astm`.
-Therefore, it requires to register a custom endpoint for doing the results import.
-
 
 ## Custom push consumer
 
