@@ -44,7 +44,7 @@ def main():
         '-d',
         '--delay',
         type=float,
-        default=0.1,
+        default=0.0,
         help='Delay in seconds between two frames.')
 
     parser.add_argument(
@@ -89,7 +89,7 @@ async def send_message(message, address, port, **kw):
     reader, writer = await asyncio.open_connection(address, port)
 
     # get the delay
-    delay = kw.get('delay', 0.0)
+    delay = kw.get('delay', 0)
 
     # Start each new message with an ENQ
     logger.info('-> Write ENQ')
