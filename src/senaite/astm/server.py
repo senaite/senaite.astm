@@ -162,10 +162,15 @@ def main():
                 asyncio.to_thread(
                     post_to_senaite, message, session, **session_args))
 
+    # Create a ASTM message consumer task to be scheduled concurrently.
+    queue = asyncio.Queue()
+    loop.create_task(consume(queue, callback=dispatch_astm_message))
+
     # Create a TCP server coroutine listening on port of the host address.
-    protocol = ASTMProtocol(message_format=args.message_format)
+    # IMPORTANT: We create a new Protocol for every connection!
     server_coro = loop.create_server(
-        lambda: protocol, host=args.listen, port=args.port)
+        lambda: ASTMProtocol(queue=queue, message_format=args.message_format),
+        host=args.listen, port=args.port)
 
     # Run until the future (an instance of Future) has completed.
     server = loop.run_until_complete(server_coro)
@@ -175,11 +180,6 @@ def main():
         logger.info('Starting server on {}:{}'.format(ip, port))
         logger.info('ASTM server ready to handle connections ...')
 
-    # Create a ASTM message consumer task to be scheduled concurrently.
-    queue = protocol.get_message_queue()
-    loop.create_task(consume(queue, callback=dispatch_astm_message))
-
-    # Run the event loop until stop() is called.
     try:
         loop.run_forever()
     except KeyboardInterrupt:
