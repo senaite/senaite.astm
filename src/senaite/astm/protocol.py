@@ -5,6 +5,7 @@ import os
 
 from senaite.astm import logger
 from senaite.astm.constants import ACK
+from senaite.astm.constants import CRLF
 from senaite.astm.constants import ENQ
 from senaite.astm.constants import EOT
 from senaite.astm.constants import NAK
@@ -258,6 +259,8 @@ class ASTMProtocol(asyncio.Protocol):
         :returns: True if the received message is valid or otherwise it raises
                   a NotAccepted Exception.
         """
+        # remove any trailing newlines at the end of the message
+        message = message.rstrip(CRLF)
         # get the frame w/o STX and checksum
         frame = message[1:-2]
         # check if the checksum matches
@@ -272,6 +275,8 @@ class ASTMProtocol(asyncio.Protocol):
     def split_message(self, message):
         """Split the message into seqence, message and checksum
         """
+        # remove any trailing newlines at the end of the message
+        message = message.rstrip(CRLF)
         # Remove the STX at the beginning and the checksum at the end
         frame = message[1:-2]
         # Get the checksum
