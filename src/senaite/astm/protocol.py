@@ -163,6 +163,14 @@ class ASTMProtocol(asyncio.Protocol):
         # stop any running timer
         self.cancel_timer()
 
+        # XXX: Seen by Yumizen instrument that EOT is sent right after ENQ.
+        #      Maybe this is some kind of keepalive?
+        #      -> For now we cancel the automatic timeout and reset the
+        #         transfer state to allow further ENQs to be sent.
+        if not self.messages:
+            self.in_transfer_state = False
+            return
+
         # LIS-2A compliant message
         lis2a_message = b""
         # Raw ASTM message (including STX, sequence and checksum)
