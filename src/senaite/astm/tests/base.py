@@ -6,7 +6,6 @@ from glob import glob
 from unittest import IsolatedAsyncioTestCase
 
 from senaite.astm.constants import ACK
-from senaite.astm.constants import CRLF
 from senaite.astm.constants import ENQ
 
 
@@ -58,9 +57,7 @@ class ASTMTestBase(IsolatedAsyncioTestCase):
 
         # Send instrument data
         for line in data:
-            # Test fixture: Remove trailing \r\n
-            message = line.strip(CRLF)
-            writer.write(message)
+            writer.write(line)
             await writer.drain()
             response = await reader.read(100)
             # We expect an ACK as response
