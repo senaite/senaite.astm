@@ -47,3 +47,11 @@ class ChecksummTestCase(ASTMTestBase):
 
     def test_short(self):
         self.assertEqual(b"02", codec.make_checksum("\x02"))
+
+    def test_instrument_files(self):
+        for path in self.instrument_files:
+            data = self.read_file_lines(path)
+            for line in data:
+                frame = line.rstrip(CRLF)[1:-2]
+                cs = line.rstrip(CRLF)[-2:]
+                self.assertEqual(cs, codec.make_checksum(frame))
