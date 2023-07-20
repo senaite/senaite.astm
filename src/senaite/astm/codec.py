@@ -92,7 +92,7 @@ def decode_message(message, encoding=ENCODING):
     if not (message.startswith(STX) and message.endswith(CRLF)):
         raise ValueError("Malformed ASTM message. Expected that it starts "
                          "with %x and followed by %x%x characters. Got: %r"
-                         % (ord(STX), ord(CR), ord(LF), message))
+                         "" % (ord(STX), ord(CR), ord(LF), message))
     # remove STX and CRLF
     frame_cs = message[1:-2]
     # split checksum
@@ -119,7 +119,7 @@ def decode_frame(frame, encoding=ENCODING):
     seq = frame[:1].decode()
     if not seq.isdigit():
         raise ValueError("Malformed ASTM frame. Expected leading seq number %r"
-                         % frame)
+                         "" % frame)
     seq, records = int(seq), frame[1:]
     return seq, [decode_record(record, encoding)
                  for record in records.split(RECORD_SEP)]
