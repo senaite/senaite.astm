@@ -79,7 +79,7 @@ class ASTMProtocol(asyncio.Protocol):
     def close_connection(self):
         """Cleanup and close connection
         """
-        self.flush_session()
+        self.drop_session()
         self.transport.close()
 
     def discard_chunked_messages(self):
@@ -87,9 +87,10 @@ class ASTMProtocol(asyncio.Protocol):
         """
         self.chunks = []
 
-    def flush_session(self):
-        """Flush environment
+    def drop_session(self):
+        """Flush session
         """
+        self.cancel_timer()
         self.chunks = []
         self.messages = []
         self.in_transfer_state = False
@@ -165,9 +166,9 @@ class ASTMProtocol(asyncio.Protocol):
 
         # XXX: Seen by Yumizen instrument that EOT is sent right after ENQ.
         #      Maybe this is some kind of keepalive?
-        #      For now we flush the session an keep the connection alive
+        #      For now we drop the session and keep the connection alive
         if not self.messages:
-            self.flush_session()
+            self.drop_session()
             return
 
         # LIS-2A compliant message
@@ -188,8 +189,9 @@ class ASTMProtocol(asyncio.Protocol):
 
         # Store the raw message for debugging and development purposes
         self.log_message(astm_message)
-        # Close connection
-        self.close_connection()
+
+        # Flush the session
+        self.drop_session()
 
     def log_message(self, message, directory="astm_messages"):
         """Store the raw ASTM message if the folder exists in the CWD
