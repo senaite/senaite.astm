@@ -99,14 +99,13 @@ class ASTMProtocol(asyncio.Protocol):
         """
         logger.debug("-> Data received from {!s}: {!r}".format(
             self.client, data))
+        # restart the timer when data is received
+        self.restart_timer()
         # handle the data
         response = self.handle_data(data)
         if response is not None:
             logger.debug("<- Sending response: {!r}".format(response))
             self.transport.write(response)
-            # restart the timer
-            # -> this ensures the next data is received within the timeout
-            self.restart_timer()
 
     def handle_data(self, data):
         """Process incoming data
