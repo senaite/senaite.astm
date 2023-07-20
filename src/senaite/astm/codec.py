@@ -56,7 +56,7 @@ def decode(data, encoding=ENCODING):
     :rtype: list
     """
     if not isinstance(data, bytes):
-        raise TypeError('bytes expected, got %r' % data)
+        raise TypeError("bytes expected, got %r" % data)
     if data.startswith(STX):  # may be decode message \x02...\x03CS\r\n
         seq, records, cs = decode_message(data, encoding)
         return records
@@ -67,7 +67,7 @@ def decode(data, encoding=ENCODING):
     return [decode_record(data, encoding)]
 
 
-def decode_message(message, encoding):
+def decode_message(message, encoding=ENCODING):
     """Decodes complete ASTM message that is sent or received due
     communication routines.
 
@@ -88,41 +88,46 @@ def decode_message(message, encoding):
         * :exc:`AssertionError` if checksum verification fails.
     """
     if not isinstance(message, bytes):
-        raise TypeError('bytes expected, got %r' % message)
+        raise TypeError("bytes expected, got %r" % message)
     if not (message.startswith(STX) and message.endswith(CRLF)):
-        raise ValueError('Malformed ASTM message. Expected that it starts'
-                         ' with %x and followed by %x%x characters. Got: %r'
-                         ' ' % (ord(STX), ord(CR), ord(LF), message))
-    stx, frame_cs = message[0], message[1:-2]
+        raise ValueError("Malformed ASTM message. Expected that it starts "
+                         "with %x and followed by %x%x characters. Got: %r"
+                         % (ord(STX), ord(CR), ord(LF), message))
+    # remove STX and CRLF
+    frame_cs = message[1:-2]
+    # split checksum
     frame, cs = frame_cs[:-2], frame_cs[-2:]
+    # validate the checksum
     ccs = make_checksum(frame)
-    assert cs == ccs, 'Checksum failure: expected %r, got %r' % (cs, ccs)
+    assert cs == ccs, "Checksum failure: expected %r, got %r" % (cs, ccs)
     seq, records = decode_frame(frame, encoding)
     return seq, records, cs.decode()
 
 
-def decode_frame(frame, encoding):
-    """Decodes ASTM frame: list of records followed by sequence number."""
+def decode_frame(frame, encoding=ENCODING):
+    """Decodes ASTM frame: list of records followed by sequence number.
+    """
     if not isinstance(frame, bytes):
-        raise TypeError('bytes expected, got %r' % frame)
+        raise TypeError("bytes expected, got %r" % frame)
     if frame.endswith(CR + ETX):
         frame = frame[:-2]
     elif frame.endswith(ETB):
         frame = frame[:-1]
     else:
-        raise ValueError('Incomplete frame data %r.'
-                         ' Expected trailing <CR><ETX> or <ETB> chars' % frame)
+        raise ValueError("Incomplete frame data %r. "
+                         "Expected trailing <CR><ETX> or <ETB> chars" % frame)
     seq = frame[:1].decode()
     if not seq.isdigit():
-        raise ValueError('Malformed ASTM frame. Expected leading seq number %r'
-                         '' % frame)
+        raise ValueError("Malformed ASTM frame. Expected leading seq number %r"
+                         % frame)
     seq, records = int(seq), frame[1:]
     return seq, [decode_record(record, encoding)
                  for record in records.split(RECORD_SEP)]
 
 
-def decode_record(record, encoding):
-    """Decodes ASTM record message."""
+def decode_record(record, encoding=ENCODING):
+    """Decodes ASTM record message
+    """
     fields = []
     for item in record.split(FIELD_SEP):
         if REPEAT_SEP in item:
@@ -131,17 +136,20 @@ def decode_record(record, encoding):
             item = decode_component(item, encoding)
         else:
             item = item.decode(encoding)
+        # default `None` if item evalualtes to `False`
         fields.append([None, item][bool(item)])
     return fields
 
 
-def decode_component(field, encoding):
-    """Decodes ASTM field component."""
+def decode_component(field, encoding=ENCODING):
+    """Decodes ASTM field component
+    """
     return [[None, item.decode(encoding)][bool(item)]
             for item in field.split(COMPONENT_SEP)]
 
 
-def decode_repeated_component(component, encoding):
-    """Decodes ASTM field repeated component."""
+def decode_repeated_component(component, encoding=ENCODING):
+    """Decodes ASTM field repeated component
+    """
     return [decode_component(item, encoding)
             for item in component.split(REPEAT_SEP)]
