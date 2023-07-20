@@ -122,6 +122,8 @@ class ASTMProtocol(asyncio.Protocol):
             response = self.on_eot(data)
         elif data.startswith(STX):
             response = self.on_message(data)
+        elif self.in_transfer_state:
+            response = self.on_message(data)
         else:
             response = self.default_handler(data)
         return response
