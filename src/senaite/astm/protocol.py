@@ -166,10 +166,9 @@ class ASTMProtocol(asyncio.Protocol):
 
         # XXX: Seen by Yumizen instrument that EOT is sent right after ENQ.
         #      Maybe this is some kind of keepalive?
-        #      -> For now we cancel the automatic timeout and reset the
-        #         transfer state to allow further ENQs to be sent.
+        #      For now we flush the session an keep the connection alive
         if not self.messages:
-            self.in_transfer_state = False
+            self.flush_session()
             return
 
         # LIS-2A compliant message
