@@ -130,7 +130,7 @@ class DecodeRecordTestCase(ASTMTestBase):
         self.assertEqual(res, codec.decode_record(msg, "utf8"))
 
 
-class ChecksummTestCase(ASTMTestBase):
+class ChecksumTestCase(ASTMTestBase):
     """Test checksum generation
     """
     def test_common(self):
