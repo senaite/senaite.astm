@@ -3,6 +3,7 @@
 # Credits to Alexander Shorin:
 # https://github.com/kxepal/python-astm/blob/master/astm/tests/test_codecs.py
 
+
 from senaite.astm import codec
 from senaite.astm.constants import CR
 from senaite.astm.constants import CRLF
@@ -26,6 +27,26 @@ def f(s, e="utf-8"):
                        CR=u(CR),
                        LF=u(LF),
                        CRLF=u(CRLF)).encode(e)
+
+
+class DecodeTestCase(ASTMTestBase):
+    """Test message decoding
+    """
+
+    def test_decode_message(self):
+        msg = f("{STX}4C|1|I|CONTROL_FAILED^^PLT_ABOVE_TOLERANCE|I{CR}{ETX}D3{CRLF}")
+        res = [['C', '1', 'I', ['CONTROL_FAILED', None, 'PLT_ABOVE_TOLERANCE'], 'I']]
+        self.assertEqual(res, codec.decode(msg))
+
+    def test_decode_frame(self):
+        msg = f("4C|1|I|CONTROL_FAILED^^PLT_ABOVE_TOLERANCE|I{CR}{ETX}")
+        res = [['C', '1', 'I', ['CONTROL_FAILED', None, 'PLT_ABOVE_TOLERANCE'], 'I']]
+        self.assertEqual(res, codec.decode(msg))
+
+    def test_decode_message_with_nonascii(self):
+        msg = f('{STX}1Й|Ц|У|К{CR}{ETX}F1{CRLF}', 'cp1251')
+        res = [[u('Й'), u('Ц'), u('У'), u('К')]]
+        self.assertEqual(res, codec.decode(msg, 'cp1251'))
 
 
 class ChecksummTestCase(ASTMTestBase):
