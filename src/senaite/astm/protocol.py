@@ -79,7 +79,7 @@ class ASTMProtocol(asyncio.Protocol):
     def close_connection(self):
         """Cleanup and close connection
         """
-        self.discard_env()
+        self.flush_session()
         self.transport.close()
 
     def discard_chunked_messages(self):
@@ -87,7 +87,7 @@ class ASTMProtocol(asyncio.Protocol):
         """
         self.chunks = []
 
-    def discard_env(self):
+    def flush_session(self):
         """Flush environment
         """
         self.chunks = []
