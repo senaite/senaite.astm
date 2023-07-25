@@ -190,8 +190,8 @@ class ASTMProtocol(asyncio.Protocol):
 
         # Store the raw message for debugging and development purposes
         self.log_message(astm_message)
-        # Close connection
-        self.close_connection()
+        # Drop session
+        self.discard_env()
 
     def log_message(self, message, directory="astm_messages"):
         """Store the raw ASTM message if the folder exists in the CWD
