@@ -104,9 +104,9 @@ class ASTMProtocol(asyncio.Protocol):
         if response is not None:
             logger.debug("<- Sending response: {!r}".format(response))
             self.transport.write(response)
-            # restart the timer
-            # -> this ensures the next data is received within the timeout
-            self.restart_timer()
+        # restart the timer
+        # -> this ensures the next data is received within the timeout
+        self.restart_timer()
 
     def handle_data(self, data):
         """Process incoming data
@@ -166,10 +166,9 @@ class ASTMProtocol(asyncio.Protocol):
 
         # XXX: Seen by Yumizen instrument that EOT is sent right after ENQ.
         #      Maybe this is some kind of keepalive?
-        #      -> For now we cancel the automatic timeout and reset the
-        #         transfer state to allow further ENQs to be sent.
+        #      For now we drop the session and keep the connection alive
         if not self.messages:
-            self.in_transfer_state = False
+            self.discard_env()
             return
 
         # LIS-2A compliant message
