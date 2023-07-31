@@ -273,6 +273,9 @@ class ASTMProtocol(asyncio.Protocol):
 
     def split_message(self, message):
         """Split the message into seqence, message and checksum
+
+        :param message: ASTM message
+        :returns: Tuple of sequence, message and checksum
         """
         # remove any trailing newlines at the end of the message
         message = message.rstrip(CRLF)
