@@ -5,6 +5,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 
+from senaite.astm.codec import make_checksum
 from senaite.astm.constants import CRLF
 from senaite.astm.constants import ETB
 from senaite.astm.constants import ETX
@@ -44,20 +45,6 @@ def join(chunks):
     """
     msg = b'1' + b''.join(c[2:-5] for c in chunks) + ETX
     return b''.join([STX, msg, make_checksum(msg), CRLF])
-
-
-def make_checksum(message):
-    """Calculates checksum for specified message.
-
-    :param message: ASTM message.
-    :type message: bytes
-
-    :returns: Checksum value that is actually byte sized integer in hex base
-    :rtype: bytes
-    """
-    if not isinstance(message[0], int):
-        message = map(ord, message)
-    return hex(sum(message) & 0xFF)[2:].upper().zfill(2).encode()
 
 
 class CleanupDict(dict):
