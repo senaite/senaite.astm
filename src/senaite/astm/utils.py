@@ -34,7 +34,54 @@ def is_chunked_message(message):
         return False
     if ETB not in message:
         return False
-    return message.index(ETB) == length - 5
+    if message.index(ETB) != length - 5:
+        return False
+    if validate_checksum(message):
+        # Chunked messages have no valid checksum!
+        return False
+    return True
+
+
+def validate_checksum(message):
+    """Validate the checksum of the message
+
+    :param message: The received message (line) of the instrument
+                    containing the STX at the beginning and the cecksum at
+                    the end.
+    :returns: True if the received message is valid or otherwise it raises
+                a NotAccepted Exception.
+    """
+    # remove any trailing newlines at the end of the message
+    message = message.rstrip(CRLF)
+    # get the frame w/o STX and checksum
+    frame = message[1:-2]
+    # check if the checksum matches
+    cs = message[-2:]
+    # generate the checksum for the frame
+    ccs = make_checksum(frame)
+    if cs != ccs:
+        return False
+    return True
+
+
+def split_message(message):
+    """Split the message into seqence, message and checksum
+
+    :param message: ASTM message
+    :returns: Tuple of sequence, message and checksum
+    """
+    # remove any trailing newlines at the end of the message
+    message = message.rstrip(CRLF)
+    # Remove the STX at the beginning and the checksum at the end
+    frame = message[1:-2]
+    # Get the checksum
+    cs = message[-2:]
+    # Get the sequence
+    seq = frame[:1]
+    if not seq.isdigit():
+        raise ValueError("Invalid frame sequence: {}".format(repr(seq)))
+    seq, msg = int(seq), frame[1:]
+    return seq, msg, cs
 
 
 def join(chunks):

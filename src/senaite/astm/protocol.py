@@ -5,7 +5,6 @@ import os
 
 from senaite.astm import logger
 from senaite.astm.constants import ACK
-from senaite.astm.constants import CRLF
 from senaite.astm.constants import ENQ
 from senaite.astm.constants import EOT
 from senaite.astm.constants import NAK
@@ -14,7 +13,8 @@ from senaite.astm.exceptions import InvalidState
 from senaite.astm.exceptions import NotAccepted
 from senaite.astm.utils import is_chunked_message
 from senaite.astm.utils import join
-from senaite.astm.codec import make_checksum
+from senaite.astm.utils import split_message
+from senaite.astm.utils import validate_checksum
 from senaite.astm.utils import write_message
 
 TIMEOUT = 15
@@ -177,7 +177,7 @@ class ASTMProtocol(asyncio.Protocol):
         astm_message = b""
 
         for record in self.messages:
-            seq, msg, cs = self.split_message(record)
+            seq, msg, cs = split_message(record)
             lis2a_message += msg
             astm_message += record
 
@@ -246,49 +246,9 @@ class ASTMProtocol(asyncio.Protocol):
 
         # append the raw message to the messages
         # NOTE: Conversion to LIS2-A2 format is done when EOT is received
-        if self.validate_checksum(full_message):
-            self.messages.append(full_message)
-
-    def validate_checksum(self, message):
-        """Validate the checksum of the message
-
-        :param message: The received message (line) of the instrument
-                        containing the STX at the beginning and the cecksum at
-                        the end.
-        :returns: True if the received message is valid or otherwise it raises
-                  a NotAccepted Exception.
-        """
-        # remove any trailing newlines at the end of the message
-        message = message.rstrip(CRLF)
-        # get the frame w/o STX and checksum
-        frame = message[1:-2]
-        # check if the checksum matches
-        cs = message[-2:]
-        # generate the checksum for the frame
-        ccs = make_checksum(frame)
-        if cs != ccs:
-            raise NotAccepted(
-                "Checksum failure: expected %r, calculated %r" % (cs, ccs))
-        return True
-
-    def split_message(self, message):
-        """Split the message into seqence, message and checksum
-
-        :param message: ASTM message
-        :returns: Tuple of sequence, message and checksum
-        """
-        # remove any trailing newlines at the end of the message
-        message = message.rstrip(CRLF)
-        # Remove the STX at the beginning and the checksum at the end
-        frame = message[1:-2]
-        # Get the checksum
-        cs = message[-2:]
-        # Get the sequence
-        seq = frame[:1]
-        if not seq.isdigit():
-            raise ValueError("Invalid frame sequence: {}".format(repr(seq)))
-        seq, msg = int(seq), frame[1:]
-        return seq, msg, cs
+        if not validate_checksum(full_message):
+            raise NotAccepted("Checksum failed for '%r'" % full_message)
+        self.messages.append(full_message)
 
     def connection_lost(self, ex):
         """Called when the connection is lost or closed.
