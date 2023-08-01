@@ -164,9 +164,8 @@ class ASTMProtocol(asyncio.Protocol):
         # stop any running timer
         self.cancel_timer()
 
-        # XXX: Seen by Yumizen instrument that EOT is sent right after ENQ.
+        # XXX: Seen from Yumizen H550: EOT right after ENQ.
         #      Maybe this is some kind of keepalive?
-        #      For now we drop the session and keep the connection alive
         if not self.messages:
             self.discard_env()
             return
