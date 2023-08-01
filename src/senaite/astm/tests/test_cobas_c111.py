@@ -3,6 +3,7 @@
 from unittest.mock import MagicMock
 from unittest.mock import Mock
 
+from senaite.astm import codec
 from senaite.astm.constants import ACK
 from senaite.astm.constants import ENQ
 from senaite.astm.protocol import ASTMProtocol
@@ -16,26 +17,7 @@ class ASTMProtocolTest(ASTMTestBase):
     async def asyncSetUp(self):
         self.protocol = ASTMProtocol()
 
-    def get_mock_transport(self, ip="127.0.0.1", port=12345):
-        transport = MagicMock()
-        transport.get_extra_info = Mock(return_value=(ip, port))
-        transport.write = MagicMock()
-        return transport
-
-    def test_communication(self):
-        """Test common instrument communication """
-
-        # Mock transport and protocol objects
-        transport = self.get_mock_transport()
-        self.protocol.transport = transport
-
-        # Establish the connection to build setup the environment
-        self.protocol.connection_made(transport)
-
-        # Send ENQ
-        self.protocol.data_received(ENQ)
-
-        lines = [
+        self.lines = [
             b'\x021H|\\^&|||C111^Roche^c111^4.2.2.1730^1^13147|||||host|RSUPL^REAL|P|1|20230727162028\r\x179B\r\n',
             b'\x022P|1||\r\x174B\r\n',
             b'\x023O|1||T20-10143GA D07^^2||R||||||N|||||||||||20230727162028|||F\r\x17C0\r\n',
@@ -45,7 +27,40 @@ class ASTMProtocolTest(ASTMTestBase):
             b'\x027L|1|N\r\x030A\r\n',
         ]
 
-        for line in lines:
+        # Mock transport and protocol objects
+        self.transport = self.get_mock_transport()
+        self.protocol.transport = self.transport
+
+    def get_mock_transport(self, ip="127.0.0.1", port=12345):
+        transport = MagicMock()
+        transport.get_extra_info = Mock(return_value=(ip, port))
+        transport.write = MagicMock()
+        return transport
+
+    def test_communication(self):
+        """Test common instrument communication """
+
+        # Establish the connection to build setup the environment
+        self.protocol.connection_made(self.transport)
+
+        # Send ENQ
+        self.protocol.data_received(ENQ)
+
+        for line in self.lines:
             self.protocol.data_received(line)
             # We expect an ACK as response
-            transport.write.assert_called_with(ACK)
+            self.transport.write.assert_called_with(ACK)
+
+    def test_decode_messages(self):
+        # Establish the connection to build setup the environment
+        self.protocol.connection_made(self.transport)
+
+        # Send ENQ
+        self.protocol.data_received(ENQ)
+
+        for line in self.lines:
+            self.protocol.data_received(line)
+            record = codec.decode(line)
+
+            self.assertTrue(isinstance(record, list), True)
+            self.assertTrue(len(record) > 0, True)
