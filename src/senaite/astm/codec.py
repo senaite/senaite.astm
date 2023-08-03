@@ -10,7 +10,6 @@ from senaite.astm.constants import ENCODING
 from senaite.astm.constants import ETB
 from senaite.astm.constants import ETX
 from senaite.astm.constants import FIELD_SEP
-from senaite.astm.constants import LF
 from senaite.astm.constants import RECORD_SEP
 from senaite.astm.constants import REPEAT_SEP
 from senaite.astm.constants import STX
@@ -89,12 +88,10 @@ def decode_message(message, encoding=ENCODING):
     """
     if not isinstance(message, bytes):
         raise TypeError("bytes expected, got %r" % message)
-    if not (message.startswith(STX) and message.endswith(CRLF)):
-        raise ValueError("Malformed ASTM message. Expected that it starts "
-                         "with %x and followed by %x%x characters. Got: %r"
-                         "" % (ord(STX), ord(CR), ord(LF), message))
+    if not message.startswith(STX):
+        raise ValueError("ASTM message does not start with STX")
     # remove STX and CRLF
-    frame_cs = message[1:-2]
+    frame_cs = message.lstrip(STX).rstrip(CRLF)
     # split checksum
     frame, cs = frame_cs[:-2], frame_cs[-2:]
     # validate the checksum
