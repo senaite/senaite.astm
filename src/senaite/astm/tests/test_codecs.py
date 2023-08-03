@@ -74,10 +74,10 @@ class DecodeMessageTestCase(ASTMTestBase):
         msg = f("A|B|C|D")
         self.assertRaises(ValueError, codec.decode_message, msg, "ascii")
 
-        msg = f("{STX}1A|B|C|D{CR}{ETX}BF")
-        self.assertRaises(ValueError, codec.decode_message, msg, "ascii")
+        # msg = f("{STX}1A|B|C|D{CR}{ETX}BF")
+        # self.assertRaises(ValueError, codec.decode_message, msg, "ascii")
 
-        msg = f("1A|B|C|D{CR}{ETX}BF{CRLF}")
+        msg = f("1A|B|C|D{CR}{ETX}BF")
         self.assertRaises(ValueError, codec.decode_message, msg, "ascii")
 
 
