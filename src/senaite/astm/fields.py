@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 #
+# Credits to Alexander Shorin:
+# https://github.com/kxepal/python-astm
+
 import datetime
 import decimal
 import inspect

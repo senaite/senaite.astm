@@ -7,6 +7,13 @@ from senaite.astm import codec
 from senaite.astm.constants import ACK
 from senaite.astm.constants import ENQ
 from senaite.astm.protocol import ASTMProtocol
+from senaite.astm.records import CommentRecord
+from senaite.astm.records import HeaderRecord
+from senaite.astm.records import OrderRecord
+from senaite.astm.records import PatientRecord
+from senaite.astm.records import ResultRecord
+from senaite.astm.records import TerminatorRecord
+from senaite.astm.records import ManufacturerInfoRecord
 from senaite.astm.tests.base import ASTMTestBase
 
 
@@ -30,6 +37,16 @@ class ASTMProtocolTest(ASTMTestBase):
         # Mock transport and protocol objects
         self.transport = self.get_mock_transport()
         self.protocol.transport = self.transport
+
+        self.wrappers = {
+            "H": HeaderRecord,
+            "P": PatientRecord,
+            "O": OrderRecord,
+            "R": ResultRecord,
+            "C": CommentRecord,
+            "M": ManufacturerInfoRecord,
+            "L": TerminatorRecord,
+        }
 
     def get_mock_transport(self, ip="127.0.0.1", port=12345):
         transport = MagicMock()
@@ -60,7 +77,11 @@ class ASTMProtocolTest(ASTMTestBase):
 
         for line in self.lines:
             self.protocol.data_received(line)
-            record = codec.decode(line)
+            records = codec.decode(line)
 
-            self.assertTrue(isinstance(record, list), True)
-            self.assertTrue(len(record) > 0, True)
+            self.assertTrue(isinstance(records, list), True)
+            self.assertTrue(len(records) > 0, True)
+
+            record = records[0][0]
+            rtype = record[0]
+            wrapper = self.wrappers[rtype](*record)

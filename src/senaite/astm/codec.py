@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # Credits to Alexander Shorin:
-# https://github.com/kxepal/python-astm/blob/master/astm/codec.py
+# https://github.com/kxepal/python-astm
 
 from senaite.astm.constants import COMPONENT_SEP
 from senaite.astm.constants import CR

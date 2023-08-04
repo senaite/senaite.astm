@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # Credits to Alexander Shorin:
-# https://github.com/kxepal/python-astm/blob/master/astm/compat.py
+# https://github.com/kxepal/python-astm
 
 import sys
 

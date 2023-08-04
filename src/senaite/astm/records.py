@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 #
+# Credits to Alexander Shorin:
+# https://github.com/kxepal/python-astm
 
 """Common ASTM records structure.
 
