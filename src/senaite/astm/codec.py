@@ -3,8 +3,6 @@
 # Credits to Alexander Shorin:
 # https://github.com/kxepal/python-astm
 
-from collections import Iterable
-
 from senaite.astm.compat import unicode
 from senaite.astm.constants import COMPONENT_SEP
 from senaite.astm.constants import CR
@@ -17,8 +15,13 @@ from senaite.astm.constants import LF
 from senaite.astm.constants import RECORD_SEP
 from senaite.astm.constants import REPEAT_SEP
 from senaite.astm.constants import STX
-from senaite.astm.utils import split
 from senaite.astm.utils import make_checksum
+from senaite.astm.utils import split
+
+try:
+    from collections import Iterable
+except ImportError:  # Python 3
+    from collections.abc import Iterable
 
 
 def decode(data, encoding=ENCODING):
