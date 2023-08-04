@@ -364,6 +364,6 @@ TerminatorRecord = Record.build(
 #: +-----+--------------+---------------------------------+-------------------+
 #:
 ManufacturerInfoRecord = Record.build(
-    ConstantField(name="RecordType", default="M"),
-    IntegerField(name="SequenceNumber", default=1, required=True),
+    ConstantField(name="type", default="M"),
+    IntegerField(name="seq", default=1, required=True),
 )

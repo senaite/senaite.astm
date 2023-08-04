@@ -85,3 +85,5 @@ class ASTMProtocolTest(ASTMTestBase):
             record = records[0][0]
             rtype = record[0]
             wrapper = self.wrappers[rtype](*record)
+            data = wrapper.to_dict()
+            self.assertEqual(data.get("type"), rtype)
