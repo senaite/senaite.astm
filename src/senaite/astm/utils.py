@@ -5,11 +5,16 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-from senaite.astm.codec import make_checksum
+from senaite.astm.constants import CR
 from senaite.astm.constants import CRLF
 from senaite.astm.constants import ETB
 from senaite.astm.constants import ETX
 from senaite.astm.constants import STX
+
+try:
+    from itertools import izip_longest
+except ImportError:  # Python 3
+    from itertools import zip_longest as izip_longest
 
 
 def write_message(message, path, dateformat="%Y-%m-%d_%H:%M:%S", ext=".txt"):
@@ -40,6 +45,20 @@ def is_chunked_message(message):
         # Chunked messages have no valid checksum!
         return False
     return True
+
+
+def make_checksum(message):
+    """Calculates checksum for specified message.
+
+    :param message: ASTM message.
+    :type message: bytes
+
+    :returns: Checksum value that is actually byte sized integer in hex base
+    :rtype: bytes
+    """
+    if not isinstance(message[0], int):
+        message = map(ord, message)
+    return hex(sum(message) & 0xFF)[2:].upper().zfill(2).encode()
 
 
 def validate_checksum(message):
@@ -90,8 +109,45 @@ def join(chunks):
     :param chunks: List of chunks as `bytes`.
     :type chunks: iterable
     """
-    msg = b'1' + b''.join(c[2:-5] for c in chunks) + ETX
-    return b''.join([STX, msg, make_checksum(msg), CRLF])
+    msg = b"1" + b"".join(c[2:-5] for c in chunks) + ETX
+    return b"".join([STX, msg, make_checksum(msg), CRLF])
+
+
+def split(msg, size):
+    """Split `msg` into chunks with specified `size`.
+
+    Chunk `size` value couldn't be less then 7 since each chunk goes with at
+    least 7 special characters: STX, frame number, ETX or ETB, checksum and
+    message terminator.
+
+    :param msg: ASTM message.
+    :type msg: bytes
+
+    :param size: Chunk size in bytes.
+    :type size: int
+
+    :yield: `bytes`
+    """
+    stx, frame, msg, tail = msg[:1], msg[1:2], msg[2:-6], msg[-6:]
+    assert stx == STX
+    assert frame.isdigit()
+    assert tail.endswith(CRLF)
+    assert size is not None and size >= 7
+    frame = int(frame)
+    chunks = make_chunks(msg, size - 7)
+    chunks, last = chunks[:-1], chunks[-1]
+    idx = 0
+    for idx, chunk in enumerate(chunks):
+        item = b"".join([str((idx + frame) % 8).encode(), chunk, ETB])
+        yield b"".join([STX, item, make_checksum(item), CRLF])
+    item = b"".join([str((idx + frame + 1) % 8).encode(), last, CR, ETX])
+    yield b"".join([STX, item, make_checksum(item), CRLF])
+
+
+def make_chunks(s, n):
+    iter_bytes = (s[i:i + 1] for i in range(len(s)))
+    return [b''.join(item)
+            for item in izip_longest(*[iter_bytes] * n, fillvalue=b'')]
 
 
 class CleanupDict(dict):

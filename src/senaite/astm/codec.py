@@ -3,6 +3,9 @@
 # Credits to Alexander Shorin:
 # https://github.com/kxepal/python-astm
 
+from collections import Iterable
+
+from senaite.astm.compat import unicode
 from senaite.astm.constants import COMPONENT_SEP
 from senaite.astm.constants import CR
 from senaite.astm.constants import CRLF
@@ -10,23 +13,12 @@ from senaite.astm.constants import ENCODING
 from senaite.astm.constants import ETB
 from senaite.astm.constants import ETX
 from senaite.astm.constants import FIELD_SEP
+from senaite.astm.constants import LF
 from senaite.astm.constants import RECORD_SEP
 from senaite.astm.constants import REPEAT_SEP
 from senaite.astm.constants import STX
-
-
-def make_checksum(message):
-    """Calculates checksum for specified message.
-
-    :param message: ASTM message.
-    :type message: bytes
-
-    :returns: Checksum value that is actually byte sized integer in hex base
-    :rtype: bytes
-    """
-    if not isinstance(message[0], int):
-        message = map(ord, message)
-    return hex(sum(message) & 0xFF)[2:].upper().zfill(2).encode()
+from senaite.astm.utils import split
+from senaite.astm.utils import make_checksum
 
 
 def decode(data, encoding=ENCODING):
@@ -150,3 +142,135 @@ def decode_repeated_component(component, encoding=ENCODING):
     """
     return [decode_component(item, encoding)
             for item in component.split(REPEAT_SEP)]
+
+
+# #############################################################################
+# ASTM ENCODE
+# #############################################################################
+
+def encode(records, encoding=ENCODING, size=None, seq=1):
+    """Encodes list of records into single ASTM message
+
+    If you need to get each record as standalone message use
+    :func:`iter_encode` instead.
+
+    If the result message is too large (greater than specified `size` if it's
+    not :const:`None`), than it will be split by chunks.
+
+    :param records: List of ASTM records.
+    :type records: list
+
+    :param encoding: Data encoding.
+    :type encoding: str
+
+    :param size: Chunk size in bytes.
+    :type size: int
+
+    :param seq: Frame start sequence number.
+    :type seq: int
+
+    :return: List of ASTM message chunks.
+    :rtype: list
+    """
+    msg = encode_message(seq, records, encoding)
+    if size is not None and len(msg) > size:
+        return list(split(msg, size))
+    return [msg]
+
+
+def iter_encode(records, encoding=ENCODING, size=None, seq=1):
+    """Encodes and emits each record as separate message.
+
+    If the result message is too large (greater than specified `size` if it's
+    not :const:`None`), than it will be split by chunks.
+
+    :yields: ASTM message chunks.
+    :rtype: str
+    """
+    for record in records:
+        msg = encode_message(seq, [record], encoding)
+        if size is not None and len(msg) > size:
+            for chunk in split(msg, size):
+                seq += 1
+                yield chunk
+        else:
+            seq += 1
+            yield msg
+
+
+def encode_message(seq, records, encoding=ENCODING):
+    """Encodes ASTM message.
+
+    :param seq: Frame sequence number.
+    :type seq: int
+
+    :param records: List of ASTM records.
+    :type records: list
+
+    :param encoding: Data encoding.
+    :type encoding: str
+
+    :return: ASTM complete message with checksum and other control characters.
+    :rtype: str
+    """
+    data = RECORD_SEP.join(encode_record(record, encoding)
+                           for record in records)
+    data = b''.join((str(seq % 8).encode(), data, CR, ETX))
+    return b''.join([STX, data, make_checksum(data), CR, LF])
+
+
+def encode_record(record, encoding=ENCODING):
+    """Encodes single ASTM record.
+
+    :param record: ASTM record. Each :class:`str`-typed item counted as field
+                   value, one level nested :class:`list` counted as components
+                   and second leveled - as repeated components.
+    :type record: list
+
+    :param encoding: Data encoding.
+    :type encoding: str
+
+    :returns: Encoded ASTM record.
+    :rtype: str
+    """
+    fields = []
+    _append = fields.append
+    for field in record:
+        if isinstance(field, bytes):
+            _append(field)
+        elif isinstance(field, unicode):
+            _append(field.encode(encoding))
+        elif isinstance(field, Iterable):
+            _append(encode_component(field, encoding))
+        elif field is None:
+            _append(b'')
+        else:
+            _append(unicode(field).encode(encoding))
+    return FIELD_SEP.join(fields)
+
+
+def encode_component(component, encoding=ENCODING):
+    """Encodes ASTM record field components.
+    """
+    items = []
+    _append = items.append
+    for item in component:
+        if isinstance(item, bytes):
+            _append(item)
+        elif isinstance(item, unicode):
+            _append(item.encode(encoding))
+        elif isinstance(item, Iterable):
+            return encode_repeated_component(component, encoding)
+        elif item is None:
+            _append(b'')
+        else:
+            _append(unicode(item).encode(encoding))
+
+    return COMPONENT_SEP.join(items).rstrip(COMPONENT_SEP)
+
+
+def encode_repeated_component(components, encoding=ENCODING):
+    """Encodes repeated components.
+    """
+    return REPEAT_SEP.join(
+        encode_component(item, encoding) for item in components)
