@@ -24,6 +24,10 @@ except ImportError:  # Python 3
     from collections.abc import Iterable
 
 
+# #############################################################################
+# ASTM DECODE
+# #############################################################################
+
 def decode(data, encoding=ENCODING):
     """Common ASTM decoding function that tries to guess which kind of data it
     handles.
@@ -218,8 +222,8 @@ def encode_message(seq, records, encoding=ENCODING):
     """
     data = RECORD_SEP.join(encode_record(record, encoding)
                            for record in records)
-    data = b''.join((str(seq % 8).encode(), data, CR, ETX))
-    return b''.join([STX, data, make_checksum(data), CR, LF])
+    data = b"".join((str(seq % 8).encode(), data, CR, ETX))
+    return b"".join([STX, data, make_checksum(data), CR, LF])
 
 
 def encode_record(record, encoding=ENCODING):
@@ -246,7 +250,7 @@ def encode_record(record, encoding=ENCODING):
         elif isinstance(field, Iterable):
             _append(encode_component(field, encoding))
         elif field is None:
-            _append(b'')
+            _append(b"")
         else:
             _append(unicode(field).encode(encoding))
     return FIELD_SEP.join(fields)
@@ -265,7 +269,7 @@ def encode_component(component, encoding=ENCODING):
         elif isinstance(item, Iterable):
             return encode_repeated_component(component, encoding)
         elif item is None:
-            _append(b'')
+            _append(b"")
         else:
             _append(unicode(item).encode(encoding))
 
