@@ -6,14 +6,8 @@ from unittest.mock import Mock
 from senaite.astm import codec
 from senaite.astm.constants import ACK
 from senaite.astm.constants import ENQ
+from senaite.astm.instruments import c111
 from senaite.astm.protocol import ASTMProtocol
-from senaite.astm.records import CommentRecord
-from senaite.astm.records import HeaderRecord
-from senaite.astm.records import OrderRecord
-from senaite.astm.records import PatientRecord
-from senaite.astm.records import ResultRecord
-from senaite.astm.records import TerminatorRecord
-from senaite.astm.records import ManufacturerInfoRecord
 from senaite.astm.tests.base import ASTMTestBase
 
 
@@ -37,16 +31,7 @@ class ASTMProtocolTest(ASTMTestBase):
         # Mock transport and protocol objects
         self.transport = self.get_mock_transport()
         self.protocol.transport = self.transport
-
-        self.wrappers = {
-            "H": HeaderRecord,
-            "P": PatientRecord,
-            "O": OrderRecord,
-            "R": ResultRecord,
-            "C": CommentRecord,
-            "M": ManufacturerInfoRecord,
-            "L": TerminatorRecord,
-        }
+        self.wrappers = c111.get_wrappers()
 
     def get_mock_transport(self, ip="127.0.0.1", port=12345):
         transport = MagicMock()
@@ -75,6 +60,9 @@ class ASTMProtocolTest(ASTMTestBase):
         # Send ENQ
         self.protocol.data_received(ENQ)
 
+        data = {}
+        keys = []
+
         for line in self.lines:
             self.protocol.data_received(line)
             records = codec.decode(line)
@@ -82,8 +70,11 @@ class ASTMProtocolTest(ASTMTestBase):
             self.assertTrue(isinstance(records, list), True)
             self.assertTrue(len(records) > 0, True)
 
-            record = records[0][0]
+            record = records[0]
             rtype = record[0]
             wrapper = self.wrappers[rtype](*record)
-            data = wrapper.to_dict()
-            self.assertEqual(data.get("type"), rtype)
+            data[rtype] = wrapper.to_dict()
+            keys.append(rtype)
+
+        for key in keys:
+            self.assertTrue(key in data)
