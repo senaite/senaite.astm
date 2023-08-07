@@ -118,6 +118,8 @@ class Mapping(_MappingProxy):
         return [(key, getattr(self, key)) for key, field in self._fields]
 
     def to_astm(self):
+        """Convert to ASTM records
+        """
         def values(obj):
             for key, field in obj._fields:
                 value = obj._data[key]
@@ -137,10 +139,24 @@ class Mapping(_MappingProxy):
                     yield value
         return list(values(self))
 
-    def to_dict(self):
-        """Convert to dictionary
+    def to_dict(self, obj=None):
+        """Convert to ASTM dictionary
         """
-        return dict(zip(self.keys(), self.to_astm()))
+        out = {}
+        obj = obj if obj else self
+
+        for key, field in obj._fields:
+            value = obj._data[key]
+            if isinstance(value, Mapping):
+                out[key] = self.to_dict(value)
+            elif isinstance(value, list):
+                out[key] = [self.to_dict(val) for val in value]
+            elif value is None and field.required:
+                raise ValueError("Field %r value should not be None" % key)
+            else:
+                out[key] = value
+
+        return out
 
 
 class Record(Mapping):
