@@ -341,6 +341,30 @@ CommentRecord = Record.build(
 #: +-----+--------------+---------------------------------+-------------------+
 #: |  #  | ASTM Field # | ASTM Name                       | Python alias      |
 #: +=====+==============+=================================+===================+
+#: |   1 |       12.1.1 |                  Record Type ID |              type |
+#: +-----+--------------+---------------------------------+-------------------+
+#: |   2 |       12.1.2 |                 Sequence Number |               seq |
+#: +-----+--------------+---------------------------------+-------------------+
+#:
+RequestInformationRecord = Record.build(
+    ConstantField(name="type", default="Q"),
+    IntegerField(name="seq", default=1, required=True),
+    NotUsedField(name="starting_range"),
+    NotUsedField(name="ending_range"),
+    NotUsedField(name="test_id"),
+    NotUsedField(name="time_limits"),
+    NotUsedField(name="beginning_results"),
+    NotUsedField(name="ending_results"),
+    NotUsedField(name="physician_name"),
+    NotUsedField(name="physician_telephone"),
+    NotUsedField(name="user_field_1"),
+    NotUsedField(name="user_field_2"),
+    NotUsedField(name="status_code"),
+)
+
+#: +-----+--------------+---------------------------------+-------------------+
+#: |  #  | ASTM Field # | ASTM Name                       | Python alias      |
+#: +=====+==============+=================================+===================+
 #: |   1 |       13.1.1 |                  Record Type ID |              type |
 #: +-----+--------------+---------------------------------+-------------------+
 #: |   2 |       13.1.2 |                 Sequence Number |               seq |
@@ -366,4 +390,15 @@ TerminatorRecord = Record.build(
 ManufacturerInfoRecord = Record.build(
     ConstantField(name="type", default="M"),
     IntegerField(name="seq", default=1, required=True),
+    NotUsedField(name="starting_range"),
+    NotUsedField(name="ending_range"),
+    NotUsedField(name="test"),
+    NotUsedField(name="time_limits"),
+    NotUsedField(name="beginning_results"),
+    NotUsedField(name="ending_results"),
+    NotUsedField(name="name"),
+    NotUsedField(name="telephone"),
+    NotUsedField(name="user_field_1"),
+    NotUsedField(name="user_field_2"),
+    NotUsedField(name="code"),
 )
