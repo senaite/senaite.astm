@@ -9,6 +9,7 @@ from senaite.astm.constants import ENQ
 from senaite.astm.instruments import c111
 from senaite.astm.protocol import ASTMProtocol
 from senaite.astm.tests.base import ASTMTestBase
+from senaite.astm.wrapper import Wrapper
 
 
 class ASTMProtocolTest(ASTMTestBase):
@@ -31,7 +32,7 @@ class ASTMProtocolTest(ASTMTestBase):
         # Mock transport and protocol objects
         self.transport = self.get_mock_transport()
         self.protocol.transport = self.transport
-        self.wrappers = c111.get_wrappers()
+        self.mapping = c111.get_mapping()
 
     def get_mock_transport(self, ip="127.0.0.1", port=12345):
         transport = MagicMock()
@@ -72,9 +73,18 @@ class ASTMProtocolTest(ASTMTestBase):
 
             record = records[0]
             rtype = record[0]
-            wrapper = self.wrappers[rtype](*record)
+            wrapper = self.mapping[rtype](*record)
             data[rtype] = wrapper.to_dict()
             keys.append(rtype)
 
         for key in keys:
             self.assertTrue(key in data)
+
+    def test_c111_wrapper(self):
+        """Test the message wrapper
+        """
+        wrapper = Wrapper(self.lines)
+        data = wrapper.to_dict()
+        results = data.get("R")
+        result = results[0]
+        self.assertEqual(result.get("value"), "95.2")

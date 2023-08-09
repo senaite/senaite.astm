@@ -13,9 +13,9 @@ from senaite.astm.exceptions import InvalidState
 from senaite.astm.exceptions import NotAccepted
 from senaite.astm.utils import is_chunked_message
 from senaite.astm.utils import join
-from senaite.astm.utils import split_message
 from senaite.astm.utils import validate_checksum
 from senaite.astm.utils import write_message
+from senaite.astm.wrapper import Wrapper
 
 TIMEOUT = 15
 QUEUE = asyncio.Queue()
@@ -172,24 +172,18 @@ class ASTMProtocol(asyncio.Protocol):
             self.discard_env()
             return
 
-        # LIS-2A compliant message
-        lis2a_message = b""
-        # Raw ASTM message (including STX, sequence and checksum)
-        astm_message = b""
+        wrapper = Wrapper(self.messages)
 
-        for record in self.messages:
-            seq, msg, cs = split_message(record)
-            lis2a_message += msg
-            astm_message += record
-
-        # Process either LIS-2A compliant or the raw message
         if self.message_format == "astm":
-            self.queue.put_nowait(astm_message)
+            self.queue.put_nowait(wrapper.to_astm())
+        elif self.message_format == "json":
+            self.queue.put_nowait(wrapper.to_json())
         else:
-            self.queue.put_nowait(lis2a_message)
+            self.queue.put_nowait(wrapper.to_lis2a())
 
         # Store the raw message for debugging and development purposes
-        self.log_message(astm_message)
+        self.log_message(wrapper.to_astm())
+
         # Drop session
         self.discard_env()
 
