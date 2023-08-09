@@ -6,7 +6,7 @@ from unittest.mock import Mock
 from senaite.astm import codec
 from senaite.astm.constants import ACK
 from senaite.astm.constants import ENQ
-from senaite.astm.instruments import c111
+from senaite.astm.instruments import roche_cobas_c111
 from senaite.astm.protocol import ASTMProtocol
 from senaite.astm.tests.base import ASTMTestBase
 from senaite.astm.wrapper import Wrapper
@@ -32,7 +32,7 @@ class ASTMProtocolTest(ASTMTestBase):
         # Mock transport and protocol objects
         self.transport = self.get_mock_transport()
         self.protocol.transport = self.transport
-        self.mapping = c111.get_mapping()
+        self.mapping = roche_cobas_c111.get_mapping()
 
     def get_mock_transport(self, ip="127.0.0.1", port=12345):
         transport = MagicMock()
