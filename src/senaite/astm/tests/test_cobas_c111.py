@@ -55,17 +55,12 @@ class ASTMProtocolTest(ASTMTestBase):
             self.transport.write.assert_called_with(ACK)
 
     def test_decode_messages(self):
-        # Establish the connection to build setup the environment
-        self.protocol.connection_made(self.transport)
-
-        # Send ENQ
-        self.protocol.data_received(ENQ)
+        self.test_communication()
 
         data = {}
         keys = []
 
-        for line in self.lines:
-            self.protocol.data_received(line)
+        for line in self.protocol.messages:
             records = codec.decode(line)
 
             self.assertTrue(isinstance(records, list), True)

@@ -41,9 +41,6 @@ def is_chunked_message(message):
         return False
     if message.index(ETB) != length - 5:
         return False
-    if validate_checksum(message):
-        # Chunked messages have no valid checksum!
-        return False
     return True
 
 

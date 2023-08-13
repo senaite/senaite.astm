@@ -14,6 +14,7 @@ from senaite.astm.exceptions import NotAccepted
 from senaite.astm.utils import is_chunked_message
 from senaite.astm.utils import join
 from senaite.astm.utils import validate_checksum
+from senaite.astm.utils import split_message
 from senaite.astm.utils import write_message
 from senaite.astm.wrapper import Wrapper
 
@@ -221,6 +222,7 @@ class ASTMProtocol(asyncio.Protocol):
     def handle_message(self, message):
         """Handle message data
         """
+
         full_message = None
         is_chunked_transfer = is_chunked_message(message)
 
@@ -239,10 +241,9 @@ class ASTMProtocol(asyncio.Protocol):
         if not full_message:
             return
 
-        # append the raw message to the messages
-        # NOTE: Conversion to LIS2-A2 format is done when EOT is received
         if not validate_checksum(full_message):
             raise NotAccepted("Checksum failed for '%r'" % full_message)
+
         self.messages.append(full_message)
 
     def connection_lost(self, ex):
