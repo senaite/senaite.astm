@@ -86,4 +86,6 @@ class Wrapper(object):
         return out
 
     def to_json(self):
-        return json.dumps(self.to_dict())
+        data = json.dumps(self.to_dict())
+        # Return the JSON encoded to bytes.
+        return data.encode()

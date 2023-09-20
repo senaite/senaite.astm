@@ -173,6 +173,7 @@ class ASTMProtocol(asyncio.Protocol):
             self.discard_env()
             return
 
+        # Wrap the message
         wrapper = Wrapper(self.messages)
 
         if self.message_format == "astm":
