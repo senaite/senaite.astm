@@ -41,7 +41,7 @@ class Wrapper(object):
             module = __import__(modname, fromlist="dummy")
             # get the regular expression to match the header message
             regex = getattr(module, "HEADER_RX", None)
-            if re.match(regex, header.decode()):
+            if regex and re.match(regex, header.decode()):
                 mapping = getattr(module, "get_mapping", None)
                 if callable(mapping):
                     return mapping()
@@ -59,13 +59,30 @@ class Wrapper(object):
         return b"\n".join(self.messages)
 
     def to_dict(self):
+        """Convert the ASTM message to a dictionary
+
+        Returns a dictionary where the key is the record type and the values is
+        a list of value dictionaries:
+
+            {
+                'H': [{...}],
+                ...
+                'L': [{...}],
+            }
+        """
         out = defaultdict(list)
+        mapping = self.get_mapping(self.messages)
+
         for message in self.messages:
             records = codec.decode(message)
-            record = records[0]
-            rtype = record[0]
-            wrapper = self.mapping[rtype](*record)
-            out[rtype].append(wrapper.to_dict())
+
+            for record in records:
+                rtype = record[0]
+                if rtype not in mapping:
+                    continue
+                wrapper = mapping[rtype](*record)
+                out[rtype].append(wrapper.to_dict())
+
         return out
 
     def to_json(self):
