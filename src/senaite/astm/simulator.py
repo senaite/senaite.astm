@@ -114,11 +114,8 @@ async def send_message(lines, address, port, **kw):
             logger.error('Expected ACK, got {!r}'.format(response))
             break
 
-    writer.write(EOT)
     logger.info('-> Write EOT')
-    await writer.drain()
-    response = await reader.read(100)
-    logger.info('<- Got response: {!r}'.format(response))
+    writer.write(EOT)
 
 
 if __name__ == '__main__':
