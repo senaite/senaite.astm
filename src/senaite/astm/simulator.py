@@ -67,8 +67,8 @@ def main():
     loop = asyncio.get_event_loop()
 
     for f in args.infile:
-        message = f.readlines()
-        task = send_message(message, args.address, args.port, delay=args.delay)
+        lines = f.readlines()
+        task = send_message(lines, args.address, args.port, delay=args.delay)
         loop.create_task(task)
 
     try:
@@ -82,10 +82,10 @@ def main():
         logger.info('Done')
 
 
-async def send_message(message, address, port, **kw):
+async def send_message(lines, address, port, **kw):
     """Send message to ASTM server
     """
-    # openm a new conection for every message
+    # open a new conection for every message
     reader, writer = await asyncio.open_connection(address, port)
 
     # get the delay
@@ -98,9 +98,12 @@ async def send_message(message, address, port, **kw):
     response = await reader.read(100)
     logger.info('<- Got response: {!r}'.format(response))
 
-    for line in message:
+    for line in lines:
         # Remove trailing \r\n
         line = line.strip(CRLF)
+        # skip empty lines
+        if not line:
+            continue
         logger.info('-> Sending data: {!r}'.format(line))
         await asyncio.sleep(delay)
         writer.write(line)
