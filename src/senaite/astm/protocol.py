@@ -14,7 +14,6 @@ from senaite.astm.exceptions import NotAccepted
 from senaite.astm.utils import is_chunked_message
 from senaite.astm.utils import join
 from senaite.astm.utils import validate_checksum
-from senaite.astm.utils import split_message
 from senaite.astm.utils import write_message
 from senaite.astm.wrapper import Wrapper
 
