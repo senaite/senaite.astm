@@ -78,7 +78,12 @@ class ASTMProtocolTest(ASTMTestBase):
     def test_c111_wrapper(self):
         """Test the message wrapper
         """
-        wrapper = Wrapper(self.lines)
+        # send test data to the server
+        self.test_communication()
+
+        # check the wrapper
+        wrapper = Wrapper(self.protocol.messages)
+
         data = wrapper.to_dict()
         results = data.get("R")
         result = results[0]
