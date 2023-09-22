@@ -97,6 +97,7 @@ async def send_message(lines, address, port, **kw):
     await writer.drain()
     response = await reader.read(100)
     logger.info('<- Got response: {!r}'.format(response))
+    success = True
 
     for line in lines:
         # Remove trailing \r\n
@@ -112,10 +113,12 @@ async def send_message(lines, address, port, **kw):
         logger.info('<- Got response: {!r}'.format(response))
         if response != ACK:
             logger.error('Expected ACK, got {!r}'.format(response))
+            success = False
             break
 
-    logger.info('-> Write EOT')
-    writer.write(EOT)
+    if success:
+        logger.info('-> Write EOT')
+        writer.write(EOT)
 
 
 if __name__ == '__main__':
