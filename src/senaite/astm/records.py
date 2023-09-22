@@ -191,7 +191,7 @@ PatientRecord = Record.build(
 #: +-----+--------------+--------------------------------+--------------------+
 #: |   6 |        9.4.6 |                       Priority |           priority |
 #: +-----+--------------+--------------------------------+--------------------+
-#: |   7 |        9.4.7 |    Requested/Ordered Date/Time |         created_at |
+#: |   7 |        9.4.7 |    Requested/Ordered Date/Time |       requested_at |
 #: +-----+--------------+--------------------------------+--------------------+
 #: |   8 |        9.4.8 |  Specimen Collection Date/Time |         sampled_at |
 #: +-----+--------------+--------------------------------+--------------------+
@@ -207,7 +207,7 @@ PatientRecord = Record.build(
 #: +-----+--------------+--------------------------------+--------------------+
 #: |  14 |       9.4.14 |           Relevant Information |      clinical_info |
 #: +-----+--------------+--------------------------------+--------------------+
-#: |  15 |       9.4.15 |    Date/Time Specimen Received |       delivered_at |
+#: |  15 |       9.4.15 |    Date/Time Specimen Received |        received_at |
 #: +-----+--------------+--------------------------------+--------------------+
 #: |  16 |       9.4.16 |            Specimen Descriptor |        biomaterial |
 #: +-----+--------------+--------------------------------+--------------------+
@@ -223,7 +223,7 @@ PatientRecord = Record.build(
 #: +-----+--------------+--------------------------------+--------------------+
 #: |  22 |       9.4.22 |         Laboratory Field No. 2 | laboratory_field_2 |
 #: +-----+--------------+--------------------------------+--------------------+
-#: |  23 |       9.4.23 |             Date/Time Reported |        modified_at |
+#: |  23 |       9.4.23 |             Date/Time Reported |        reported_at |
 #: +-----+--------------+--------------------------------+--------------------+
 #: |  24 |       9.4.24 |              Instrument Charge |  instrument_charge |
 #: +-----+--------------+--------------------------------+--------------------+
@@ -239,7 +239,7 @@ OrderRecord = Record.build(
     NotUsedField(name="instrument"),
     NotUsedField(name="test"),
     NotUsedField(name="priority"),
-    NotUsedField(name="created_at"),
+    NotUsedField(name="requested_at"),
     NotUsedField(name="sampled_at"),
     NotUsedField(name="collected_at"),
     NotUsedField(name="volume"),
@@ -247,7 +247,7 @@ OrderRecord = Record.build(
     NotUsedField(name="action_code"),
     NotUsedField(name="danger_code"),
     NotUsedField(name="clinical_info"),
-    NotUsedField(name="delivered_at"),
+    NotUsedField(name="received_at"),
     NotUsedField(name="biomaterial"),
     NotUsedField(name="physician"),
     NotUsedField(name="physician_phone"),
@@ -255,7 +255,7 @@ OrderRecord = Record.build(
     NotUsedField(name="user_field_2"),
     NotUsedField(name="laboratory_field_1"),
     NotUsedField(name="laboratory_field_2"),
-    NotUsedField(name="modified_at"),
+    NotUsedField(name="reported_at"),
     NotUsedField(name="instrument_charge"),
     NotUsedField(name="instrument_section"),
     NotUsedField(name="report_type"),

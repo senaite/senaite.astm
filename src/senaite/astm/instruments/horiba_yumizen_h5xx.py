@@ -55,6 +55,29 @@ class PatientRecord(records.PatientRecord):
 class OrderRecord(records.OrderRecord):
     """Order Record (O)
     """
+    sample_id = TextField()
+    instrument = TextField()
+    test = ComponentField(
+        Component.build(
+            NotUsedField(name='_'),
+            NotUsedField(name='__'),
+            NotUsedField(name='___'),
+            SetField(
+                name='testname',
+                field=TextField(),
+                values=('CBC', 'DIF')),
+        ))
+    priority = ComponentField(
+        Component.build(
+            SetField(
+                name='value',
+                field=TextField(),
+                values=('R', 'S')),
+        ))
+    requested_at = DateTimeField()
+    received_at = DateTimeField()
+    sampled_at = DateTimeField()
+    reported_at = DateTimeField()
 
 
 class CommentRecord(records.CommentRecord):
