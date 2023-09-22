@@ -5,6 +5,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 
+from senaite.astm import logger
 from senaite.astm.constants import CR
 from senaite.astm.constants import CRLF
 from senaite.astm.constants import ETB
@@ -76,6 +77,7 @@ def validate_checksum(message):
     # generate the checksum for the frame
     ccs = make_checksum(frame)
     if cs != ccs:
+        logger.warn("Expected checksum '%s', got '%s'" % (cs, ccs))
         return False
     return True
 
