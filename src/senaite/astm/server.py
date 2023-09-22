@@ -65,7 +65,7 @@ def main():
         '-c',
         '--consumer',
         type=str,
-        default='senaite.lis2a.import',
+        default='senaite.core.lis2a.import',
         help='SENAITE push consumer interface')
 
     lims_group.add_argument(
