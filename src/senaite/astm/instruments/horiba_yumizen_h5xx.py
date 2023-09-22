@@ -88,7 +88,6 @@ class CommentRecord(records.CommentRecord):
 class ResultRecord(records.ResultRecord):
     """Record to transmit analytical data.
     """
-
     test = ComponentField(
         Component.build(
             NotUsedField(name='_'),

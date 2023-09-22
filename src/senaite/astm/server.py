@@ -72,7 +72,7 @@ def main():
         '-m',
         '--message-format',
         type=str,
-        default='lis2a',
+        default='json',
         help='Message format to send to SENAITE.'
              'Allowed formats "astm", "lis2a", "json".')
 

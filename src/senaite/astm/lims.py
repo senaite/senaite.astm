@@ -60,11 +60,15 @@ class Session(object):
         self.username = auth[0]
         self.password = auth[1]
         self.url = requests.utils.urldefragauth(url)
-        self.session = requests.Session()
+
+    @property
+    def session(self):
+        session = requests.Session()
+        session.auth = (self.username, self.password)
+        return session
 
     def auth(self):
         logger.info("Starting session with SENAITE ...")
-        self.session.auth = (self.username, self.password)
 
         # try to get the version of the remote JSON API
         version = self.get("version")
