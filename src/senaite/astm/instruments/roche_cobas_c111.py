@@ -44,9 +44,9 @@ class HeaderRecord(records.HeaderRecord):
             TextField(name="name"),
             ConstantField(name="manufacturer", default="Roche"),
             ConstantField(name="instrument_type", default="c111"),
-            TextField(name="serial"),
             TextField(name="version"),
             TextField(name="protocol_version"),
+            TextField(name="serial"),
         ))
 
     comments = ComponentField(
