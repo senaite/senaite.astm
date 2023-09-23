@@ -19,7 +19,7 @@ from senaite.astm.wrapper import Wrapper
 
 TIMEOUT = 15
 QUEUE = asyncio.Queue()
-DEFAULT_FORMAT = "lis2a"
+DEFAULT_FORMAT = "json"
 
 
 class ASTMProtocol(asyncio.Protocol):

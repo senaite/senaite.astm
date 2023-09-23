@@ -73,8 +73,8 @@ def main():
         '--message-format',
         type=str,
         default='json',
-        help='Message format to send to SENAITE.'
-             'Allowed formats "astm", "lis2a", "json".')
+        help='Message format to send to SENAITE. '
+             'Allowed formats: "astm", "lis2a", "json".')
 
     lims_group.add_argument(
         '-r',
