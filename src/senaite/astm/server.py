@@ -65,15 +65,16 @@ def main():
         '-c',
         '--consumer',
         type=str,
-        default='senaite.lis2a.import',
+        default='senaite.core.lis2a.import',
         help='SENAITE push consumer interface')
 
     lims_group.add_argument(
         '-m',
         '--message-format',
         type=str,
-        default='lis2a',
-        help='Message format to send to SENAITE. Supports "astm" or "lis2a".')
+        default='json',
+        help='Message format to send to SENAITE. '
+             'Allowed formats: "astm", "lis2a", "json".')
 
     lims_group.add_argument(
         '-r',

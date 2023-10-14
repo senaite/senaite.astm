@@ -38,7 +38,8 @@ class ASTMTestBase(IsolatedAsyncioTestCase):
         """Read the lines of the file
         """
         with open(path, mode) as f:
-            return f.readlines()
+            lines = f.readlines()
+            return list(map(lambda x: x.rstrip(b"\n"), lines))
 
     async def communicate(self, data, **kw):
         """Simulate a full instrument communication

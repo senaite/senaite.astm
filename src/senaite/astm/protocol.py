@@ -5,7 +5,6 @@ import os
 
 from senaite.astm import logger
 from senaite.astm.constants import ACK
-from senaite.astm.constants import CRLF
 from senaite.astm.constants import ENQ
 from senaite.astm.constants import EOT
 from senaite.astm.constants import NAK
@@ -14,12 +13,13 @@ from senaite.astm.exceptions import InvalidState
 from senaite.astm.exceptions import NotAccepted
 from senaite.astm.utils import is_chunked_message
 from senaite.astm.utils import join
-from senaite.astm.utils import make_checksum
+from senaite.astm.utils import validate_checksum
 from senaite.astm.utils import write_message
+from senaite.astm.wrapper import Wrapper
 
 TIMEOUT = 15
 QUEUE = asyncio.Queue()
-DEFAULT_FORMAT = "lis2a"
+DEFAULT_FORMAT = "json"
 
 
 class ASTMProtocol(asyncio.Protocol):
@@ -99,14 +99,16 @@ class ASTMProtocol(asyncio.Protocol):
         """
         logger.debug("-> Data received from {!s}: {!r}".format(
             self.client, data))
+
+        # restart the timer
+        # -> this ensures the next data is received within the timeout
+        self.restart_timer()
+
         # handle the data
         response = self.handle_data(data)
         if response is not None:
             logger.debug("<- Sending response: {!r}".format(response))
             self.transport.write(response)
-            # restart the timer
-            # -> this ensures the next data is received within the timeout
-            self.restart_timer()
 
     def handle_data(self, data):
         """Process incoming data
@@ -164,34 +166,27 @@ class ASTMProtocol(asyncio.Protocol):
         # stop any running timer
         self.cancel_timer()
 
-        # XXX: Seen by Yumizen instrument that EOT is sent right after ENQ.
+        # XXX: Seen from Yumizen H550: EOT right after ENQ.
         #      Maybe this is some kind of keepalive?
-        #      -> For now we cancel the automatic timeout and reset the
-        #         transfer state to allow further ENQs to be sent.
         if not self.messages:
-            self.in_transfer_state = False
+            self.discard_env()
             return
 
-        # LIS-2A compliant message
-        lis2a_message = b""
-        # Raw ASTM message (including STX, sequence and checksum)
-        astm_message = b""
+        # Wrap the message
+        wrapper = Wrapper(self.messages)
 
-        for record in self.messages:
-            seq, msg, cs = self.split_message(record)
-            lis2a_message += msg
-            astm_message += record
-
-        # Process either LIS-2A compliant or the raw message
         if self.message_format == "astm":
-            self.queue.put_nowait(astm_message)
+            self.queue.put_nowait(wrapper.to_astm())
+        elif self.message_format == "json":
+            self.queue.put_nowait(wrapper.to_json())
         else:
-            self.queue.put_nowait(lis2a_message)
+            self.queue.put_nowait(wrapper.to_lis2a())
 
         # Store the raw message for debugging and development purposes
-        self.log_message(astm_message)
-        # Close connection
-        self.close_connection()
+        self.log_message(wrapper.to_astm())
+
+        # Drop session
+        self.discard_env()
 
     def log_message(self, message, directory="astm_messages"):
         """Store the raw ASTM message if the folder exists in the CWD
@@ -227,6 +222,7 @@ class ASTMProtocol(asyncio.Protocol):
     def handle_message(self, message):
         """Handle message data
         """
+
         full_message = None
         is_chunked_transfer = is_chunked_message(message)
 
@@ -245,48 +241,10 @@ class ASTMProtocol(asyncio.Protocol):
         if not full_message:
             return
 
-        # append the raw message to the messages
-        # NOTE: Conversion to LIS2-A2 format is done when EOT is received
-        if self.validate_checksum(full_message):
-            self.messages.append(full_message)
+        if not validate_checksum(full_message):
+            raise NotAccepted("Checksum failed for '%r'" % full_message)
 
-    def validate_checksum(self, message):
-        """Validate the checksum of the message
-
-        :param message: The received message (line) of the instrument
-                        containing the STX at the beginning and the cecksum at
-                        the end.
-        :returns: True if the received message is valid or otherwise it raises
-                  a NotAccepted Exception.
-        """
-        # remove any trailing newlines at the end of the message
-        message = message.rstrip(CRLF)
-        # get the frame w/o STX and checksum
-        frame = message[1:-2]
-        # check if the checksum matches
-        cs = message[-2:]
-        # generate the checksum for the frame
-        ccs = make_checksum(frame)
-        if cs != ccs:
-            raise NotAccepted(
-                "Checksum failure: expected %r, calculated %r" % (cs, ccs))
-        return True
-
-    def split_message(self, message):
-        """Split the message into seqence, message and checksum
-        """
-        # remove any trailing newlines at the end of the message
-        message = message.rstrip(CRLF)
-        # Remove the STX at the beginning and the checksum at the end
-        frame = message[1:-2]
-        # Get the checksum
-        cs = message[-2:]
-        # Get the sequence
-        seq = frame[:1]
-        if not seq.isdigit():
-            raise ValueError("Invalid frame sequence: {}".format(repr(seq)))
-        seq, msg = int(seq), frame[1:]
-        return seq, msg, cs
+        self.messages.append(full_message)
 
     def connection_lost(self, ex):
         """Called when the connection is lost or closed.
