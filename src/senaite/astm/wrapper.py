@@ -8,6 +8,7 @@ from collections import defaultdict
 from senaite.astm import codec
 from senaite.astm import instruments
 from senaite.astm import records
+from senaite.astm.constants import ENCODING
 from senaite.astm.utils import split_message
 
 DEFAULT_MAPPING = {
@@ -28,6 +29,7 @@ class Wrapper(object):
     def __init__(self, messages):
         self.messages = messages
         self.mapping = self.get_mapping(messages)
+        self.module = None
 
     def get_mapping(self, messages):
         """Returns the record mapping for the message
@@ -45,18 +47,21 @@ class Wrapper(object):
                 mapping = getattr(module, "get_mapping", None)
                 if callable(mapping):
                     return mapping()
+                # remember the matching module
+                self.module = module
 
         return DEFAULT_MAPPING
 
-    def to_lis2a(self):
+    def to_lis2a(self, encoding=ENCODING):
         out = b""
         for message in self.messages:
             seq, msg, cs = split_message(message)
             out += msg
-        return out
+        return out.decode(encoding)
 
-    def to_astm(self):
-        return b"\n".join(self.messages)
+    def to_astm(self, encoding=ENCODING):
+        out = b"\n".join(self.messages)
+        return out.decode(encoding)
 
     def to_dict(self):
         """Convert the ASTM message to a dictionary
@@ -70,8 +75,22 @@ class Wrapper(object):
                 'L': [{...}],
             }
         """
-        out = defaultdict(list)
+
+        # get the record mapping if provided
         mapping = self.get_mapping(self.messages)
+        # Prepare some metadata
+        metadata = {
+            "astm": self.to_astm(),
+            "lis2a": self.to_lis2a(),
+        }
+        # Append additional metadata if provided by the module
+        metadata_func = getattr(self.module, "get_metadata", None)
+        if callable(metadata_func):
+            metadata.update(metadata_func(self))
+
+        # Output dictionary
+        out = defaultdict(list)
+        out["metadata"] = metadata
 
         for message in self.messages:
             records = codec.decode(message)

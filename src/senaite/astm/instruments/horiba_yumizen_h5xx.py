@@ -12,6 +12,15 @@ from senaite.astm.mapping import Component
 HEADER_RX = r".*H5[0,5]0\^"
 
 
+def get_metadata(wrapper):
+    """Additional metadata
+
+    :param wrapper: The wrapper instance
+    :returns: dictionary of additional metadata
+    """
+    return {}
+
+
 def get_mapping():
     """Returns the wrappers for this instrument
     """

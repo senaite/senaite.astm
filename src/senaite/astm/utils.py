@@ -28,6 +28,9 @@ def write_message(message, path, dateformat="%Y-%m-%d_%H:%M:%S", ext=".txt"):
     now = datetime.now()
     timestamp = now.strftime(dateformat)
     filename = "{}{}".format(timestamp, ext)
+    # ensure we have a bytes type message
+    if isinstance(message, str):
+        message = bytes(message, "utf-8")
     with open(os.path.join(path, filename), "wb") as f:
         f.write(message)
 
