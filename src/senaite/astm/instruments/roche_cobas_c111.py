@@ -9,6 +9,7 @@ from senaite.astm.fields import SetField
 from senaite.astm.fields import TextField
 from senaite.astm.mapping import Component
 
+VERSION = "1.0.0"
 HEADER_RX = r".*Roche\^c111"
 
 
@@ -18,7 +19,10 @@ def get_metadata(wrapper):
     :param wrapper: The wrapper instance
     :returns: dictionary of additional metadata
     """
-    return {}
+    return {
+        "version": VERSION,
+        "header_rx": HEADER_RX,
+    }
 
 
 def get_mapping():
