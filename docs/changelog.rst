@@ -5,6 +5,7 @@ Changelog
 1.0.0 (unreleased)
 ------------------
 
+- #15 Add Cobas C311 import schema
 - #11 Fix same transport is used for different connections
 - #9  Add Cobas C311 Test
 - #7  Add Cobas C111 Test
