@@ -110,7 +110,7 @@ class HeaderRecord(records.HeaderRecord):
         Component.build(
             TextField(name="name", default="XN"),
             TextField(name="version"),
-            TextField(name="analyser_serial_no"),
+            TextField(name="serial"),
             NotUsedField(name='_'),
             NotUsedField(name='__'),
             NotUsedField(name='___'),

@@ -82,7 +82,7 @@ class SysmexXN550(ASTMTestBase):
         # test sender version
         self.assertEqual(record["sender"]["version"], "00-24")
         # test analyser serial no
-        self.assertEqual(record["sender"]["analyser_serial_no"], "22723")
+        self.assertEqual(record["sender"]["serial"], "22723")
         # test PS code
         self.assertEqual(record["sender"]["ps_code"], "BD634545")
 
