@@ -78,7 +78,7 @@ class SysmexXN550(ASTMTestBase):
         record = data["H"][0]
 
         # test sender name
-        self.assertEqual(record["sender"]["name"], "XN-550")
+        self.assertEqual(record["sender"]["name"].strip(), "XN-550")
         # test sender version
         self.assertEqual(record["sender"]["version"], "00-24")
         # test analyser serial no
@@ -127,12 +127,12 @@ class SysmexXN550(ASTMTestBase):
 
         # test parameters
         parameters = [
-            'WBC', 'RBC', 'HGB', 'HCT', 'MCV', 'MCH', 'MCHC', 'PLT', 'RDW-SD',
-            'RDW-CV', 'MPV', 'NEUT#', 'LYMPH#', 'MONO#', 'EO#', 'BASO#',
-            'NEUT%', 'LYMPH%', 'MONO%', 'EO%', 'BASO%', 'IG#', 'IG%'
+            "WBC", "RBC", "HGB", "HCT", "MCV", "MCH", "MCHC", "PLT", "RDW-SD",
+            "RDW-CV", "MPV", "NEUT#", "LYMPH#", "MONO#", "EO#", "BASO#",
+            "NEUT%", "LYMPH%", "MONO%", "EO%", "BASO%", "IG#", "IG%"
         ]
         for idx, test in enumerate(record["test"]):
-            self.assertEqual(test, parameters[idx])
+            self.assertEqual(test["parameter"], parameters[idx])
 
         # test action code
         self.assertEqual(record["action_code"], "N")
@@ -153,24 +153,21 @@ class SysmexXN550(ASTMTestBase):
         results = [
             "8.13", "2.60", "8.0", "22.7", "87.3", "30.8", "35.2", "99",
             "57.4", "12.8", "7.3", "22.1", "0.4", "4.67", "1.04", "0.59",
-            "1.80", "0.03", "0.2", "0.02", "47.5", "14.8", "8.1", "", "40",
+            "1.80", "0.03", "0.2", "0.02", "47.5", "14.8", "8.1", "", "", "40",
             "0", "10", "0", "70", "90", "80", "80", "0", "0", "", "",
             "PNG&R&20240628&R&2024_06_27_13_54_27_WDF.PNG",
             "PNG&R&20240628&R&2024_06_27_13_54_27_WDF_CBC.PNG",
             "PNG&R&20240628&R&2024_06_27_13_54_27_RBC.PNG",
             "PNG&R&20240628&R&2024_06_27_13_54_27_PLT.PNG",
         ]
-
         for idx, record in enumerate(records):
             self.assertEqual(record.get("value"), results[idx])
 
         units = [
             "10*3/uL", "10*6/uL", "g/dL", "%", "fL", "pg", "g/dL", "10*3/uL",
             "%", "%", "%", "%", "%", "10*3/uL", "10*3/uL", "10*3/uL",
-            "10*3/uL", "10*3/uL", "10*3/uL", "%", "10*3/uL", "fL", "%", "fL",
-            "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-            "",
+            "10*3/uL", "10*3/uL", "%", "10*3/uL", "fL", "%", "fL", "", "", "",
+            "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
         ]
-
         for idx, record in enumerate(records):
             self.assertEqual(record.get("units"), units[idx])

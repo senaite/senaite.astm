@@ -2,6 +2,7 @@
 
 from senaite.astm import records
 from senaite.astm.fields import ComponentField
+from senaite.astm.fields import DateField
 from senaite.astm.fields import DateTimeField
 from senaite.astm.fields import IntegerField
 from senaite.astm.fields import NotUsedField
@@ -31,7 +32,7 @@ SAMPLE_ID_ATTRIBUTES = (
 )
 
 ACTION_CODES = (
-    "M",  # M: Manual/initial analysis
+    "N",  # M: Manual/initial analysis
     "A",  # A: Rerun/reflex analayis
     "Q",  # Q: QC analysis
 )
@@ -132,7 +133,7 @@ class PatientRecord(records.PatientRecord):
         )
     )
 
-    birthdate = DateTimeField()
+    birthdate = DateField()
     sex = SetField(values=PATIENT_SEXES)
     physician_id = ComponentField(
         Component.build(
@@ -157,8 +158,8 @@ class OrderRecord(records.OrderRecord):
     # Note the field "Sample ID" is not used, but the "Instrument Specimen ID"
     instrument = ComponentField(
         Component.build(
-            TextField(name="sampler_adaptor_number"),
-            TextField(name="sampler_adaptor_position"),
+            TextField(name="sampler_adaptor_number", default=""),
+            TextField(name="sampler_adaptor_position", default=""),
             TextField(name="sample_id"),
             SetField(name="sample_id_attr", values=SAMPLE_ID_ATTRIBUTES)
         )
@@ -200,8 +201,8 @@ class ResultRecord(records.ResultRecord):
             TextField(name="extended_order_result"),
         )
     )
-    value = TextField()
-    units = TextField()
+    value = TextField(default="")
+    units = TextField(default="")
     abnormal_flag = SetField(values=RESULT_ABNORMAL_FLAGS)
     status = SetField(values=RESULT_STATUSES)
     completed_at = DateTimeField()
