@@ -180,6 +180,7 @@ class OrderRecord(records.OrderRecord):
 class CommentRecord(records.CommentRecord):
     """Comment Record (C)
     """
+    data = TextField()
 
 
 class ResultRecord(records.ResultRecord):
