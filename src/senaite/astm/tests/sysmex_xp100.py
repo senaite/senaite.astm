@@ -126,23 +126,23 @@ class SysmexXP100(ASTMTestBase):
         self.assertEqual(len(records), 20)
 
         results = [
-            "  5.5", " 2.87", " 10.1", " 24.2", " 84.3", " 35.2", " 41.7", 
-            "  170", " 26.4", " 10.2", " 63.4", "  1.5", "  0.6", "  3.4", 
+            "  5.5", " 2.87", " 10.1", " 24.2", " 84.3", " 35.2", " 41.7",
+            "  170", " 26.4", " 10.2", " 63.4", "  1.5", "  0.6", "  3.4",
             " 38.5", " 11.8", " 12.8", " 10.2", " 26.9", " 0.17"
         ]
         for idx, record in enumerate(records):
             self.assertEqual(record.get("value"), results[idx])
 
         units = [
-            "10*3/uL", "10*6/uL", "g/dL", "%", "fL", "pg", "g/dL", "10*3/uL", 
-            "%", "%", "%", "10*3/uL", "10*3/uL", "10*3/uL", "fL", "%", "fL", 
+            "10*3/uL", "10*6/uL", "g/dL", "%", "fL", "pg", "g/dL", "10*3/uL",
+            "%", "%", "%", "10*3/uL", "10*3/uL", "10*3/uL", "fL", "%", "fL",
             "fL", "%", "%"
         ]
         for idx, record in enumerate(records):
             self.assertEqual(record.get("units"), units[idx])
 
         flags = [
-            "N", "N", "N", "L", "L", "N", "H", "N", "N", "N", "N", "N", "N", 
+            "N", "N", "N", "L", "L", "N", "H", "N", "N", "N", "N", "N", "N",
             "N", "N", "N", "N", "N", "N", "N"
         ]
         for idx, record in enumerate(records):
