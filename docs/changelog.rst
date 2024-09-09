@@ -5,7 +5,7 @@ Changelog
 1.0.0 (unreleased)
 ------------------
 
-- #18 Add Siemens' DCA Vantage® Analyzer schema
+- #18 Add Siemens' DCA Vantage® Analyzer import schema
 - #15 Add Cobas C311 import schema
 - #11 Fix same transport is used for different connections
 - #9  Add Cobas C311 Test
