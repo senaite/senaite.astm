@@ -6,6 +6,7 @@ Changelog
 ------------------
 
 - #17 Add Sysmex XP-100 import schema
+- #16 Add Sysmex XN-550 import schema
 - #15 Add Cobas C311 import schema
 - #11 Fix same transport is used for different connections
 - #9  Add Cobas C311 Test
