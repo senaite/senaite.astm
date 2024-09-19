@@ -75,7 +75,7 @@ class HeaderRecord(records.HeaderRecord):
         Component.build(
             TextField(name="name", default="DCA VANTAGE"),
             TextField(name="version"),
-            TextField(name="serial_number"),
+            TextField(name="serial"),
         ))
 
     processing_id = SetField(values=PROCESSING_IDS)
