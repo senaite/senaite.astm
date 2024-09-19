@@ -85,7 +85,7 @@ class DCAVantage(ASTMTestBase):
         self.assertEqual(record["sender"]["version"], "04.04.00.00")
 
         # test serial number
-        self.assertEqual(record["sender"]["serial_number"], "S067337")
+        self.assertEqual(record["sender"]["serial"], "S067337")
 
         # test processing id
         self.assertEqual(record["processing_id"], "P")
