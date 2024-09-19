@@ -101,8 +101,7 @@ class PatientRecord(records.PatientRecord):
 class OrderRecord(records.OrderRecord):
     """Order Record (O)
     """
-    # Note the field "Sample ID" is not used, but the sample_seq_number.
-    # Consider to better find matches by using patient record's practice_id
+    sample_id = TextField(default="")
     instrument = ComponentField(
         Component.build(
             # Patient results: 001 through 999 (sample sequence number),
