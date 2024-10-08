@@ -5,6 +5,7 @@ Changelog
 1.0.0 (unreleased)
 ------------------
 
+- #18 Add Siemens' DCA Vantage® Analyzer import schema
 - #17 Add Sysmex XP-100 import schema
 - #16 Add Sysmex XN-550 import schema
 - #15 Add Cobas C311 import schema
