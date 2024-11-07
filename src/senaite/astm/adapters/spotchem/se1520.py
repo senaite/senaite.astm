@@ -90,7 +90,7 @@ class DataHandler:
         self.protocol.messages = messages
 
         # end the communicaiton
-        # self.protocol.on_eot(EOT)
+        self.protocol.on_eot(EOT)
 
         return ACK
 
