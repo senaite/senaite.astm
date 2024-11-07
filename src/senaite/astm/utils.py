@@ -18,6 +18,7 @@ try:
 except ImportError:  # Python 3
     from itertools import zip_longest as izip_longest
 
+
 def u(s):
     if isinstance(s, bytes):
         return s.decode("utf-8")
