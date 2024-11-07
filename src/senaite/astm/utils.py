@@ -10,12 +10,27 @@ from senaite.astm.constants import CR
 from senaite.astm.constants import CRLF
 from senaite.astm.constants import ETB
 from senaite.astm.constants import ETX
+from senaite.astm.constants import LF
 from senaite.astm.constants import STX
 
 try:
     from itertools import izip_longest
 except ImportError:  # Python 3
     from itertools import zip_longest as izip_longest
+
+def u(s):
+    if isinstance(s, bytes):
+        return s.decode("utf-8")
+    return s
+
+
+def f(s, e="utf-8", **kw):
+    return u(s).format(STX=u(STX),
+                       ETX=u(ETX),
+                       ETB=u(ETB),
+                       CR=u(CR),
+                       LF=u(LF),
+                       CRLF=u(CRLF), **kw).encode(e)
 
 
 def write_message(message, path, dateformat="%Y-%m-%d_%H:%M:%S", ext=".txt"):

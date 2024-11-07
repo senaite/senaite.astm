@@ -3,6 +3,8 @@
 import asyncio
 import os
 
+from senaite.astm import adapter_registry
+from senaite.astm import adapters
 from senaite.astm import logger
 from senaite.astm.constants import ACK
 from senaite.astm.constants import ENQ
@@ -11,6 +13,7 @@ from senaite.astm.constants import NAK
 from senaite.astm.constants import STX
 from senaite.astm.exceptions import InvalidState
 from senaite.astm.exceptions import NotAccepted
+from senaite.astm.interfaces import IDataHandler
 from senaite.astm.utils import is_chunked_message
 from senaite.astm.utils import join
 from senaite.astm.utils import validate_checksum
@@ -20,6 +23,7 @@ from senaite.astm.wrapper import Wrapper
 TIMEOUT = 15
 QUEUE = asyncio.Queue()
 DEFAULT_FORMAT = "json"
+
 
 
 class ASTMProtocol(asyncio.Protocol):
@@ -113,6 +117,11 @@ class ASTMProtocol(asyncio.Protocol):
     def handle_data(self, data):
         """Process incoming data
         """
+        # lookup custom multi-adapter to handle the data
+        adapter = adapter_registry.queryMultiAdapter((self, data), IDataHandler)
+        if adapter and adapter.can_handle():
+            return adapter.handle_data()
+
         response = None
         if data.startswith(ENQ):
             response = self.on_enq(data)
