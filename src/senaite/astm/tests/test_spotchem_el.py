@@ -21,9 +21,14 @@ class SpotchemEL(ASTMTestBase):
     async def asyncSetUp(self):
         self.protocol = ASTMProtocol()
 
+        # This is the actual output of the instrument
         self.lines = [
             b'\x0224/10/29 13:08 ID# 1DC042FP   [B. Plasma] Na       131  mmol/L K        9.7  mmol/L Cl        96  mmol/L              \x03'
         ]
+
+        # Test fixture
+        path = self.get_instrument_file_path("spotchem_el_mock.txt")
+        self.mocklines = self.read_file_lines(path)
 
         # Mock transport and protocol objects
         self.transport = self.get_mock_transport()
@@ -71,9 +76,7 @@ class SpotchemEL(ASTMTestBase):
     def test_header_record(self):
         """Test the Header Record wrapper
         """
-        self.test_communication()
-
-        wrapper = Wrapper(self.protocol.messages)
+        wrapper = Wrapper(self.mocklines)
         data = wrapper.to_dict()
         record = data["H"][0]
 
@@ -84,12 +87,10 @@ class SpotchemEL(ASTMTestBase):
         # test sender version
         self.assertEqual(record["sender"]["version"], "1.0.0")
 
-    def test_xn550_result_records(self):
+    def test_result_records(self):
         """Test the Result Record wrapper
         """
-        self.test_communication()
-
-        wrapper = Wrapper(self.protocol.messages)
+        wrapper = Wrapper(self.mocklines)
         data = wrapper.to_dict()
         records = data["R"]
 
