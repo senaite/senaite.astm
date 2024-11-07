@@ -5,9 +5,6 @@ from unittest.mock import Mock
 
 from senaite.astm import codec
 from senaite.astm.constants import ACK
-from senaite.astm.constants import EOT
-from senaite.astm.constants import ENQ
-from senaite.astm.instruments import sysmex_xn
 from senaite.astm.protocol import ASTMProtocol
 from senaite.astm.tests.base import ASTMTestBase
 from senaite.astm.wrapper import Wrapper
@@ -23,7 +20,9 @@ class SpotchemEL(ASTMTestBase):
 
         # This is the actual output of the instrument
         self.lines = [
-            b'\x0224/10/29 13:08 ID# 1DC042FP   [B. Plasma] Na       131  mmol/L K        9.7  mmol/L Cl        96  mmol/L              \x03'
+            b'\x0224/10/29 13:08 ID# 1DC042FP   [B. Plasma] Na       131'
+            b'  mmol/L K        9.7  mmol/L Cl        96  mmol/L'
+            b'              \x03'
         ]
 
         # Test fixture
@@ -103,5 +102,9 @@ class SpotchemEL(ASTMTestBase):
             ["Cl", "96.0", "mmol/L"],
         ]
         for idx, record in enumerate(records):
-            values = [record.get("test"), record.get("value"), record.get("units")]
+            values = [
+                record.get("test"),
+                record.get("value"),
+                record.get("units"),
+            ]
             self.assertEqual(values, results[idx])
