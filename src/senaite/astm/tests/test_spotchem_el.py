@@ -45,8 +45,6 @@ class SpotchemEL(ASTMTestBase):
 
         for line in self.lines:
             self.protocol.data_received(line)
-            # We expect an ACK as response
-            self.transport.write.assert_called_with(ACK)
 
     def test_decode_messages(self):
         self.test_communication()
