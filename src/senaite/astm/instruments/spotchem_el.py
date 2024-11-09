@@ -3,8 +3,6 @@
 from senaite.astm import records
 from senaite.astm.fields import ComponentField
 from senaite.astm.fields import DateTimeField
-from senaite.astm.fields import NotUsedField
-from senaite.astm.fields import SetField
 from senaite.astm.fields import TextField
 from senaite.astm.mapping import Component
 
@@ -30,9 +28,11 @@ def get_mapping():
     """
     return {
         "H": HeaderRecord,
+        "O": OrderRecord,
         "R": ResultRecord,
         "L": TerminatorRecord,
     }
+
 
 class HeaderRecord(records.HeaderRecord):
     """Message Header Record (H)
@@ -43,6 +43,14 @@ class HeaderRecord(records.HeaderRecord):
             TextField(name="manufacturer", default="Spotchem"),
             TextField(name="version"),
         ))
+
+
+class OrderRecord(records.OrderRecord):
+
+    sample_id = TextField()
+    test = TextField()
+    sampled_at = DateTimeField()
+
 
 class ResultRecord(records.ResultRecord):
     """Record to transmit analytical data.
@@ -64,6 +72,7 @@ class ResultRecord(records.ResultRecord):
 
     # 10.1.13: Date time test completed
     completed_at = DateTimeField()
+
 
 class TerminatorRecord(records.TerminatorRecord):
     """Message Termination Record (L)

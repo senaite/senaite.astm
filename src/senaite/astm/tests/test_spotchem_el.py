@@ -86,6 +86,20 @@ class SpotchemEL(ASTMTestBase):
         # test sender version
         self.assertEqual(record["sender"]["version"], "1.0.0")
 
+    def test_order_records(self):
+        """Test the Result Record wrapper
+        """
+        wrapper = Wrapper(self.mocklines)
+        data = wrapper.to_dict()
+        records = data["O"]
+
+        self.assertEqual(len(records), 1)
+
+        order = records[0]
+
+        self.assertEqual(order.get("sample_id"), "1DC042FP")
+        self.assertEqual(order.get("test"), "B. Plasma")
+
     def test_result_records(self):
         """Test the Result Record wrapper
         """
@@ -93,7 +107,6 @@ class SpotchemEL(ASTMTestBase):
         data = wrapper.to_dict()
         records = data["R"]
 
-        # We should have 41 results
         self.assertEqual(len(records), 3)
 
         results = [
