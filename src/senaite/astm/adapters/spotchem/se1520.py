@@ -5,7 +5,6 @@ from datetime import datetime
 
 from senaite.astm import adapter_registry
 from senaite.astm import utils
-from senaite.astm.constants import ACK
 from senaite.astm.constants import ENQ
 from senaite.astm.constants import EOT
 from senaite.astm.constants import NAK
