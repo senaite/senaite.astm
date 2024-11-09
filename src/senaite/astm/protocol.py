@@ -117,7 +117,7 @@ class ASTMProtocol(asyncio.Protocol):
     def handle_data(self, data):
         """Process incoming data
         """
-        # lookup custom multi-adapter to handle the data
+        # lookup custom adapter to handle the data
         adapter = adapter_registry.queryMultiAdapter((self, data), IDataHandler)
         if adapter and adapter.can_handle():
             return adapter.handle_data()
