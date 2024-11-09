@@ -4,7 +4,6 @@ from unittest.mock import MagicMock
 from unittest.mock import Mock
 
 from senaite.astm import codec
-from senaite.astm.constants import ACK
 from senaite.astm.protocol import ASTMProtocol
 from senaite.astm.tests.base import ASTMTestBase
 from senaite.astm.wrapper import Wrapper
