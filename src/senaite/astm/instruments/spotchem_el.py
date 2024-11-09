@@ -43,6 +43,7 @@ class HeaderRecord(records.HeaderRecord):
             TextField(name="manufacturer", default="Spotchem"),
             TextField(name="version"),
         ))
+    timestamp = DateTimeField()
 
 
 class OrderRecord(records.OrderRecord):

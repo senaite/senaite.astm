@@ -80,6 +80,9 @@ class SpotchemEL(ASTMTestBase):
         # test sender version
         self.assertEqual(record["sender"]["version"], "1.0.0")
 
+        # test the timestamp
+        self.assertEqual(record["timestamp"], "20241029130800")
+
     def test_order_records(self):
         """Test the Result Record wrapper
         """
