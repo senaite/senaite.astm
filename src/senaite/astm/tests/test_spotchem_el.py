@@ -19,11 +19,8 @@ class SpotchemEL(ASTMTestBase):
         self.protocol = ASTMProtocol()
 
         # This is the actual output of the instrument
-        self.lines = [
-            b'\x0224/10/29 13:08 ID# 1DC042FP   [B. Plasma] Na       131'
-            b'  mmol/L K        9.7  mmol/L Cl        96  mmol/L'
-            b'              \x03'
-        ]
+        path = self.get_instrument_file_path("spotchem_el.txt")
+        self.lines = self.read_file_lines(path)
 
         # Test fixture
         path = self.get_instrument_file_path("spotchem_el_mock.txt")

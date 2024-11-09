@@ -39,10 +39,6 @@ class DataHandler:
         self.data = data
 
     def can_handle(self):
-        # The instrument does not send an ENQ, so we will never go into the
-        # transfer state
-        if self.protocol.in_transfer_state:
-            return False
         return re.match(RX, self.data) is not None
 
     def handle_data(self):
@@ -57,8 +53,10 @@ class DataHandler:
         if not parts:
             return NAK
 
-        # initialize the communication
-        self.protocol.on_enq(ENQ)
+        # initialize the communication if we're not already in transfer state
+        # Note: This is mainly a test fixture for the simulator
+        if not self.protocol.in_transfer_state:
+            self.protocol.on_enq(ENQ)
 
         date = parts.group(1).decode("utf-8")         # Date
         time = parts.group(2).decode("utf-8")         # Time
@@ -99,8 +97,6 @@ class DataHandler:
 
         # end the communicaiton
         self.protocol.on_eot(EOT)
-
-        return ACK
 
 
 # register the adapter
