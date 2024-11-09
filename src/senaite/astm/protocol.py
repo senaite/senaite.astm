@@ -4,7 +4,6 @@ import asyncio
 import os
 
 from senaite.astm import adapter_registry
-from senaite.astm import adapters
 from senaite.astm import logger
 from senaite.astm.constants import ACK
 from senaite.astm.constants import ENQ
@@ -23,7 +22,6 @@ from senaite.astm.wrapper import Wrapper
 TIMEOUT = 15
 QUEUE = asyncio.Queue()
 DEFAULT_FORMAT = "json"
-
 
 
 class ASTMProtocol(asyncio.Protocol):
@@ -117,8 +115,9 @@ class ASTMProtocol(asyncio.Protocol):
     def handle_data(self, data):
         """Process incoming data
         """
-        # lookup custom adapter to handle the data
-        adapter = adapter_registry.queryMultiAdapter((self, data), IDataHandler)
+        # lookup custom multi-adapter to handle the data
+        adapter = adapter_registry.queryMultiAdapter(
+            (self, data), IDataHandler)
         if adapter and adapter.can_handle():
             return adapter.handle_data()
 
