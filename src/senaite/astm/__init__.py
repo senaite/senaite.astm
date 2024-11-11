@@ -13,3 +13,6 @@ logger.setLevel(LOG_LEVEL)
 
 # global adapter registry
 adapter_registry = Components()
+
+# Make sure adapters are initialized *after* the adapter registry is in place!
+from senaite.astm import adapters  # noqa: F401,E402

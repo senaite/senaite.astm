@@ -17,7 +17,7 @@ RX = (
     rb"\x02"                             # Start of the message
     rb"(\d{2}/\d{2}/\d{2})\s+"           # Date in YY/MM/DD format
     rb"(\d{2}:\d{2})\s+"                 # Time in HH:MM format
-    rb"ID#\s*([A-Z0-9]+)\s+"             # Sample ID prefixed by "ID#"
+    rb"ID#\s*([A-Z0-9\-_]+)\s+"          # Sample ID prefixed by "ID#"
     rb"\[(.*?)\]\s+"                     # Sample type in square brackets
     rb"Na\s+([\d.]+)\s+(mmol/L)\s+"      # Na result
     rb"K\s+([\d.]+)\s+(mmol/L)\s+"       # K result
