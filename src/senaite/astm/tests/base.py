@@ -8,6 +8,10 @@ from unittest import IsolatedAsyncioTestCase
 from senaite.astm.constants import ACK
 from senaite.astm.constants import ENQ
 
+IGNORE_INSTRUMENT_FILES = [
+    "spotchem_el.txt"  # Not valid ASTM (see PR #19)
+]
+
 
 class ASTMTestBase(IsolatedAsyncioTestCase):
     """Base Test Class
@@ -27,7 +31,9 @@ class ASTMTestBase(IsolatedAsyncioTestCase):
         """Returns all instrument files from the data directory
         """
         path = "{}/*.txt".format(self.data_dir)
-        return glob(path)
+        files = glob(path)
+        return filter(lambda x: os.path.basename(x)
+                      not in IGNORE_INSTRUMENT_FILES, files)
 
     def get_instrument_file_path(self, filename):
         """Returns the instrument file path

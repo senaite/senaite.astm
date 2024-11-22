@@ -5,6 +5,7 @@ Changelog
 1.0.0 (unreleased)
 ------------------
 
+- #19 Add Spotchem™EL SE-1520 import schema
 - #18 Add Siemens' DCA Vantage® Analyzer import schema
 - #17 Add Sysmex XP-100 import schema
 - #16 Add Sysmex XN-550 import schema
