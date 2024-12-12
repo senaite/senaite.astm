@@ -68,10 +68,10 @@ class HeaderRecord(records.HeaderRecord):
     contains information about the sender and receiver, instruments, and
     computer system whose records are being exchanged. It also identifies the
     delimiter characters. The minimum information that must be sent in a Header
-    record is: H|\^&{RT}
+    record is: H|\\^&{RT}
 
     Example:
-    H|\^&|||Afinion 2 Analyzer^^AF0000030|||||EPR||P|1|20100608185448|
+    H|\\^&|||Afinion 2 Analyzer^^AF0000030|||||EPR||P|1|20100608185448|
     """
     sender = ComponentField(
         Component.build(
