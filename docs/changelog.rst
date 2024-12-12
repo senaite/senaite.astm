@@ -5,6 +5,7 @@ Changelog
 1.0.0 (unreleased)
 ------------------
 
+- #20 Add Abbott Afinion™ 2 Analyzer import schema
 - #19 Add Spotchem™EL SE-1520 import schema
 - #18 Add Siemens' DCA Vantage® Analyzer import schema
 - #17 Add Sysmex XP-100 import schema
