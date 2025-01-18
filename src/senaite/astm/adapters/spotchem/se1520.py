@@ -103,4 +103,5 @@ adapter_registry.registerAdapter(
     DataHandler,
     required=(object, object),
     provided=IDataHandler,
+    name="spotchem_se1520",
 )
