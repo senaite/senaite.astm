@@ -95,7 +95,7 @@ def decode_message(message, encoding=ENCODING):
     frame, cs = frame_cs[:-2], frame_cs[-2:]
     # validate the checksum
     ccs = make_checksum(frame)
-    assert cs == ccs, "Checksum failure: expected %r, got %r" % (cs, ccs)
+    assert cs.upper() == ccs, "Checksum failure: expected %r, got %r" % (cs, ccs)
     seq, records = decode_frame(frame, encoding)
     return seq, records, cs.decode()
 
