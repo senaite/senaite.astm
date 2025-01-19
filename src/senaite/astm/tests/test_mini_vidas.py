@@ -8,6 +8,7 @@ from senaite.astm.constants import ACK, ENQ
 from senaite.astm.protocol import ASTMProtocol
 from senaite.astm.tests.base import ASTMTestBase
 from senaite.astm.wrapper import Wrapper
+from senaite.astm.instruments import biomerieux_mini_vidas
 
 # from senaite.astm.instruments import spotchem_el
 
@@ -23,9 +24,14 @@ class MiniVidas(ASTMTestBase):
         path = self.get_instrument_file_path("mini_vidas.txt")
         self.lines = self.read_file_lines(path)
 
+        # Test fixture
+        path = self.get_instrument_file_path("mini_vidas_mock.txt")
+        self.mocklines = self.read_file_lines(path)
+
         # Mock transport and protocol objects
         self.transport = self.get_mock_transport()
         self.protocol.transport = self.transport
+        self.mapping = biomerieux_mini_vidas.get_mapping()
 
     def get_mock_transport(self, ip="127.0.0.1", port=12345):
         transport = MagicMock()
@@ -67,3 +73,64 @@ class MiniVidas(ASTMTestBase):
 
         for key in keys:
             self.assertTrue(key in data)
+
+    def test_header_record(self):
+        """Test the Header Record wrapper
+        """
+        wrapper = Wrapper(self.mocklines)
+        data = wrapper.to_dict()
+        record = data["H"][0]
+
+        # test sender name
+        self.assertEqual(record["sender"]["name"].strip(), "miniVidas")
+        # test sender manufacturer
+        self.assertEqual(record["sender"]["manufacturer"], "biomerieux")
+        # test sender version
+        self.assertEqual(record["sender"]["version"], "1.0.0")
+
+        # test the timestamp
+        self.assertEqual(record["timestamp"], "20241025183500")
+
+    def test_patient_records(self):
+        """Test the Result Record wrapper
+        """
+        wrapper = Wrapper(self.mocklines)
+        data = wrapper.to_dict()
+        records = data["P"]
+
+        self.assertEqual(len(records), 1)
+        patient = records[0]
+        self.assertEqual(patient.get("name"), "test_patient")
+
+    def test_order_records(self):
+        """Test the Result Record wrapper
+        """
+        wrapper = Wrapper(self.mocklines)
+        data = wrapper.to_dict()
+        records = data["O"]
+
+        self.assertEqual(len(records), 1)
+
+        order = records[0]
+
+        self.assertEqual(order.get("sample_id"), "Z1G021SCR")
+        self.assertEqual(order.get("test"), "Anti-HBc Total II")
+
+    def test_result_records(self):
+        """Test the Result Record wrapper
+        """
+        wrapper = Wrapper(self.mocklines)
+        data = wrapper.to_dict()
+        records = data["R"]
+
+        self.assertEqual(len(records), 1)
+
+        results = [
+            ["HBCT", "0.05"],
+        ]
+        for idx, record in enumerate(records):
+            values = [
+                record.get("test"),
+                record.get("value"),
+            ]
+            self.assertEqual(values, results[idx])
