@@ -93,19 +93,19 @@ class DataHandler:
         frames = [
             f("1H|\\^&|||miniVidas^biomerieux^1.0.0|||||||||{ts}{CR}{ETX}",
               **data),
-            f("2P|1|||{pi}|{pn}||{pb}||{ps}|||||||||||||||||{CR}{ETX}",
+            f("2P|1|||{pi}|{pn}||{pb}|{ps}||||||||||||||||||||||||||{CR}{ETX}",
               **data),
-            f("3O|1|{ci}||{si}|||{ts}||||||||||||||||||{CR}{ETX}",
+            f("3O|1|{ci}||{rn}||||||||||||||||||{ts}||||||||{CR}{ETX}",
               **data),
-            f("6L|1|N{CR}{ETX}"),
+            f("4R|1|{rt}|{qn}|||{nc}||{ql}||{m4}||{ts}|{CR}{ETX}",
+              **data),
+            f("5L|1|N{CR}{ETX}"),
         ]
         messages = []
         for frame in frames:
             cs = utils.make_checksum(frame)
             messages.append(
                 f("{STX}{frame}{cs}{CRLF}", frame=u(frame), cs=u(cs)))
-
-        import pdb; pdb.set_trace()
 
         # fill in the full message
         self.protocol.messages = messages
