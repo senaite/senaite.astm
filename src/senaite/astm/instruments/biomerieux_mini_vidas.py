@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from senaite.astm import records
-from senaite.astm.fields import ComponentField, DateField, SetField
+from senaite.astm.fields import ComponentField, DateField
 from senaite.astm.fields import DateTimeField
 from senaite.astm.fields import TextField
 from senaite.astm.mapping import Component
