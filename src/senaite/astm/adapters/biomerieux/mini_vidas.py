@@ -41,7 +41,7 @@ RX = (
 
 @implementer(IDataHandler)
 class DataHandler:
-    """Custom data handler for Spotchem SE-1520
+    """Custom data handler for Biomérieux miniVidas
 
     We receive from this instrument a non valid ASTM message that need to be
     handled differntly
@@ -111,7 +111,7 @@ class DataHandler:
         self.protocol.messages = messages
 
         # end the communicaiton
-        self.protocol.on_eot(EOT)
+        # self.protocol.on_eot(EOT)
 
 
 # register the adapter
