@@ -70,6 +70,7 @@ class ResultRecord(records.ResultRecord):
     """
     test = TextField()
     value = TextField()
+    status = TextField()
     completed_at = DateTimeField()
 
 
