@@ -8,8 +8,10 @@ from unittest import IsolatedAsyncioTestCase
 from senaite.astm.constants import ACK
 from senaite.astm.constants import ENQ
 
+# Ignore invalid ASTM files that are handled by and adapter (see PR #19)
 IGNORE_INSTRUMENT_FILES = [
-    "spotchem_el.txt"  # Not valid ASTM (see PR #19)
+    "spotchem_el.txt",
+    "mini_vidas.txt",
 ]
 
 
