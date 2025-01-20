@@ -10,8 +10,6 @@ from senaite.astm.tests.base import ASTMTestBase
 from senaite.astm.wrapper import Wrapper
 from senaite.astm.instruments import biomerieux_mini_vidas
 
-# from senaite.astm.instruments import spotchem_el
-
 
 class MiniVidas(ASTMTestBase):
     """Test ASTM communication protocol for the Mini VIDAS analyzer
