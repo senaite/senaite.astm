@@ -69,6 +69,7 @@ class Mapping(_MappingProxy):
         for field in a:
             if field.name is None:
                 raise ValueError('Name is required for ordered fields.')
+            # set the definied fields as class attributes
             setattr(newcls, field.name, field)
             fields.append((field.name, field))
         newcls._fields = fields
