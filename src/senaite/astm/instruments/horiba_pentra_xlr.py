@@ -2,15 +2,16 @@
 
 from senaite.astm import records
 from senaite.astm.fields import ComponentField
+from senaite.astm.fields import DateField
 from senaite.astm.fields import DateTimeField
+from senaite.astm.fields import JSONListField
 from senaite.astm.fields import NotUsedField
 from senaite.astm.fields import SetField
 from senaite.astm.fields import TextField
-from senaite.astm.fields import JSONListField
 from senaite.astm.mapping import Component
 
 VERSION = "1.0.0"
-HEADER_RX = r".*ABX\^"
+HEADER_RX = r".*(ABX|LIS).*"
 
 
 def get_metadata(wrapper):
@@ -43,12 +44,7 @@ def get_mapping():
 class HeaderRecord(records.HeaderRecord):
     """Message Header Record (H)
     """
-    sender = ComponentField(
-        Component.build(
-            TextField(name="name"),
-            TextField(name="serial"),
-            TextField(name="version"),
-        ))
+    sender = TextField(length=3)
 
     processing_id = SetField(
         field=TextField(),
@@ -65,20 +61,21 @@ class PatientRecord(records.PatientRecord):
     # Patient Id (Advised on ABX Pentra XL80 for workflow management)
     laboratory_id = TextField(length=25)
 
+    # format: Name^First name
     name = ComponentField(
         Component.build(
             TextField(name="name"),
             TextField(name="first_name"),
         ))
 
-    birthdate = DateTimeField()
+    # format: YYYYMMDD
+    birthdate = DateField()
+
+    # M, F or U
     sex = SetField(
         field=TextField(),
         length=1,
         values=("M", "F", "U"))
-
-    physician_id = TextField(length=20)
-    location = TextField(length=20)
 
 
 class OrderRecord(records.OrderRecord):
@@ -111,7 +108,10 @@ class OrderRecord(records.OrderRecord):
                 values=("CBC", "DIF", "RET", "DIR", "CBR")),
         ))
 
+    # format: YYYYMMDDHHMMSS
     sampled_at = DateTimeField()
+
+    # format: YYYYMMDDHHMMSS
     collected_at = DateTimeField()
 
     biomaterial = TextField()
