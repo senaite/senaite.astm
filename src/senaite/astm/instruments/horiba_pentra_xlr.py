@@ -11,7 +11,7 @@ from senaite.astm.fields import TextField
 from senaite.astm.mapping import Component
 
 VERSION = "1.0.0"
-HEADER_RX = r".*(ABX|LIS).*"
+HEADER_RX = r".*(?<=\|)(LIS|ABX)(?=\|).*"
 
 
 def get_metadata(wrapper):
