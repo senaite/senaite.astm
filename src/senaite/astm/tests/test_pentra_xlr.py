@@ -109,7 +109,7 @@ class PentraXLR(ASTMTestBase):
         record = data["O"][0]
 
         # test sample id
-        self.assertEqual(record["sample_id"]["id"], "S1234")
+        self.assertEqual(record["sample_id"]["sample_id"], "S1234")
         self.assertEqual(record["sample_id"]["rack"], "00")
         self.assertEqual(record["sample_id"]["position"], "00")
 

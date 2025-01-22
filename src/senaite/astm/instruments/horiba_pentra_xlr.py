@@ -94,7 +94,7 @@ class OrderRecord(records.OrderRecord):
     # 45264012^02^08
     sample_id = ComponentField(
         Component.build(
-            TextField(name="id"),
+            TextField(name="sample_id"),
             TextField(name="rack"),
             TextField(name="position"),
         )
