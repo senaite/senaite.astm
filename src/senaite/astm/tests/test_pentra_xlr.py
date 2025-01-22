@@ -76,7 +76,7 @@ class PentraXLR(ASTMTestBase):
         record = data["H"][0]
 
         # test sender name
-        self.assertEqual(record["sender"], "ABX")
+        self.assertEqual(record["sender"]["name"].strip(), "ABX")
 
         # test processing_id
         self.assertEqual(record["processing_id"], "P")

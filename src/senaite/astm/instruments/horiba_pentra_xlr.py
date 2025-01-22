@@ -44,7 +44,13 @@ def get_mapping():
 class HeaderRecord(records.HeaderRecord):
     """Message Header Record (H)
     """
-    sender = TextField(length=3)
+
+    # Note: Although the field comes in as a single value text, we need to nest
+    #       it for senaite.core.astm.consumer.get_sender_name to work properly
+    sender = ComponentField(
+        Component.build(
+            TextField(name="name"),
+        ))
 
     processing_id = SetField(
         field=TextField(),
