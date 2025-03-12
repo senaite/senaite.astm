@@ -6,6 +6,7 @@
 import datetime
 import decimal
 import inspect
+import json
 import time
 import warnings
 from itertools import islice
@@ -106,6 +107,24 @@ class TextField(Field):
         if not isinstance(value, basestring):
             raise TypeError("String value expected, got %r" % value)
         return super(TextField, self)._set_value(value)
+
+
+class JSONListField(Field):
+    """Converts the value into a JSON list
+    """
+    def _set_value(self, value):
+        if not isinstance(value, list):
+            value = [value]
+        value = json.dumps(value)
+        return super(JSONListField, self)._set_value(value)
+
+    def _get_value(self, value, default=None):
+        if default is None:
+            default = []
+        try:
+            return json.loads(value)
+        except (TypeError, ValueError):
+            return default
 
 
 class DateField(Field):

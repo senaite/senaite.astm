@@ -5,6 +5,7 @@ Changelog
 1.0.0 (unreleased)
 ------------------
 
+- #22 Add Horiba Pentra XLR import schema
 - #21 Add Biomérieux MINI VIDAS® import schema
 - #20 Add Abbott Afinion™ 2 Analyzer import schema
 - #19 Add Spotchem™EL SE-1520 import schema
