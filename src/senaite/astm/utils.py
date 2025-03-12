@@ -92,7 +92,8 @@ def validate_checksum(message):
     # get the frame w/o STX and checksum
     frame = message[1:-2]
     # check if the checksum matches
-    cs = message[-2:]
+    # NOTE: hex numbers are not case sensitive, i.e. B0 is equal to b0.
+    cs = message[-2:].upper()
     # generate the checksum for the frame
     ccs = make_checksum(frame)
     if cs != ccs:

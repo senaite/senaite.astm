@@ -116,10 +116,10 @@ class ASTMProtocol(asyncio.Protocol):
         """Process incoming data
         """
         # lookup custom multi-adapter to handle the data
-        adapter = adapter_registry.queryMultiAdapter(
-            (self, data), IDataHandler)
-        if adapter and adapter.can_handle():
-            return adapter.handle_data()
+        adapters = adapter_registry.getAdapters((self, data), IDataHandler)
+        for name, adapter in adapters:
+            if adapter and adapter.can_handle():
+                return adapter.handle_data()
 
         response = None
         if data.startswith(ENQ):

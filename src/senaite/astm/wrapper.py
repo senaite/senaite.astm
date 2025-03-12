@@ -99,7 +99,11 @@ class Wrapper(object):
                 rtype = record[0]
                 if rtype not in mapping:
                     continue
-                wrapper = mapping[rtype](*record)
+                try:
+                    wrapper = mapping[rtype](*record)
+                except ValueError as exc:
+                    raise ValueError("Could not wrap '%s' record! (%s)"
+                                     % (rtype, str(exc)))
                 out[rtype].append(wrapper.to_dict())
 
         return out
