@@ -140,14 +140,13 @@ class HeaderRecord(records.HeaderRecord):
 class PatientRecord(records.PatientRecord):
     """Patient Information Record (P)
     """
-    # Practice Assigned Patient ID. (This field is not sent in Service Mode 1.)
+    # 3: Patient ID 2: Practice Assigned Patient ID
     practice_id = TextField()
-    laboratory_id = TextField()
+
+    # 5: Patient ID 1: Patient identification
     id = TextField()
 
-    # Component Field: <last name>^<first name> (patient samples only,
-    # only if entered, not in Manufacturing Mode 1)(This field is not sent in
-    # Service Mode 1)
+    # 6: Patient Name
     name = ComponentField(
         Component.build(
             TextField(name="family_name"),
@@ -162,13 +161,26 @@ class PatientRecord(records.PatientRecord):
 class OrderRecord(records.OrderRecord):
     """Order Record (O)
     """
+    # 3: Specimen ID. A unique identifier for the specimen assigned by the HOST
     sample_id = TextField(required=True)
+
+    # 4: Instrument Specimen ID. A unique identifier for the specimen assigned
+    #    by the system
     instrument = TextField()
+
+    # 6: Priority
     priority = SetField(values=PRIORITIES, default="R")
+
+    # 7: Ordered Date and Time
     requested_at = DateTimeField(default=datetime.now)
+
+    # 12: Action code. The action that needs to be taken with the order
     action_code = SetField(values=ACTION_CODES)
-    # ORH ('Other' according to POCT1-A standard)
+
+    # 16: Specimen descriptor. ORH ('Other' according to POCT1-A standard)
     biomaterial = TextField(default="ORH")
+
+    # 26: Report Type. Intention of the information contained in the record
     report_type = SetField(values=REPORT_TYPES)
 
 
