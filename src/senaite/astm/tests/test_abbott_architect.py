@@ -140,7 +140,7 @@ class AbbottArchitect(ASTMTestBase):
         self.assertEqual(records[0]["value"], "< 1.20"),
         self.assertEqual(records[0]["units"], "mIU/mL")
         self.assertEqual(records[0]["references"], "0.35 TO 4.94")
-        abnormal_flags= [{"flag": "EXP"}, {"flag": "<"}]
+        abnormal_flags = [{"flag": "EXP"}, {"flag": "<"}]
         self.assertEqual(records[0]["abnormal_flag"], abnormal_flags)
         self.assertEqual(records[0]["status"], "F")
         self.assertEqual(records[0]["instrument"], "I20100")
