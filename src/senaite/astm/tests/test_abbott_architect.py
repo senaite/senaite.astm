@@ -6,27 +6,27 @@ from unittest.mock import Mock
 from senaite.astm import codec
 from senaite.astm.constants import ACK
 from senaite.astm.constants import ENQ
-from senaite.astm.instruments import abbott_architect_ci4100
+from senaite.astm.instruments import abbott_architect
 from senaite.astm.protocol import ASTMProtocol
 from senaite.astm.tests.base import ASTMTestBase
 from senaite.astm.wrapper import Wrapper
 
 
-class AbbottArchitectCi4100(ASTMTestBase):
-    """Test ASTM communication protocol for the Abbott ARCHITECT ci4100
+class AbbottArchitect(ASTMTestBase):
+    """Test ASTM communication protocol for the Abbott ARCHITECT
     """
 
     async def asyncSetUp(self):
         self.protocol = ASTMProtocol()
 
         # read instrument file
-        path = self.get_instrument_file_path("abbott_architect_ci4100.txt")
+        path = self.get_instrument_file_path("abbott_architect.txt")
         self.lines = self.read_file_lines(path)
 
         # Mock transport and protocol objects
         self.transport = self.get_mock_transport()
         self.protocol.transport = self.transport
-        self.mapping = abbott_architect_ci4100.get_mapping()
+        self.mapping = abbott_architect.get_mapping()
 
     def get_mock_transport(self, ip="127.0.0.1", port=12345):
         transport = MagicMock()
@@ -69,7 +69,7 @@ class AbbottArchitectCi4100(ASTMTestBase):
         for key in keys:
             self.assertTrue(key in data)
 
-    def test_architect_ci4100_header_record(self):
+    def test_architect_header_record(self):
         """Test the Header Record wrapper
         """
         wrapper = Wrapper(self.lines)
@@ -83,7 +83,7 @@ class AbbottArchitectCi4100(ASTMTestBase):
         self.assertEqual(record["processing_id"], "P")
         self.assertEqual(record["version"], "1")
 
-    def test_architect_ci4100_patient_record(self):
+    def test_architect_patient_record(self):
         """Test the Patient Record wrapper
         """
         wrapper = Wrapper(self.lines)
@@ -100,7 +100,7 @@ class AbbottArchitectCi4100(ASTMTestBase):
         self.assertEqual(record["physician_id"], "Dr.Amesbury")
         self.assertEqual(record["location"], "ParkClinic")
 
-    def test_architect_ci4100_order_record(self):
+    def test_architect_order_record(self):
         """Test the Order Record wrapper
         """
         wrapper = Wrapper(self.lines)
@@ -119,7 +119,7 @@ class AbbottArchitectCi4100(ASTMTestBase):
         self.assertEqual(record["action_code"], None)
         self.assertEqual(record["report_type"], "F")
 
-    def test_architect_ci4100_result_records(self):
+    def test_architect_result_records(self):
         """Test the Result Record wrapper
         """
         wrapper = Wrapper(self.lines)
