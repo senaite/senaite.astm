@@ -6,6 +6,7 @@ Changelog
 ------------------
 
 - #24 Add Abbott ARCHITECT System import schema
+- #23 Add Cepheid GeneXpert import schema
 - #22 Add Horiba Pentra XLR import schema
 - #21 Add Biomérieux MINI VIDAS® import schema
 - #20 Add Abbott Afinion™ 2 Analyzer import schema
