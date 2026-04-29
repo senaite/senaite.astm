@@ -1,0 +1,636 @@
+{
+  "C": [
+    {
+      "ctype": "I",
+      "data": "[\"Alarm_WBC\", \"LMNE-\", \"BASO+\", \"LL\", \"NL\", \"LN\", \"NO\", \"SL1\"]",
+      "seq": "1",
+      "source": "I",
+      "type": "C"
+    },
+    {
+      "ctype": "I",
+      "data": "[\"LARGE IMMATURE CELL\", \"NRBCs\"]",
+      "seq": "2",
+      "source": "I",
+      "type": "C"
+    },
+    {
+      "ctype": "I",
+      "data": "[\"PLATELET AGGREGATS\"]",
+      "seq": "1",
+      "source": "I",
+      "type": "C"
+    }
+  ],
+  "H": [
+    {
+      "address": null,
+      "caps": null,
+      "comments": null,
+      "delimeter": [
+        {
+          "_": "",
+          "__": null
+        },
+        {
+          "_": "",
+          "__": "&"
+        }
+      ],
+      "message_id": null,
+      "password": null,
+      "phone": null,
+      "processing_id": "P",
+      "receiver": null,
+      "reserved": null,
+      "sender": {
+        "name": "ABX"
+      },
+      "timestamp": "<volatile>",
+      "type": "H",
+      "version": "E1394-97"
+    }
+  ],
+  "L": [
+    {
+      "code": "N",
+      "seq": "1",
+      "type": "L"
+    }
+  ],
+  "O": [
+    {
+      "action_code": null,
+      "biomaterial": "Standard",
+      "clinical_info": null,
+      "collected_at": "20220526000000",
+      "collector": null,
+      "danger_code": null,
+      "infection_flag": null,
+      "instrument": null,
+      "instrument_charge": null,
+      "instrument_section": null,
+      "laboratory": null,
+      "laboratory_field_1": null,
+      "laboratory_field_2": null,
+      "location_ward": null,
+      "physician": null,
+      "physician_phone": null,
+      "priority": null,
+      "received_at": null,
+      "report_type": "F",
+      "reported_at": null,
+      "requested_at": null,
+      "reserved": null,
+      "sample_id": {
+        "position": "00",
+        "rack": "00",
+        "sample_id": "S1234"
+      },
+      "sampled_at": "20220527000000",
+      "seq": "1",
+      "specimen_service": null,
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "testname": "DIF"
+      },
+      "type": "O",
+      "user_field_1": null,
+      "user_field_2": null,
+      "volume": null
+    }
+  ],
+  "P": [
+    {
+      "address": null,
+      "admission_date": null,
+      "admission_status": null,
+      "birthdate": "19771201",
+      "diagnosis": null,
+      "diagnostic_code": null,
+      "diagnostic_code_nature": null,
+      "diet": null,
+      "dosage_category": null,
+      "height": null,
+      "hospital_institution": null,
+      "hospital_service": null,
+      "id": null,
+      "isolation_status": null,
+      "laboratory_id": null,
+      "language": null,
+      "location": null,
+      "maiden_name": null,
+      "martial_status": null,
+      "medication": null,
+      "name": {
+        "first_name": "Rita",
+        "name": "Mohale"
+      },
+      "phone": null,
+      "physician_id": null,
+      "practice_field_1": null,
+      "practice_field_2": null,
+      "practice_id": null,
+      "race": null,
+      "religion": null,
+      "reserved": null,
+      "seq": "1",
+      "sex": "F",
+      "special_1": null,
+      "special_2": null,
+      "type": "P",
+      "weight": null
+    }
+  ],
+  "R": [
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": "20220727121550",
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": "NNE NNEMT",
+      "references": null,
+      "seq": "1",
+      "started_at": null,
+      "status": "W",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "loinc_code": "804-5",
+        "result_name": "WBC",
+        "testname": "1"
+      },
+      "type": "R",
+      "units": "1",
+      "value": "8.5"
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": "20220727121550",
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": "NNE NNEMT",
+      "references": null,
+      "seq": "2",
+      "started_at": null,
+      "status": "W",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "loinc_code": "731-0",
+        "result_name": "LYM#",
+        "testname": "1"
+      },
+      "type": "R",
+      "units": "1",
+      "value": "3.29"
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": "20220727121550",
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": "NNE NNEMT",
+      "references": null,
+      "seq": "3",
+      "started_at": null,
+      "status": "W",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "loinc_code": "736-9",
+        "result_name": "LYM%",
+        "testname": "1"
+      },
+      "type": "R",
+      "units": "1",
+      "value": "38.6"
+    },
+    {
+      "abnormal_flag": "L",
+      "abnormality_nature": null,
+      "completed_at": "20220727121550",
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": "NNE NNEMT",
+      "references": null,
+      "seq": "4",
+      "started_at": null,
+      "status": "W",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "loinc_code": "742-7",
+        "result_name": "MON#",
+        "testname": "1"
+      },
+      "type": "R",
+      "units": "1",
+      "value": "0.15"
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": "20220727121550",
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": "NNE NNEMT",
+      "references": null,
+      "seq": "5",
+      "started_at": null,
+      "status": "W",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "loinc_code": "744-3",
+        "result_name": "MON%",
+        "testname": "1"
+      },
+      "type": "R",
+      "units": "1",
+      "value": "1.8"
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": "20220727121550",
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": "NNE NNEMT",
+      "references": null,
+      "seq": "6",
+      "started_at": null,
+      "status": "W",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "loinc_code": "751-8",
+        "result_name": "NEU#",
+        "testname": "1"
+      },
+      "type": "R",
+      "units": "1",
+      "value": "4.62"
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": "20220727121550",
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": "NNE NNEMT",
+      "references": null,
+      "seq": "7",
+      "started_at": null,
+      "status": "W",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "loinc_code": "770-8",
+        "result_name": "NEU%",
+        "testname": "1"
+      },
+      "type": "R",
+      "units": "1",
+      "value": "54.2"
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": "20220727121550",
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": "NNE NNEMT",
+      "references": null,
+      "seq": "8",
+      "started_at": null,
+      "status": "W",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "loinc_code": "711-2",
+        "result_name": "EOS#",
+        "testname": "1"
+      },
+      "type": "R",
+      "units": "1",
+      "value": "0.46"
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": "20220727121550",
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": "NNE NNEMT",
+      "references": null,
+      "seq": "9",
+      "started_at": null,
+      "status": "W",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "loinc_code": "713-8",
+        "result_name": "EOS%",
+        "testname": "1"
+      },
+      "type": "R",
+      "units": "1",
+      "value": "5.4"
+    },
+    {
+      "abnormal_flag": "HH",
+      "abnormality_nature": null,
+      "completed_at": "20220727121550",
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": "NNE NNEMT",
+      "references": null,
+      "seq": "10",
+      "started_at": null,
+      "status": "X",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "loinc_code": "704-7",
+        "result_name": "BAS#",
+        "testname": "1"
+      },
+      "type": "R",
+      "units": "1",
+      "value": "-----"
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": "20220727121550",
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": "NNE NNEMT",
+      "references": null,
+      "seq": "11",
+      "started_at": null,
+      "status": "X",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "loinc_code": "706-2",
+        "result_name": "BAS%",
+        "testname": "1"
+      },
+      "type": "R",
+      "units": "1",
+      "value": "-----"
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": "20220727121550",
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": "NNE NNEMT",
+      "references": null,
+      "seq": "12",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "loinc_code": "789-9",
+        "result_name": "RBC",
+        "testname": "1"
+      },
+      "type": "R",
+      "units": "1",
+      "value": "4.65"
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": "20220727121550",
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": "NNE NNEMT",
+      "references": null,
+      "seq": "13",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "loinc_code": "717-9",
+        "result_name": "HGB",
+        "testname": "1"
+      },
+      "type": "R",
+      "units": "1",
+      "value": "14.0"
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": "20220727121550",
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": "NNE NNEMT",
+      "references": null,
+      "seq": "14",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "loinc_code": "4544-3",
+        "result_name": "HCT",
+        "testname": "1"
+      },
+      "type": "R",
+      "units": "1",
+      "value": "40.9"
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": "20220727121550",
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": "NNE NNEMT",
+      "references": null,
+      "seq": "15",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "loinc_code": "787-2",
+        "result_name": "MCV",
+        "testname": "1"
+      },
+      "type": "R",
+      "units": "1",
+      "value": "88"
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": "20220727121550",
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": "NNE NNEMT",
+      "references": null,
+      "seq": "16",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "loinc_code": "785-6",
+        "result_name": "MCH",
+        "testname": "1"
+      },
+      "type": "R",
+      "units": "1",
+      "value": "30.1"
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": "20220727121550",
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": "NNE NNEMT",
+      "references": null,
+      "seq": "17",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "loinc_code": "786-4",
+        "result_name": "MCHC",
+        "testname": "1"
+      },
+      "type": "R",
+      "units": "1",
+      "value": "34.2"
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": "20220727121550",
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": "NNE NNEMT",
+      "references": null,
+      "seq": "18",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "loinc_code": "788-0",
+        "result_name": "RDW",
+        "testname": "1"
+      },
+      "type": "R",
+      "units": "1",
+      "value": "13.5"
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": "20220727121550",
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": "NNE NNEMT",
+      "references": null,
+      "seq": "19",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "loinc_code": "777-3",
+        "result_name": "PLT",
+        "testname": "1"
+      },
+      "type": "R",
+      "units": "1",
+      "value": "234"
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": "20220727121550",
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": "NNE NNEMT",
+      "references": null,
+      "seq": "20",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "loinc_code": "776-5",
+        "result_name": "MPV",
+        "testname": "1"
+      },
+      "type": "R",
+      "units": "1",
+      "value": "10.2"
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": "20220727121550",
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": "NNE NNEMT",
+      "references": null,
+      "seq": "21",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "loinc_code": "2100-5",
+        "result_name": "RDWSD",
+        "testname": "1"
+      },
+      "type": "R",
+      "units": "1",
+      "value": "43"
+    }
+  ],
+  "metadata": {
+    "astm": "\u00021H|\\^&|||ABX|||||||P|E1394-97|20220727121551\r\u000358\n\u00022P|1||||Mohale^Rita||19771201|F\r\u0003C9\n\u00023O|1|S1234^00^00||^^^DIF|||202205270000|202205260000|||||||Standard||||||||||F\r\u000383\n\u00024R|1|^^^WBC^804-5^1|8.5|1||||W||NNE NNEMT||20220727121550\r\u0003E2\n\u00025C|1|I|Alarm_WBC^LMNE-^BASO+^LL^NL^LN^NO^SL1|I\r\u0003D7\n\u00026C|2|I|LARGE IMMATURE CELL^NRBCs|I\r\u000362\n\u00027R|2|^^^LYM#^731-0^1|3.29|1||||W||NNE NNEMT||20220727121550\r\u00034A\n\u00020R|3|^^^LYM%^736-9^1|38.6|1||||W||NNE NNEMT||20220727121550\r\u000357\n\u00021R|4|^^^MON#^742-7^1|0.15|1||L||W||NNE NNEMT||20220727121550\r\u00038B\n\u00022R|5|^^^MON%^744-3^1|1.8|1||||W||NNE NNEMT||20220727121550\r\u000314\n\u00023R|6|^^^NEU#^751-8^1|4.62|1||||W||NNE NNEMT||20220727121550\r\u000348\n\u00024R|7|^^^NEU%^770-8^1|54.2|1||||W||NNE NNEMT||20220727121550\r\u00034C\n\u00025R|8|^^^EOS#^711-2^1|0.46|1||||W||NNE NNEMT||20220727121550\r\u00033F\n\u00026R|9|^^^EOS%^713-8^1|5.4|1||||W||NNE NNEMT||20220727121550\r\u00031A\n\u00027R|10|^^^BAS#^704-7^1|-----|1||HH||X||NNE NNEMT||20220727121550\r\u00030A\n\u00020R|11|^^^BAS%^706-2^1|-----|1||||X||NNE NNEMT||20220727121550\r\u000373\n\u00021R|12|^^^RBC^789-9^1|4.65|1||||F||NNE NNEMT||20220727121550\r\u00033D\n\u00022R|13|^^^HGB^717-9^1|14.0|1||||F||NNE NNEMT||20220727121550\r\u000326\n\u00023R|14|^^^HCT^4544-3^1|40.9|1||||F||NNE NNEMT||20220727121550\r\u00036A\n\u00024R|15|^^^MCV^787-2^1|88|1||||F||NNE NNEMT||20220727121550\r\u0003EC\n\u00025R|16|^^^MCH^785-6^1|30.1|1||||F||NNE NNEMT||20220727121550\r\u000334\n\u00026R|17|^^^MCHC^786-4^1|34.2|1||||F||NNE NNEMT||20220727121550\r\u00037D\n\u00027R|18|^^^RDW^788-0^1|13.5|1||||F||NNE NNEMT||20220727121550\r\u00034F\n\u00020R|19|^^^PLT^777-3^1|234|1||||F||NNE NNEMT||20220727121550\r\u00031F\n\u00021C|1|I|PLATELET AGGREGATS|I\r\u000347\n\u00022R|20|^^^MPV^776-5^1|10.2|1||||F||NNE NNEMT||20220727121550\r\u000345\n\u00023R|21|^^^RDWSD^2100-5^1|43|1||||F||NNE NNEMT||20220727121550\r\u00039D\n\u00024L|1|N\r\u000307",
+    "lis2a": "H|\\^&|||ABX|||||||P|E1394-97|20220727121551\r\u0003P|1||||Mohale^Rita||19771201|F\r\u0003O|1|S1234^00^00||^^^DIF|||202205270000|202205260000|||||||Standard||||||||||F\r\u0003R|1|^^^WBC^804-5^1|8.5|1||||W||NNE NNEMT||20220727121550\r\u0003C|1|I|Alarm_WBC^LMNE-^BASO+^LL^NL^LN^NO^SL1|I\r\u0003C|2|I|LARGE IMMATURE CELL^NRBCs|I\r\u0003R|2|^^^LYM#^731-0^1|3.29|1||||W||NNE NNEMT||20220727121550\r\u0003R|3|^^^LYM%^736-9^1|38.6|1||||W||NNE NNEMT||20220727121550\r\u0003R|4|^^^MON#^742-7^1|0.15|1||L||W||NNE NNEMT||20220727121550\r\u0003R|5|^^^MON%^744-3^1|1.8|1||||W||NNE NNEMT||20220727121550\r\u0003R|6|^^^NEU#^751-8^1|4.62|1||||W||NNE NNEMT||20220727121550\r\u0003R|7|^^^NEU%^770-8^1|54.2|1||||W||NNE NNEMT||20220727121550\r\u0003R|8|^^^EOS#^711-2^1|0.46|1||||W||NNE NNEMT||20220727121550\r\u0003R|9|^^^EOS%^713-8^1|5.4|1||||W||NNE NNEMT||20220727121550\r\u0003R|10|^^^BAS#^704-7^1|-----|1||HH||X||NNE NNEMT||20220727121550\r\u0003R|11|^^^BAS%^706-2^1|-----|1||||X||NNE NNEMT||20220727121550\r\u0003R|12|^^^RBC^789-9^1|4.65|1||||F||NNE NNEMT||20220727121550\r\u0003R|13|^^^HGB^717-9^1|14.0|1||||F||NNE NNEMT||20220727121550\r\u0003R|14|^^^HCT^4544-3^1|40.9|1||||F||NNE NNEMT||20220727121550\r\u0003R|15|^^^MCV^787-2^1|88|1||||F||NNE NNEMT||20220727121550\r\u0003R|16|^^^MCH^785-6^1|30.1|1||||F||NNE NNEMT||20220727121550\r\u0003R|17|^^^MCHC^786-4^1|34.2|1||||F||NNE NNEMT||20220727121550\r\u0003R|18|^^^RDW^788-0^1|13.5|1||||F||NNE NNEMT||20220727121550\r\u0003R|19|^^^PLT^777-3^1|234|1||||F||NNE NNEMT||20220727121550\r\u0003C|1|I|PLATELET AGGREGATS|I\r\u0003R|20|^^^MPV^776-5^1|10.2|1||||F||NNE NNEMT||20220727121550\r\u0003R|21|^^^RDWSD^2100-5^1|43|1||||F||NNE NNEMT||20220727121550\r\u0003L|1|N\r\u0003"
+  }
+}

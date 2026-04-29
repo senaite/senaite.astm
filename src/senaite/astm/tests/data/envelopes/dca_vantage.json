@@ -1,0 +1,205 @@
+{
+  "C": [
+    {
+      "ctype": "G",
+      "data": null,
+      "seq": "1",
+      "source": "I",
+      "type": "C"
+    },
+    {
+      "ctype": "G",
+      "data": null,
+      "seq": "1",
+      "source": "I",
+      "type": "C"
+    }
+  ],
+  "H": [
+    {
+      "address": null,
+      "caps": null,
+      "comments": null,
+      "delimeter": [
+        {
+          "_": "",
+          "__": null
+        },
+        {
+          "_": "",
+          "__": "&"
+        }
+      ],
+      "message_id": null,
+      "password": null,
+      "phone": null,
+      "processing_id": "P",
+      "receiver": null,
+      "reserved": null,
+      "sender": {
+        "name": "DCA VANTAGE",
+        "serial": "S067337",
+        "version": "04.04.00.00"
+      },
+      "timestamp": "<volatile>",
+      "type": "H",
+      "version": null
+    }
+  ],
+  "L": [
+    {
+      "code": "N",
+      "seq": "1",
+      "type": "L"
+    }
+  ],
+  "O": [
+    {
+      "action_code": null,
+      "biomaterial": null,
+      "clinical_info": null,
+      "collected_at": null,
+      "collector": null,
+      "danger_code": null,
+      "infection_flag": null,
+      "instrument": {
+        "reagent_lot_num": "0090",
+        "sample_seq_num": "660"
+      },
+      "instrument_charge": null,
+      "instrument_section": null,
+      "laboratory": null,
+      "laboratory_field_1": null,
+      "laboratory_field_2": null,
+      "location_ward": null,
+      "physician": null,
+      "physician_phone": null,
+      "priority": null,
+      "received_at": null,
+      "report_type": "F",
+      "reported_at": null,
+      "requested_at": null,
+      "reserved": null,
+      "sample_id": "",
+      "sampled_at": null,
+      "seq": "1",
+      "specimen_service": null,
+      "test": null,
+      "type": "O",
+      "user_field_1": null,
+      "user_field_2": null,
+      "volume": null
+    }
+  ],
+  "P": [
+    {
+      "address": null,
+      "admission_date": null,
+      "admission_status": null,
+      "birthdate": null,
+      "diagnosis": null,
+      "diagnostic_code": null,
+      "diagnostic_code_nature": null,
+      "diet": null,
+      "dosage_category": null,
+      "height": null,
+      "hospital_institution": null,
+      "hospital_service": null,
+      "id": null,
+      "isolation_status": null,
+      "laboratory_id": null,
+      "language": null,
+      "location": null,
+      "maiden_name": null,
+      "martial_status": null,
+      "medication": null,
+      "name": {
+        "first_name": null,
+        "last_name": null
+      },
+      "phone": null,
+      "physician_id": null,
+      "practice_field_1": null,
+      "practice_field_2": null,
+      "practice_id": "BU24R554",
+      "race": null,
+      "religion": null,
+      "reserved": null,
+      "seq": "1",
+      "sex": null,
+      "special_1": null,
+      "special_2": null,
+      "type": "P",
+      "weight": null
+    }
+  ],
+  "R": [
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": null,
+      "references": "",
+      "seq": "1",
+      "started_at": "20240820151030",
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "parameter": "Alb"
+      },
+      "type": "R",
+      "units": "mg/L",
+      "value": "63.7"
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": null,
+      "references": "",
+      "seq": "2",
+      "started_at": "20240820151030",
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "parameter": "Crt"
+      },
+      "type": "R",
+      "units": "mg/dL",
+      "value": "230.8"
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": null,
+      "references": "",
+      "seq": "3",
+      "started_at": "20240820151030",
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "parameter": "Ratio"
+      },
+      "type": "R",
+      "units": "mg/g",
+      "value": "27.6"
+    }
+  ],
+  "metadata": {
+    "astm": "\u00021H|\\^&|||DCA VANTAGE^04.04.00.00^S067337|||||||P||20240820151746\rP|1|BU24R554\rO|1||660^0090||||||||||||||||||||||F\rR|1|^^^Alb|63.7|mg/L||||F|||20240820151030\rC|1|I|1.000^0.0 mg/L|G\rR|2|^^^Crt|230.8|mg/dL||||F|||20240820151030\rC|1|I|1.000^0.0 mg/dL|G\rR|3|^^^Ratio|27.6|mg/g||||F|||20240820151030\rL|1|N\r\u000343\r",
+    "lis2a": "H|\\^&|||DCA VANTAGE^04.04.00.00^S067337|||||||P||20240820151746\rP|1|BU24R554\rO|1||660^0090||||||||||||||||||||||F\rR|1|^^^Alb|63.7|mg/L||||F|||20240820151030\rC|1|I|1.000^0.0 mg/L|G\rR|2|^^^Crt|230.8|mg/dL||||F|||20240820151030\rC|1|I|1.000^0.0 mg/dL|G\rR|3|^^^Ratio|27.6|mg/g||||F|||20240820151030\rL|1|N\r\u0003"
+  }
+}

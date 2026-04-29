@@ -41,6 +41,7 @@ setup(
         "dev": [
             "pytest",
             "coverage",
+            "responses",
         ]
     },
     entry_points={

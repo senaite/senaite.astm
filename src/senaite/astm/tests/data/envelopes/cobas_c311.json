@@ -1,0 +1,392 @@
+{
+  "C": [
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    }
+  ],
+  "H": [
+    {
+      "address": null,
+      "caps": null,
+      "comments": {
+        "meaning_of_message": "RSUPL",
+        "mode_of_message": "REAL"
+      },
+      "delimeter": [
+        {
+          "_": "",
+          "__": null
+        },
+        {
+          "_": "",
+          "__": "&"
+        }
+      ],
+      "message_id": null,
+      "password": null,
+      "phone": null,
+      "processing_id": "P",
+      "receiver": "host",
+      "reserved": null,
+      "sender": {
+        "name": "c311",
+        "version": "1"
+      },
+      "timestamp": "<volatile>",
+      "type": "H",
+      "version": "1"
+    }
+  ],
+  "L": [
+    {
+      "code": "N",
+      "seq": "1",
+      "type": "L"
+    }
+  ],
+  "O": [
+    {
+      "action_code": "N",
+      "biomaterial": "SC",
+      "clinical_info": null,
+      "collected_at": null,
+      "collector": null,
+      "danger_code": null,
+      "infection_flag": null,
+      "instrument": {
+        "container_type": null,
+        "position_number": null,
+        "rack_id": null,
+        "sample_type": null,
+        "sequence_number": "R1"
+      },
+      "instrument_charge": null,
+      "instrument_section": null,
+      "laboratory": null,
+      "laboratory_field_1": null,
+      "laboratory_field_2": null,
+      "location_ward": null,
+      "physician": null,
+      "physician_phone": null,
+      "priority": "R",
+      "received_at": null,
+      "report_type": "F",
+      "reported_at": "20240203132011",
+      "requested_at": null,
+      "reserved": null,
+      "sample_id": {
+        "_": null,
+        "sample_count": "1",
+        "sample_daily_counter": "004",
+        "sample_id": "CL-PL-24-0370         ",
+        "sample_total_counter": "11625"
+      },
+      "sampled_at": null,
+      "seq": "1",
+      "specimen_service": null,
+      "test": [
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "685/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "687/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "712/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "158/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "735/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "717/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "690/",
+          "dilution": null
+        }
+      ],
+      "type": "O",
+      "user_field_1": null,
+      "user_field_2": null,
+      "volume": null
+    }
+  ],
+  "P": [
+    {
+      "address": null,
+      "admission_date": null,
+      "admission_status": null,
+      "birthdate": null,
+      "diagnosis": null,
+      "diagnostic_code": null,
+      "diagnostic_code_nature": null,
+      "diet": null,
+      "dosage_category": null,
+      "height": null,
+      "hospital_institution": null,
+      "hospital_service": null,
+      "id": null,
+      "isolation_status": null,
+      "laboratory_id": null,
+      "language": null,
+      "location": null,
+      "maiden_name": null,
+      "martial_status": null,
+      "medication": null,
+      "name": null,
+      "phone": null,
+      "physician_id": null,
+      "practice_field_1": null,
+      "practice_field_2": null,
+      "practice_id": null,
+      "race": null,
+      "religion": null,
+      "reserved": null,
+      "seq": "1",
+      "sex": null,
+      "special_1": {
+        "age": null,
+        "unit": null
+      },
+      "special_2": null,
+      "type": "P",
+      "weight": null
+    }
+  ],
+  "R": [
+    {
+      "abnormal_flag": "A",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "P1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "1",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "685/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": "U/l",
+      "value": "22.4"
+    },
+    {
+      "abnormal_flag": "N",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "P1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "2",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "687/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": "U/l",
+      "value": "15.0"
+    },
+    {
+      "abnormal_flag": "L",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "P1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "3",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "712/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": "umol/l",
+      "value": "4.1"
+    },
+    {
+      "abnormal_flag": "N",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "P1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "4",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "158/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": "U/l",
+      "value": "301"
+    },
+    {
+      "abnormal_flag": "N",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "P1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "5",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "735/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": "umol/l",
+      "value": "1.6"
+    },
+    {
+      "abnormal_flag": "N",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "P1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "6",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "717/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": "mmol/l",
+      "value": "5.85"
+    },
+    {
+      "abnormal_flag": "A",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "P1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "7",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "690/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": "umol/l",
+      "value": "34"
+    }
+  ],
+  "metadata": {
+    "astm": "\u00021H|\\^&|||c311^1|||||host|RSUPL^REAL|P|1\rP|1\rO|1|11625^CL-PL-24-0370         ^1^^004|R1|^^^685/\\^^^687/\\^^^712/\\^^^158/\\^^^735/\\^^^717/\\^^^690/|R||||||N||^^||SC|||labo  |                              ^                         ^                    ^               ^          |||20240203132011|||F\rR|1|^^^685/|22.4|U/l||A||F|||||P1\rC|1|I|43|I\rR|2|^^^687/|15.0|U/l||N||F|||||P1\rC|1|I|0|I\rR|3|^^^712/|4.1|umol/l||L||F|||||P1\rC|1|I|0|I\rR|4|^^^158/|301|U/l||N||F|||||P1\rC|1|I|0|I\rR|5|^^^735/|1.6|umol/l||N||F|||||P1\rC|1|I|0|I\rR|6|^^^717/|5.85|mmol/l||N||F|||||P1\rC|1|I|0|I\rR|7|^^^690/|34|umol/l||A||F|||||P1\rC|1|I|43|I\rL|1|N\r\u000306\r",
+    "lis2a": "H|\\^&|||c311^1|||||host|RSUPL^REAL|P|1\rP|1\rO|1|11625^CL-PL-24-0370         ^1^^004|R1|^^^685/\\^^^687/\\^^^712/\\^^^158/\\^^^735/\\^^^717/\\^^^690/|R||||||N||^^||SC|||labo  |                              ^                         ^                    ^               ^          |||20240203132011|||F\rR|1|^^^685/|22.4|U/l||A||F|||||P1\rC|1|I|43|I\rR|2|^^^687/|15.0|U/l||N||F|||||P1\rC|1|I|0|I\rR|3|^^^712/|4.1|umol/l||L||F|||||P1\rC|1|I|0|I\rR|4|^^^158/|301|U/l||N||F|||||P1\rC|1|I|0|I\rR|5|^^^735/|1.6|umol/l||N||F|||||P1\rC|1|I|0|I\rR|6|^^^717/|5.85|mmol/l||N||F|||||P1\rC|1|I|0|I\rR|7|^^^690/|34|umol/l||A||F|||||P1\rC|1|I|43|I\rL|1|N\r\u0003"
+  }
+}
