@@ -3,7 +3,8 @@
 # Credits to Alexander Shorin:
 # https://github.com/kxepal/python-astm
 
-from senaite.astm.compat import unicode
+from collections.abc import Iterable
+
 from senaite.astm.constants import COMPONENT_SEP
 from senaite.astm.constants import CR
 from senaite.astm.constants import CRLF
@@ -18,15 +19,11 @@ from senaite.astm.constants import STX
 from senaite.astm.utils import make_checksum
 from senaite.astm.utils import split
 
-try:
-    from collections import Iterable
-except ImportError:  # Python 3
-    from collections.abc import Iterable
-
 
 # #############################################################################
 # ASTM DECODE
 # #############################################################################
+
 
 def decode(data, encoding=ENCODING):
     """Common ASTM decoding function that tries to guess which kind of data it
@@ -245,14 +242,14 @@ def encode_record(record, encoding=ENCODING):
     for field in record:
         if isinstance(field, bytes):
             _append(field)
-        elif isinstance(field, unicode):
+        elif isinstance(field, str):
             _append(field.encode(encoding))
         elif isinstance(field, Iterable):
             _append(encode_component(field, encoding))
         elif field is None:
             _append(b"")
         else:
-            _append(unicode(field).encode(encoding))
+            _append(str(field).encode(encoding))
     return FIELD_SEP.join(fields)
 
 
@@ -264,14 +261,14 @@ def encode_component(component, encoding=ENCODING):
     for item in component:
         if isinstance(item, bytes):
             _append(item)
-        elif isinstance(item, unicode):
+        elif isinstance(item, str):
             _append(item.encode(encoding))
         elif isinstance(item, Iterable):
             return encode_repeated_component(component, encoding)
         elif item is None:
             _append(b"")
         else:
-            _append(unicode(item).encode(encoding))
+            _append(str(item).encode(encoding))
 
     return COMPONENT_SEP.join(items).rstrip(COMPONENT_SEP)
 

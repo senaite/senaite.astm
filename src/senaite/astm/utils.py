@@ -3,6 +3,7 @@
 import os
 import time
 from datetime import datetime
+from itertools import zip_longest
 from pathlib import Path
 
 from senaite.astm import logger
@@ -12,11 +13,6 @@ from senaite.astm.constants import ETB
 from senaite.astm.constants import ETX
 from senaite.astm.constants import LF
 from senaite.astm.constants import STX
-
-try:
-    from itertools import izip_longest
-except ImportError:  # Python 3
-    from itertools import zip_longest as izip_longest
 
 
 def u(s):
@@ -97,7 +93,7 @@ def validate_checksum(message):
     # generate the checksum for the frame
     ccs = make_checksum(frame)
     if cs != ccs:
-        logger.warn("Expected checksum '%s', got '%s'" % (cs, ccs))
+        logger.warning("Expected checksum '%s', got '%s'" % (cs, ccs))
         return False
     return True
 
@@ -166,7 +162,7 @@ def split(msg, size):
 def make_chunks(s, n):
     iter_bytes = (s[i:i + 1] for i in range(len(s)))
     return [b''.join(item)
-            for item in izip_longest(*[iter_bytes] * n, fillvalue=b'')]
+            for item in zip_longest(*[iter_bytes] * n, fillvalue=b'')]
 
 
 class CleanupDict(dict):

@@ -11,11 +11,6 @@ import time
 import warnings
 from itertools import islice
 
-from senaite.astm.compat import basestring
-from senaite.astm.compat import long
-from senaite.astm.compat import make_string
-from senaite.astm.compat import unicode
-
 
 class Field(object):
     """Base mapping field class.
@@ -48,7 +43,10 @@ class Field(object):
         return value
 
     def _set_value(self, value):
-        value = make_string(value)
+        if isinstance(value, bytes):
+            value = value.decode("utf-8")
+        else:
+            value = str(value)
         if self.length is not None and len(value) > self.length:
             raise ValueError("Field %r value is too long (max %d, got %d)"
                              "" % (self.name, self.length, len(value)))
@@ -80,7 +78,7 @@ class IntegerField(Field):
         return int(value)
 
     def _set_value(self, value):
-        if not isinstance(value, (int, long)):
+        if not isinstance(value, int):
             try:
                 value = self._get_value(value)
             except Exception:
@@ -95,7 +93,7 @@ class DecimalField(Field):
         return decimal.Decimal(value)
 
     def _set_value(self, value):
-        if not isinstance(value, (int, long, float, decimal.Decimal)):
+        if not isinstance(value, (int, float, decimal.Decimal)):
             raise TypeError("Decimal value expected, got %r" % value)
         return super(DecimalField, self)._set_value(value)
 
@@ -104,7 +102,7 @@ class TextField(Field):
     """Mapping field for string values.
     """
     def _set_value(self, value):
-        if not isinstance(value, basestring):
+        if not isinstance(value, (str, bytes)):
             raise TypeError("String value expected, got %r" % value)
         return super(TextField, self)._set_value(value)
 
@@ -136,7 +134,7 @@ class DateField(Field):
         return datetime.datetime.strptime(value, self.format)
 
     def _set_value(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, (str, bytes)):
             value = self._get_value(value)
         if not isinstance(value, (datetime.datetime, datetime.date)):
             raise TypeError("Datetime value expected, got %r" % value)
@@ -149,7 +147,7 @@ class TimeField(Field):
     format = "%H%M%S"
 
     def _get_value(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, (str, bytes)):
             try:
                 value = value.split(".", 1)[0]  # strip out microseconds
                 value = datetime.time(*time.strptime(value, self.format)[3:6])
@@ -159,7 +157,7 @@ class TimeField(Field):
         return value
 
     def _set_value(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, (str, bytes)):
             value = self._get_value(value)
         if not isinstance(value, (datetime.datetime, datetime.time)):
             raise TypeError("Datetime value expected, got %r" % value)
@@ -177,7 +175,7 @@ class DateTimeField(Field):
         return datetime.datetime.strptime(value, self.format)
 
     def _set_value(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, (str, bytes)):
             value = self._get_value(value)
         if not isinstance(value, (datetime.datetime, datetime.date)):
             raise TypeError("Datetime value expected, got %r" % value)
@@ -256,7 +254,7 @@ class ComponentField(Field):
             return self.mapping(**value)
         elif isinstance(value, self.mapping):
             return value
-        if isinstance(value, basestring):
+        if isinstance(value, (str, bytes)):
             value = [value]
         return self.mapping(*value)
 
@@ -324,7 +322,7 @@ class RepeatedComponentField(Field):
             return str(self.list)
 
         def __unicode__(self):
-            return unicode(self.list)
+            return str(self.list)
 
         def __delitem__(self, index):
             del self.list[index]
