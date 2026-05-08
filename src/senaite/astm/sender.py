@@ -3,9 +3,9 @@
 import argparse
 import logging
 
-from senaite.astm import lims
 from senaite.astm import logger
-from senaite.astm.lims import post_to_senaite
+from senaite.astm.core import lims
+from senaite.astm.core.lims import post_to_senaite
 
 
 def main():
