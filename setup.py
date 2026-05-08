@@ -4,7 +4,7 @@ from setuptools import find_packages
 from setuptools import setup
 
 
-version = "1.0.0"
+version = "2.0.0"
 
 setup(
     name="senaite.astm",
