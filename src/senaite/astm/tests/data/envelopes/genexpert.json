@@ -1,0 +1,3101 @@
+{
+  "C": [
+    {
+      "ctype": "I",
+      "data": {
+        "code": null,
+        "description": "Id# 118176 Sardani P Lantion CDU/Dr. A Marcil cp",
+        "id": "Notes"
+      },
+      "seq": "1",
+      "source": "I",
+      "type": "C"
+    },
+    {
+      "ctype": "I",
+      "data": {
+        "code": null,
+        "description": "Id# 118176 Sardani P Lantion CDU/Dr. A Marcil cp",
+        "id": "Notes"
+      },
+      "seq": "1",
+      "source": "I",
+      "type": "C"
+    },
+    {
+      "ctype": "I",
+      "data": {
+        "code": null,
+        "description": "Id# 118176 Sardani P Lantion CDU/Dr. A Marcil cp",
+        "id": "Notes"
+      },
+      "seq": "1",
+      "source": "I",
+      "type": "C"
+    }
+  ],
+  "H": [
+    {
+      "address": null,
+      "caps": null,
+      "comments": null,
+      "delimeter": [
+        {
+          "_": "@",
+          "__": null
+        },
+        {
+          "_": "",
+          "__": null
+        }
+      ],
+      "message_id": "URM-8lT4abZA-06",
+      "password": null,
+      "phone": null,
+      "processing_id": "P",
+      "receiver": "HNH-SENAITE",
+      "reserved": null,
+      "sender": {
+        "id": ".806149 Happy Hospital",
+        "name": "GeneXpert",
+        "software_version": "4.8"
+      },
+      "timestamp": "<volatile>",
+      "type": "H",
+      "version": "1394-97"
+    }
+  ],
+  "L": [
+    {
+      "code": "N",
+      "seq": "1",
+      "type": "L"
+    }
+  ],
+  "O": [
+    {
+      "action_code": null,
+      "biomaterial": "ORH",
+      "clinical_info": null,
+      "collected_at": null,
+      "collector": null,
+      "danger_code": null,
+      "infection_flag": null,
+      "instrument": null,
+      "instrument_charge": null,
+      "instrument_section": null,
+      "laboratory": null,
+      "laboratory_field_1": null,
+      "laboratory_field_2": null,
+      "location_ward": null,
+      "physician": null,
+      "physician_phone": null,
+      "priority": "R",
+      "received_at": null,
+      "report_type": "F",
+      "reported_at": null,
+      "requested_at": "20250514121638",
+      "reserved": null,
+      "sample_id": "PR25A137",
+      "sampled_at": null,
+      "seq": "1",
+      "specimen_service": null,
+      "test": null,
+      "type": "O",
+      "user_field_1": null,
+      "user_field_2": null,
+      "volume": null
+    }
+  ],
+  "P": [
+    {
+      "address": null,
+      "admission_date": null,
+      "admission_status": null,
+      "birthdate": null,
+      "diagnosis": null,
+      "diagnostic_code": null,
+      "diagnostic_code_nature": null,
+      "diet": null,
+      "dosage_category": null,
+      "height": null,
+      "hospital_institution": null,
+      "hospital_service": null,
+      "id": null,
+      "isolation_status": null,
+      "laboratory_id": null,
+      "language": null,
+      "location": null,
+      "maiden_name": null,
+      "martial_status": null,
+      "medication": null,
+      "name": {
+        "family_name": null,
+        "given_name": null,
+        "middle_name": null,
+        "prefix": null,
+        "suffix": null
+      },
+      "phone": null,
+      "physician_id": null,
+      "practice_field_1": null,
+      "practice_field_2": null,
+      "practice_id": null,
+      "race": null,
+      "religion": null,
+      "reserved": null,
+      "seq": "1",
+      "sex": null,
+      "special_1": null,
+      "special_2": null,
+      "type": "P",
+      "weight": null
+    }
+  ],
+  "R": [
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": "20250514132103",
+      "instrument": {
+        "cartridge": "831583371",
+        "expiration_date": "20250525",
+        "instrument_sn": "806149",
+        "module_sn": "653624",
+        "reagent_lot": "56401",
+        "system_name": "Cepheid-44413S0"
+      },
+      "norms_changed_at": null,
+      "operator": "John Doe",
+      "references": null,
+      "seq": "1",
+      "started_at": "20250514121638",
+      "status": "F",
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "MTB",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "Xpert",
+        "test_name": "Xpert MTB-RIF Ultra",
+        "test_version": "4"
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": "NOT DETECTED",
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "2",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB1",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "Xpert",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": "INVALID",
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "3",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB1",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "Xpert",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "4",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB1",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "Xpert",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "-2.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "5",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB2",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "Xpert",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": "INVALID",
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "6",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB2",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "Xpert",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "7",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB2",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "Xpert",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "4.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "8",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB3",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "Xpert",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": "INVALID",
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "9",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB3",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "Xpert",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "10",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB3",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "Xpert",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "8.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "11",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB4",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "Xpert",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": "INVALID",
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "12",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB4",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "Xpert",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "13",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB4",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "Xpert",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "8.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "14",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "SPC",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "Xpert",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": "PASS",
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "15",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "SPC",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "Xpert",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "24.7"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "16",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "SPC",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "Xpert",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "159.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "17",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": null,
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "Xpert",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": "FAIL",
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "18",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "IS1081-IS6110",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "Xpert",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "19",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "IS1081-IS6110",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "Xpert",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "3.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": "20250514132103",
+      "instrument": {
+        "cartridge": "831583371",
+        "expiration_date": "20250525",
+        "instrument_sn": "806149",
+        "module_sn": "653624",
+        "reagent_lot": "56401",
+        "system_name": "Cepheid-44413S0"
+      },
+      "norms_changed_at": null,
+      "operator": "John Doe",
+      "references": null,
+      "seq": "20",
+      "started_at": "20250514121638",
+      "status": "F",
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "MTB Trace",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "Trace",
+        "test_name": "Xpert MTB-RIF Ultra",
+        "test_version": "4"
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "21",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB1",
+        "complementary_name": null,
+        "panel_id": "MTB-RI",
+        "test_id": "Trace",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": "INVALID",
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "22",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB1",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "Trace",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "23",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB1",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "Trace",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "-2.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "24",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB2",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "Trace",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": "INVALID",
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "25",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB2",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "Trace",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "26",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB2",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "Trace",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "4.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "27",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB3",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "Trace",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": "INVALID",
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "28",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB3",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "Trace",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "29",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB3",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "Trace",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "8.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "30",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB4",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "Trace",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": "INVALID",
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "31",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB4",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "Trace",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "32",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB4",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "Trace",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "8.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "33",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "SPC",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "Trace",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": "PASS",
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "34",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "SPC",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "Trace",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "24.7"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "35",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "SPC",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "Trace",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "159.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "36",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "IS1081-IS6110",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "Trace",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": "FAIL",
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "37",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "IS1081-IS6110",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "Trace",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "38",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "IS1081-IS6110",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "Trace",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "3.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": "20250514132103",
+      "instrument": {
+        "cartridge": "831583371",
+        "expiration_date": "20250525",
+        "instrument_sn": "806149",
+        "module_sn": "653624",
+        "reagent_lot": "56401",
+        "system_name": "Cepheid-44413S0"
+      },
+      "norms_changed_at": null,
+      "operator": "John Doe",
+      "references": null,
+      "seq": "39",
+      "started_at": "20250514121638",
+      "status": "F",
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "RIF Resistance",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": "Xpert MTB-RIF Ultra",
+        "test_version": "4"
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "40",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB1",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": "INVALID",
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "41",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB1",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "42",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB1",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "-2.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "43",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB2",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": "INVALID",
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "44",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB2",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "45",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB2",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "4.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "46",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB3",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": "INVALID",
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "47",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB3",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "48",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB3",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "8.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "49",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB4",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": "INVALID",
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "50",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB4",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "51",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB4",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "8.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "52",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB1 melt",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "53",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB1 melt",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "54",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB1 melt",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "55",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB2 melt",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "56",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB2 melt",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "57",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB2 melt",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "58",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB3 melt",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "59",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB3 melt",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "60",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB3 melt",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "61",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB4 melt",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "62",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB4 melt",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "63",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB4 melt",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "64",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB1 Mut melt",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "65",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB1 Mut melt",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "66",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB1 Mut melt",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "67",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB2 Mut melt",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "68",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB2 Mut melt",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "69",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB2 Mut melt",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "70",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB3 Mut melt",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "71",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB3 Mut melt",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "72",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB3 Mut melt",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "73",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB4 Mut melt A",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "74",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB4 Mut melt A",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "75",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB4 Mut melt A",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "76",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB4 Mut melt B",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "77",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB4 Mut melt B",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "78",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "rpoB4 Mut melt B",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "79",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "SPC",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": "PASS",
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "80",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "SPC",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "24.7"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "81",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "SPC",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "159.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "82",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "IS1081-IS6110",
+        "complementary_name": null,
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": "FAIL",
+        "quantitative_result": null
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "83",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "IS1081-IS6110",
+        "complementary_name": "Ct",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "0.0"
+      }
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": {
+        "cartridge": null,
+        "expiration_date": null,
+        "instrument_sn": null,
+        "module_sn": null,
+        "reagent_lot": null,
+        "system_name": null
+      },
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "84",
+      "started_at": null,
+      "status": null,
+      "test": {
+        "_": null,
+        "___": null,
+        "analyte_name": "IS1081-IS6110",
+        "complementary_name": "EndPt",
+        "panel_id": "MTB-RIF",
+        "test_id": "RIF",
+        "test_name": null,
+        "test_version": null
+      },
+      "type": "R",
+      "units": null,
+      "value": {
+        "qualitative_result": null,
+        "quantitative_result": "3.0"
+      }
+    }
+  ],
+  "metadata": {
+    "astm": "\u00021H|@^\\|URM-8lT4abZA-06||.806149 Happy Hospital^GeneXpert^4.8|||||HNH-SENAITE||P|1394-97|20250516125515\rP|1||||^^^^|||||||||||||||||||||\rO|1|PR25A137||^^^MTB-RIF|R|20250514121638|||||||||ORH||||||||||F\rR|1|^MTB-RIF^^Xpert^Xpert MTB-RIF Ultra^4^MTB^|NOT DETECTED^|||||F||John Doe|20250514121638|20250514132103|Cepheid-44413S0^806149^653624^831583371^56401^20250525\rC|1|I|Notes^^Id# 118176 Sardani P Lantion CDU/Dr. A Marcil cp|I\rR|2|^MTB-RIF^^Xpert^^^rpoB1^|INVALID^|||\rR|3|^MTB-RIF^^Xpert^^^rpoB1^Ct|^0.0|||\rR|4|^MTB-RIF^^Xpert^^^rpoB1^EndPt|^-2.0|||\rR|5|^MTB-RIF^^Xpert^^^rpoB2^|INVALID^|||\rR|6|^MTB-RIF^^Xpert^^^rpoB2^Ct|^0.0|||\rR|7|^MTB-RIF^^Xpert^^^rpoB2^EndPt|^4.0|||\rR|8|^MTB-RIF^^Xpert^^^rpoB3^|INVALID^|||\rR|9|^MTB-RIF^^Xpert^^^rpoB3^Ct|^0.0|||\rR|10|^MTB-RIF^^Xpert^^^rpoB3^EndPt|^8.0|||\rR|11|^MTB-RIF^^Xpert^^^rpoB4^|INVALID^|||\rR|12|^MTB-RIF^^Xpert^^^rpoB4^Ct|^0.0|||\rR|13|^MTB-RIF^^Xpert^^^rpoB4^EndPt|^8.0|||\rR|14|^MTB-RIF^^Xpert^^^SPC^|PASS^|||\rR|15|^MTB-RIF^^Xpert^^^SPC^Ct|^24.7|||\rR|16|^MTB-RIF^^Xpert^^^SPC^EndPt|^159.0|||\rR|17|^MTB-RIF^^Xpert^^^^|FAIL^|||\rR|18|^MTB-RIF^^Xpert^^^IS1081-IS6110^Ct|^0.0|||\rR|19|^MTB-RIF^^Xpert^^^IS1081-IS6110^EndPt|^3.0|||\rR|20|^MTB-RIF^^Trace^Xpert MTB-RIF Ultra^4^MTB Trace^|^|||||F||John Doe|20250514121638|20250514132103|Cepheid-44413S0^806149^653624^831583371^56401^20250525\rC|1|I|Notes^^Id# 118176 Sardani P Lantion CDU/Dr. A Marcil cp|I\rR|21|^MTB-RI^^Trace^^^rpoB1^|INVALID^|||\rR|22|^MTB-RIF^^Trace^^^rpoB1^Ct|^0.0|||\rR|23|^MTB-RIF^^Trace^^^rpoB1^EndPt|^-2.0|||\rR|24|^MTB-RIF^^Trace^^^rpoB2^|INVALID^|||\rR|25|^MTB-RIF^^Trace^^^rpoB2^Ct|^0.0|||\rR|26|^MTB-RIF^^Trace^^^rpoB2^EndPt|^4.0|||\rR|27|^MTB-RIF^^Trace^^^rpoB3^|INVALID^|||\rR|28|^MTB-RIF^^Trace^^^rpoB3^Ct|^0.0|||\rR|29|^MTB-RIF^^Trace^^^rpoB3^EndPt|^8.0|||\rR|30|^MTB-RIF^^Trace^^^rpoB4^|INVALID^|||\rR|31|^MTB-RIF^^Trace^^^rpoB4^Ct|^0.0|||\rR|32|^MTB-RIF^^Trace^^^rpoB4^EndPt|^8.0|||\rR|33|^MTB-RIF^^Trace^^^SPC^|PASS^|||\rR|34|^MTB-RIF^^Trace^^^SPC^Ct|^24.7|||\rR|35|^MTB-RIF^^Trace^^^SPC^EndPt|^159.0|||\rR|36|^MTB-RIF^^Trace^^^IS1081-IS6110^|FAIL^|||\rR|37|^MTB-RIF^^Trace^^^IS1081-IS6110^Ct|^0.0|||\rR|38|^MTB-RIF^^Trace^^^IS1081-IS6110^EndPt|^3.0|||\rR|39|^MTB-RIF^^RIF^Xpert MTB-RIF Ultra^4^RIF Resistance^|^|||||F||John Doe|20250514121638|20250514132103|Cepheid-44413S0^806149^653624^831583371^56401^20250525\rC|1|I|Notes^^Id# 118176 Sardani P Lantion CDU/Dr. A Marcil cp|I\rR|40|^MTB-RIF^^RIF^^^rpoB1^|INVALID^|||\rR|41|^MTB-RIF^^RIF^^^rpoB1^Ct|^0.0|||\rR|42|^MTB-RIF^^RIF^^^rpoB1^EndPt|^-2.0|||\rR|43|^MTB-RIF^^RIF^^^rpoB2^|INVALID^|||\rR|44|^MTB-RIF^^RIF^^^rpoB2^Ct|^0.0|||\rR|45|^MTB-RIF^^RIF^^^rpoB2^EndPt|^4.0|||\rR|46|^MTB-RIF^^RIF^^^rpoB3^|INVALID^|||\rR|47|^MTB-RIF^^RIF^^^rpoB3^Ct|^0.0|||\rR|48|^MTB-RIF^^RIF^^^rpoB3^EndPt|^8.0|||\rR|49|^MTB-RIF^^RIF^^^rpoB4^|INVALID^|||\rR|50|^MTB-RIF^^RIF^^^rpoB4^Ct|^0.0|||\rR|51|^MTB-RIF^^RIF^^^rpoB4^EndPt|^8.0|||\rR|52|^MTB-RIF^^RIF^^^rpoB1 melt^|^|||\rR|53|^MTB-RIF^^RIF^^^rpoB1 melt^Ct|^0.0|||\rR|54|^MTB-RIF^^RIF^^^rpoB1 melt^EndPt|^0.0|||\rR|55|^MTB-RIF^^RIF^^^rpoB2 melt^|^|||\rR|56|^MTB-RIF^^RIF^^^rpoB2 melt^Ct|^0.0|||\rR|57|^MTB-RIF^^RIF^^^rpoB2 melt^EndPt|^0.0|||\rR|58|^MTB-RIF^^RIF^^^rpoB3 melt^|^|||\rR|59|^MTB-RIF^^RIF^^^rpoB3 melt^Ct|^0.0|||\rR|60|^MTB-RIF^^RIF^^^rpoB3 melt^EndPt|^0.0|||\rR|61|^MTB-RIF^^RIF^^^rpoB4 melt^|^|||\rR|62|^MTB-RIF^^RIF^^^rpoB4 melt^Ct|^0.0|||\rR|63|^MTB-RIF^^RIF^^^rpoB4 melt^EndPt|^0.0|||\rR|64|^MTB-RIF^^RIF^^^rpoB1 Mut melt^|^|||\rR|65|^MTB-RIF^^RIF^^^rpoB1 Mut melt^Ct|^0.0|||\rR|66|^MTB-RIF^^RIF^^^rpoB1 Mut melt^EndPt|^0.0|||\rR|67|^MTB-RIF^^RIF^^^rpoB2 Mut melt^|^|||\rR|68|^MTB-RIF^^RIF^^^rpoB2 Mut melt^Ct|^0.0|||\rR|69|^MTB-RIF^^RIF^^^rpoB2 Mut melt^EndPt|^0.0|||\rR|70|^MTB-RIF^^RIF^^^rpoB3 Mut melt^|^|||\rR|71|^MTB-RIF^^RIF^^^rpoB3 Mut melt^Ct|^0.0|||\rR|72|^MTB-RIF^^RIF^^^rpoB3 Mut melt^EndPt|^0.0|||\rR|73|^MTB-RIF^^RIF^^^rpoB4 Mut melt A^|^|||\rR|74|^MTB-RIF^^RIF^^^rpoB4 Mut melt A^Ct|^0.0|||\rR|75|^MTB-RIF^^RIF^^^rpoB4 Mut melt A^EndPt|^0.0|||\rR|76|^MTB-RIF^^RIF^^^rpoB4 Mut melt B^|^|||\rR|77|^MTB-RIF^^RIF^^^rpoB4 Mut melt B^Ct|^0.0|||\rR|78|^MTB-RIF^^RIF^^^rpoB4 Mut melt B^EndPt|^0.0|||\rR|79|^MTB-RIF^^RIF^^^SPC^|PASS^|||\rR|80|^MTB-RIF^^RIF^^^SPC^Ct|^24.7|||\rR|81|^MTB-RIF^^RIF^^^SPC^EndPt|^159.0|||\rR|82|^MTB-RIF^^RIF^^^IS1081-IS6110^|FAIL^|||\rR|83|^MTB-RIF^^RIF^^^IS1081-IS6110^Ct|^0.0|||\rR|84|^MTB-RIF^^RIF^^^IS1081-IS6110^EndPt|^3.0|||\rL|1|N\r\u000342\r",
+    "lis2a": "H|@^\\|URM-8lT4abZA-06||.806149 Happy Hospital^GeneXpert^4.8|||||HNH-SENAITE||P|1394-97|20250516125515\rP|1||||^^^^|||||||||||||||||||||\rO|1|PR25A137||^^^MTB-RIF|R|20250514121638|||||||||ORH||||||||||F\rR|1|^MTB-RIF^^Xpert^Xpert MTB-RIF Ultra^4^MTB^|NOT DETECTED^|||||F||John Doe|20250514121638|20250514132103|Cepheid-44413S0^806149^653624^831583371^56401^20250525\rC|1|I|Notes^^Id# 118176 Sardani P Lantion CDU/Dr. A Marcil cp|I\rR|2|^MTB-RIF^^Xpert^^^rpoB1^|INVALID^|||\rR|3|^MTB-RIF^^Xpert^^^rpoB1^Ct|^0.0|||\rR|4|^MTB-RIF^^Xpert^^^rpoB1^EndPt|^-2.0|||\rR|5|^MTB-RIF^^Xpert^^^rpoB2^|INVALID^|||\rR|6|^MTB-RIF^^Xpert^^^rpoB2^Ct|^0.0|||\rR|7|^MTB-RIF^^Xpert^^^rpoB2^EndPt|^4.0|||\rR|8|^MTB-RIF^^Xpert^^^rpoB3^|INVALID^|||\rR|9|^MTB-RIF^^Xpert^^^rpoB3^Ct|^0.0|||\rR|10|^MTB-RIF^^Xpert^^^rpoB3^EndPt|^8.0|||\rR|11|^MTB-RIF^^Xpert^^^rpoB4^|INVALID^|||\rR|12|^MTB-RIF^^Xpert^^^rpoB4^Ct|^0.0|||\rR|13|^MTB-RIF^^Xpert^^^rpoB4^EndPt|^8.0|||\rR|14|^MTB-RIF^^Xpert^^^SPC^|PASS^|||\rR|15|^MTB-RIF^^Xpert^^^SPC^Ct|^24.7|||\rR|16|^MTB-RIF^^Xpert^^^SPC^EndPt|^159.0|||\rR|17|^MTB-RIF^^Xpert^^^^|FAIL^|||\rR|18|^MTB-RIF^^Xpert^^^IS1081-IS6110^Ct|^0.0|||\rR|19|^MTB-RIF^^Xpert^^^IS1081-IS6110^EndPt|^3.0|||\rR|20|^MTB-RIF^^Trace^Xpert MTB-RIF Ultra^4^MTB Trace^|^|||||F||John Doe|20250514121638|20250514132103|Cepheid-44413S0^806149^653624^831583371^56401^20250525\rC|1|I|Notes^^Id# 118176 Sardani P Lantion CDU/Dr. A Marcil cp|I\rR|21|^MTB-RI^^Trace^^^rpoB1^|INVALID^|||\rR|22|^MTB-RIF^^Trace^^^rpoB1^Ct|^0.0|||\rR|23|^MTB-RIF^^Trace^^^rpoB1^EndPt|^-2.0|||\rR|24|^MTB-RIF^^Trace^^^rpoB2^|INVALID^|||\rR|25|^MTB-RIF^^Trace^^^rpoB2^Ct|^0.0|||\rR|26|^MTB-RIF^^Trace^^^rpoB2^EndPt|^4.0|||\rR|27|^MTB-RIF^^Trace^^^rpoB3^|INVALID^|||\rR|28|^MTB-RIF^^Trace^^^rpoB3^Ct|^0.0|||\rR|29|^MTB-RIF^^Trace^^^rpoB3^EndPt|^8.0|||\rR|30|^MTB-RIF^^Trace^^^rpoB4^|INVALID^|||\rR|31|^MTB-RIF^^Trace^^^rpoB4^Ct|^0.0|||\rR|32|^MTB-RIF^^Trace^^^rpoB4^EndPt|^8.0|||\rR|33|^MTB-RIF^^Trace^^^SPC^|PASS^|||\rR|34|^MTB-RIF^^Trace^^^SPC^Ct|^24.7|||\rR|35|^MTB-RIF^^Trace^^^SPC^EndPt|^159.0|||\rR|36|^MTB-RIF^^Trace^^^IS1081-IS6110^|FAIL^|||\rR|37|^MTB-RIF^^Trace^^^IS1081-IS6110^Ct|^0.0|||\rR|38|^MTB-RIF^^Trace^^^IS1081-IS6110^EndPt|^3.0|||\rR|39|^MTB-RIF^^RIF^Xpert MTB-RIF Ultra^4^RIF Resistance^|^|||||F||John Doe|20250514121638|20250514132103|Cepheid-44413S0^806149^653624^831583371^56401^20250525\rC|1|I|Notes^^Id# 118176 Sardani P Lantion CDU/Dr. A Marcil cp|I\rR|40|^MTB-RIF^^RIF^^^rpoB1^|INVALID^|||\rR|41|^MTB-RIF^^RIF^^^rpoB1^Ct|^0.0|||\rR|42|^MTB-RIF^^RIF^^^rpoB1^EndPt|^-2.0|||\rR|43|^MTB-RIF^^RIF^^^rpoB2^|INVALID^|||\rR|44|^MTB-RIF^^RIF^^^rpoB2^Ct|^0.0|||\rR|45|^MTB-RIF^^RIF^^^rpoB2^EndPt|^4.0|||\rR|46|^MTB-RIF^^RIF^^^rpoB3^|INVALID^|||\rR|47|^MTB-RIF^^RIF^^^rpoB3^Ct|^0.0|||\rR|48|^MTB-RIF^^RIF^^^rpoB3^EndPt|^8.0|||\rR|49|^MTB-RIF^^RIF^^^rpoB4^|INVALID^|||\rR|50|^MTB-RIF^^RIF^^^rpoB4^Ct|^0.0|||\rR|51|^MTB-RIF^^RIF^^^rpoB4^EndPt|^8.0|||\rR|52|^MTB-RIF^^RIF^^^rpoB1 melt^|^|||\rR|53|^MTB-RIF^^RIF^^^rpoB1 melt^Ct|^0.0|||\rR|54|^MTB-RIF^^RIF^^^rpoB1 melt^EndPt|^0.0|||\rR|55|^MTB-RIF^^RIF^^^rpoB2 melt^|^|||\rR|56|^MTB-RIF^^RIF^^^rpoB2 melt^Ct|^0.0|||\rR|57|^MTB-RIF^^RIF^^^rpoB2 melt^EndPt|^0.0|||\rR|58|^MTB-RIF^^RIF^^^rpoB3 melt^|^|||\rR|59|^MTB-RIF^^RIF^^^rpoB3 melt^Ct|^0.0|||\rR|60|^MTB-RIF^^RIF^^^rpoB3 melt^EndPt|^0.0|||\rR|61|^MTB-RIF^^RIF^^^rpoB4 melt^|^|||\rR|62|^MTB-RIF^^RIF^^^rpoB4 melt^Ct|^0.0|||\rR|63|^MTB-RIF^^RIF^^^rpoB4 melt^EndPt|^0.0|||\rR|64|^MTB-RIF^^RIF^^^rpoB1 Mut melt^|^|||\rR|65|^MTB-RIF^^RIF^^^rpoB1 Mut melt^Ct|^0.0|||\rR|66|^MTB-RIF^^RIF^^^rpoB1 Mut melt^EndPt|^0.0|||\rR|67|^MTB-RIF^^RIF^^^rpoB2 Mut melt^|^|||\rR|68|^MTB-RIF^^RIF^^^rpoB2 Mut melt^Ct|^0.0|||\rR|69|^MTB-RIF^^RIF^^^rpoB2 Mut melt^EndPt|^0.0|||\rR|70|^MTB-RIF^^RIF^^^rpoB3 Mut melt^|^|||\rR|71|^MTB-RIF^^RIF^^^rpoB3 Mut melt^Ct|^0.0|||\rR|72|^MTB-RIF^^RIF^^^rpoB3 Mut melt^EndPt|^0.0|||\rR|73|^MTB-RIF^^RIF^^^rpoB4 Mut melt A^|^|||\rR|74|^MTB-RIF^^RIF^^^rpoB4 Mut melt A^Ct|^0.0|||\rR|75|^MTB-RIF^^RIF^^^rpoB4 Mut melt A^EndPt|^0.0|||\rR|76|^MTB-RIF^^RIF^^^rpoB4 Mut melt B^|^|||\rR|77|^MTB-RIF^^RIF^^^rpoB4 Mut melt B^Ct|^0.0|||\rR|78|^MTB-RIF^^RIF^^^rpoB4 Mut melt B^EndPt|^0.0|||\rR|79|^MTB-RIF^^RIF^^^SPC^|PASS^|||\rR|80|^MTB-RIF^^RIF^^^SPC^Ct|^24.7|||\rR|81|^MTB-RIF^^RIF^^^SPC^EndPt|^159.0|||\rR|82|^MTB-RIF^^RIF^^^IS1081-IS6110^|FAIL^|||\rR|83|^MTB-RIF^^RIF^^^IS1081-IS6110^Ct|^0.0|||\rR|84|^MTB-RIF^^RIF^^^IS1081-IS6110^EndPt|^3.0|||\rL|1|N\r\u0003"
+  }
+}

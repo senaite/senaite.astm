@@ -1,0 +1,133 @@
+{
+  "H": [
+    {
+      "address": null,
+      "caps": null,
+      "comments": null,
+      "delimeter": [
+        {
+          "_": "",
+          "__": null
+        },
+        {
+          "_": "",
+          "__": null
+        },
+        {
+          "_": "",
+          "__": "&"
+        }
+      ],
+      "message_id": null,
+      "password": null,
+      "phone": null,
+      "processing_id": "P",
+      "receiver": null,
+      "reserved": null,
+      "sender": {
+        "manufacturer": "Spotchem",
+        "name": "SE-1520",
+        "version": "1.0.0"
+      },
+      "timestamp": "<volatile>",
+      "type": "H",
+      "version": null
+    }
+  ],
+  "L": [
+    {
+      "code": "N",
+      "seq": "1",
+      "type": "L"
+    }
+  ],
+  "O": [
+    {
+      "action_code": null,
+      "biomaterial": null,
+      "clinical_info": null,
+      "collected_at": null,
+      "collector": null,
+      "danger_code": null,
+      "infection_flag": null,
+      "instrument": null,
+      "instrument_charge": null,
+      "instrument_section": null,
+      "laboratory": null,
+      "laboratory_field_1": null,
+      "laboratory_field_2": null,
+      "location_ward": null,
+      "physician": null,
+      "physician_phone": null,
+      "priority": null,
+      "received_at": null,
+      "report_type": null,
+      "reported_at": null,
+      "requested_at": null,
+      "reserved": null,
+      "sample_id": "1DC042FP",
+      "sampled_at": "20241029130800",
+      "seq": "1",
+      "specimen_service": null,
+      "test": "B. Plasma",
+      "type": "O",
+      "user_field_1": null,
+      "user_field_2": null,
+      "volume": null
+    }
+  ],
+  "R": [
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": "20241029130800",
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "1",
+      "started_at": null,
+      "status": null,
+      "test": "Na",
+      "type": "R",
+      "units": "mmol/L",
+      "value": "131.0"
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": "20241029130800",
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "2",
+      "started_at": null,
+      "status": null,
+      "test": "K",
+      "type": "R",
+      "units": "mmol/L",
+      "value": "9.7"
+    },
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": "20241029130800",
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "3",
+      "started_at": null,
+      "status": null,
+      "test": "Cl",
+      "type": "R",
+      "units": "mmol/L",
+      "value": "96.0"
+    }
+  ],
+  "metadata": {
+    "astm": "\u00021H|\\\\^&|||SE-1520^Spotchem^1.0.0|||||||||20241029130800\r\u00034A\n\u00022O|1|1DC042FP||B. Plasma|||20241029130800||||||||||||||||||\r\u000370\n\u00023R|1|Na|131.0|mmol/L||||||||20241029130800|\r\u0003A4\n\u00024R|2|K|9.7|mmol/L||||||||20241029130800|\r\u0003ED\n\u00025R|3|Cl|96.0|mmol/L||||||||20241029130800|\r\u000382\n\u00026L|1|N\r\u000309",
+    "lis2a": "H|\\\\^&|||SE-1520^Spotchem^1.0.0|||||||||20241029130800\r\u0003O|1|1DC042FP||B. Plasma|||20241029130800||||||||||||||||||\r\u0003R|1|Na|131.0|mmol/L||||||||20241029130800|\r\u0003R|2|K|9.7|mmol/L||||||||20241029130800|\r\u0003R|3|Cl|96.0|mmol/L||||||||20241029130800|\r\u0003L|1|N\r\u0003"
+  }
+}
