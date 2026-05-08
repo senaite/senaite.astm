@@ -41,7 +41,7 @@ def post_to_senaite(messages, session, **kwargs):
         # increase attempts
         attempt += 1
 
-        logger.warn('Could not push. Retrying {}/{}'.format(
+        logger.warning('Could not push. Retrying {}/{}'.format(
             attempt, retries))
 
         # Sleep before we retry

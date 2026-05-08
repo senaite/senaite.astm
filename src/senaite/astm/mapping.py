@@ -3,14 +3,10 @@
 # Credits to Alexander Shorin:
 # https://github.com/kxepal/python-astm
 
+from itertools import zip_longest
 from operator import itemgetter
 
 from senaite.astm.fields import Field
-
-try:
-    from itertools import izip_longest
-except ImportError:  # Python 3
-    from itertools import zip_longest as izip_longest
 
 
 class MetaMapping(type):
@@ -50,7 +46,7 @@ class Mapping(_MappingProxy):
 
     def __init__(self, *args, **kwargs):
         fieldnames = map(itemgetter(0), self._fields)
-        values = dict(izip_longest(fieldnames, args))
+        values = dict(zip_longest(fieldnames, args))
         values.update(kwargs)
         self._data = {}
         for attrname, field in self._fields:
