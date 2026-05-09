@@ -29,6 +29,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
+        "pydantic>=2",
         "requests",
         "zope.interface",
     ],

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import json
 import pkgutil
 import re
 from collections import defaultdict
@@ -9,6 +8,8 @@ from senaite.astm import codec
 from senaite.astm import instruments
 from senaite.astm import records
 from senaite.astm.constants import ENCODING
+from senaite.astm.core.envelope import Envelope
+from senaite.astm.core.envelope import Metadata
 from senaite.astm.utils import split_message
 
 DEFAULT_MAPPING = {
@@ -63,52 +64,48 @@ class Wrapper(object):
         out = b"\n".join(self.messages)
         return out.decode(encoding)
 
-    def to_dict(self):
-        """Convert the ASTM message to a dictionary
+    def to_envelope(self):
+        """Parse the ASTM messages into a typed :class:`Envelope`.
 
-        Returns a dictionary where the key is the record type and the values is
-        a list of value dictionaries:
-
-            {
-                'H': [{...}],
-                ...
-                'L': [{...}],
-            }
+        See :mod:`senaite.astm.core.envelope` for the schema and
+        the contract guarantees.
         """
-
-        # get the record mapping if provided
         mapping = self.get_mapping(self.messages)
-        # Prepare some metadata
-        metadata = {
+
+        metadata_extras = {
             "astm": self.to_astm(),
             "lis2a": self.to_lis2a(),
         }
-        # Append additional metadata if provided by the module
-        metadata_func = getattr(self.module, "get_metadata", None)
-        if callable(metadata_func):
-            metadata.update(metadata_func(self))
+        get_metadata = getattr(self.module, "get_metadata", None)
+        if callable(get_metadata):
+            metadata_extras.update(get_metadata(self))
 
-        # Output dictionary
-        out = defaultdict(list)
-        out["metadata"] = metadata
-
+        buckets = defaultdict(list)
         for message in self.messages:
-            records = codec.decode(message)
-
-            for record in records:
+            for record in codec.decode(message):
                 rtype = record[0]
                 if rtype not in mapping:
                     continue
                 try:
-                    wrapper = mapping[rtype](*record)
+                    wrapped = mapping[rtype](*record)
                 except ValueError as exc:
                     raise ValueError("Could not wrap '%s' record! (%s)"
                                      % (rtype, str(exc)))
-                out[rtype].append(wrapper.to_dict())
+                buckets[rtype].append(wrapped.to_dict())
 
-        return out
+        return Envelope(
+            metadata=Metadata(**metadata_extras),
+            **buckets,
+        )
+
+    def to_dict(self):
+        """Return the envelope as a plain JSON-serialisable dict.
+
+        Equivalent to :meth:`to_envelope` followed by
+        ``model_dump(mode="json")``.
+        """
+        return self.to_envelope().model_dump(mode="json")
 
     def to_json(self):
-        data = json.dumps(self.to_dict())
-        # Return the JSON encoded to bytes.
-        return data.encode()
+        """Return the envelope as JSON-encoded bytes."""
+        return self.to_envelope().model_dump_json().encode()

@@ -1,4 +1,5 @@
 {
+  "C": [],
   "H": [
     {
       "address": null,
@@ -41,6 +42,7 @@
       "type": "L"
     }
   ],
+  "M": [],
   "O": [
     {
       "action_code": null,
@@ -115,6 +117,7 @@
       "weight": null
     }
   ],
+  "Q": [],
   "R": [
     {
       "abnormal_flag": null,
@@ -135,6 +138,7 @@
   ],
   "metadata": {
     "astm": "\u00021H|\\\\^&|||miniVidas^biomerieux^1.0.0|||||||||20241025183500\r\u000358\n\u00022P|1||||test_patient|||||||||||||||||||||||||||||\r\u00034F\n\u00023O|1|Z1G021SCR||Anti-HBc Total II||||||||||||||||||20241025183500||||||||\r\u0003D5\n\u00024R|1|HBCT|0.05|||||Positif||||20241025183500|\r\u000396\n\u00025L|1|N\r\u000308",
+    "envelope_version": "1.0",
     "lis2a": "H|\\\\^&|||miniVidas^biomerieux^1.0.0|||||||||20241025183500\r\u0003P|1||||test_patient|||||||||||||||||||||||||||||\r\u0003O|1|Z1G021SCR||Anti-HBc Total II||||||||||||||||||20241025183500||||||||\r\u0003R|1|HBCT|0.05|||||Positif||||20241025183500|\r\u0003L|1|N\r\u0003"
   }
 }
