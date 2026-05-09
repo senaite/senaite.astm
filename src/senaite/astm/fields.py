@@ -7,9 +7,9 @@ import datetime
 import decimal
 import inspect
 import json
-import time
-import warnings
 from itertools import islice
+
+from senaite.astm import logger
 
 
 class Field(object):
@@ -54,10 +54,13 @@ class Field(object):
 
 
 class NotUsedField(Field):
-    """Mapping field for value that should be used.
+    """Mapping field for slots that the instrument may populate but
+    we deliberately don't model.
 
-    Acts as placeholder.  On attempt to assign something to it raises
-    :exc:`UserWarning` and rejects assigned value.
+    Any assigned value is silently dropped. The field used to emit a
+    :exc:`UserWarning` per assignment, which drowned out real
+    warnings (the cobas_c311 fixture alone produced ~78 of them per
+    parse) without giving the operator anything actionable.
     """
     def __init__(self, name=None):
         super(NotUsedField, self).__init__(name)
@@ -66,8 +69,6 @@ class NotUsedField(Field):
         return None
 
     def _set_value(self, value):
-        warnings.warn("Field %r is not used, any assignments are omitted"
-                      "" % self.name, UserWarning)
         return None
 
 
@@ -125,13 +126,36 @@ class JSONListField(Field):
             return default
 
 
+def _parse_with_formats(value, formats):
+    """Try each format in order, return the first match.
+
+    :raises ValueError: when none of the formats match.
+    """
+    for fmt in formats:
+        try:
+            return datetime.datetime.strptime(value, fmt)
+        except ValueError:
+            continue
+    raise ValueError("Value %r does not match any of: %s"
+                     "" % (value, ", ".join(formats)))
+
+
 class DateField(Field):
-    """Mapping field for storing date/time values.
+    """Mapping field for storing date values.
+
+    The canonical output format is :attr:`format`. Subclasses can
+    extend :attr:`parse_formats` to accept additional formats on
+    input; the canonical format is always tried first.
     """
     format = "%Y%m%d"
+    parse_formats = ()
+
+    @property
+    def _accepted_formats(self):
+        return (self.format,) + tuple(self.parse_formats)
 
     def _get_value(self, value):
-        return datetime.datetime.strptime(value, self.format)
+        return _parse_with_formats(value, self._accepted_formats)
 
     def _set_value(self, value):
         if isinstance(value, (str, bytes)):
@@ -143,17 +167,23 @@ class DateField(Field):
 
 class TimeField(Field):
     """Mapping field for storing times.
+
+    The canonical output format is :attr:`format`. Subclasses can
+    extend :attr:`parse_formats` to accept additional formats on
+    input; the canonical format is always tried first.
     """
     format = "%H%M%S"
+    parse_formats = ()
+
+    @property
+    def _accepted_formats(self):
+        return (self.format,) + tuple(self.parse_formats)
 
     def _get_value(self, value):
         if isinstance(value, (str, bytes)):
-            try:
-                value = value.split(".", 1)[0]  # strip out microseconds
-                value = datetime.time(*time.strptime(value, self.format)[3:6])
-            except ValueError:
-                raise ValueError("Value %r does not match format %s"
-                                 "" % (value, self.format))
+            value = value.split(".", 1)[0]  # strip out microseconds
+            parsed = _parse_with_formats(value, self._accepted_formats)
+            return parsed.time()
         return value
 
     def _set_value(self, value):
@@ -168,11 +198,20 @@ class TimeField(Field):
 
 class DateTimeField(Field):
     """Mapping field for storing date/time values.
+
+    The canonical output format is :attr:`format`. Subclasses can
+    extend :attr:`parse_formats` to accept additional formats on
+    input; the canonical format is always tried first.
     """
     format = "%Y%m%d%H%M%S"
+    parse_formats = ()
+
+    @property
+    def _accepted_formats(self):
+        return (self.format,) + tuple(self.parse_formats)
 
     def _get_value(self, value):
-        return datetime.datetime.strptime(value, self.format)
+        return _parse_with_formats(value, self._accepted_formats)
 
     def _set_value(self, value):
         if isinstance(value, (str, bytes)):
@@ -214,14 +253,23 @@ class ConstantField(Field):
 
 
 class SetField(Field):
-    """Mapping field for predefined set of values.
+    """Mapping field for a predefined set of values.
+
+    By default, unknown values are accepted and a debug message is
+    logged. A device firmware update that introduces a new status
+    code should not crash parsing of every message that contains it.
+
+    Pass ``strict=True`` to restore the legacy raise-on-unknown
+    behaviour (useful for tests or for fields whose vocabulary is
+    truly closed).
     """
     def __init__(self, name=None, default=None,
                  required=False, length=None,
-                 values=None, field=Field()):
+                 values=None, field=Field(), strict=False):
         super(SetField, self).__init__(name, default, required, length)
         self.field = field
         self.values = values and set(values) or set([])
+        self.strict = strict
 
     def _get_value(self, value):
         return self.field._get_value(value)
@@ -229,7 +277,12 @@ class SetField(Field):
     def _set_value(self, value):
         value = self.field._get_value(value)
         if value not in self.values:
-            raise ValueError("Unexpected value %r (%s)" % (value, self.name))
+            if self.strict:
+                raise ValueError(
+                    "Unexpected value %r (%s)" % (value, self.name))
+            logger.debug(
+                "Field %r received unexpected value %r (allowed: %s)",
+                self.name, value, sorted(self.values))
         return self.field._set_value(value)
 
 
