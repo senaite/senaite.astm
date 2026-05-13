@@ -25,6 +25,8 @@ import re
 
 from senaite.astm import logger
 
+_REGISTRY = {}
+
 
 class AmbiguousInstrumentError(LookupError):
     """Raised when more than one registered instrument matches the
@@ -70,9 +72,6 @@ class Instrument(object):
         Default returns an empty dict.
         """
         return {}
-
-
-_REGISTRY = {}
 
 
 def register_instrument(cls):
