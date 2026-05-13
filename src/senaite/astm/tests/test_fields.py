@@ -52,11 +52,18 @@ class NotUsedFieldTestCase(ASTMTestBase):
         self.assertEqual(obj.field, None)
         self.assertEqual(obj[0], None)
 
-    def test_set_value(self):
+    def test_set_value_silently_drops(self):
+        """Assignments are dropped without emitting a warning.
+
+        Previously every assignment fired a UserWarning, which
+        flooded the log with no actionable signal — the cobas_c311
+        fixture alone produced ~78 of them per parse.
+        """
         obj = self.Dummy()
         with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
             obj.field = 42
-            assert issubclass(w[-1].category, UserWarning)
+            self.assertEqual(w, [])
         self.assertEqual(obj.field, None)
 
 
@@ -346,13 +353,24 @@ class SetFieldTestCase(ASTMTestBase):
         obj.field = "bar"
         self.assertEqual(obj.field, "bar")
 
-    def test_restrict_new_values_by_specified_set(self):
+    def test_unknown_values_are_accepted_by_default(self):
+        """A new vocabulary item from a device firmware update
+        should not crash parsing of every message that contains it.
+        """
         obj = self.Dummy()
+        obj.field = "boo"
+        self.assertEqual(obj.field, "boo")
+
+    def test_strict_mode_raises_on_unknown_value(self):
+        class Dummy(Mapping):
+            field = fields.SetField(
+                values=["foo", "bar", "baz"], strict=True)
+        obj = Dummy()
         self.assertRaises(ValueError, setattr, obj, "field", "boo")
 
-    def test_reject_any_value(self):
+    def test_strict_with_empty_value_set_rejects_everything(self):
         class Dummy(Mapping):
-            field = fields.SetField()
+            field = fields.SetField(strict=True)
         obj = Dummy()
         self.assertRaises(ValueError, setattr, obj, "field", "bar")
         self.assertRaises(ValueError, setattr, obj, "field", "foo")
@@ -374,6 +392,71 @@ class SetFieldTestCase(ASTMTestBase):
         obj = self.Dummy()
         obj.field = "foo"
         self.assertEqual(obj._data["field"], "foo")
+
+
+class SetFieldTolerantLoggingTest(ASTMTestBase):
+    """Tolerant SetField logs the unknown value but does not crash."""
+
+    def setUp(self):
+        class Dummy(Mapping):
+            field = fields.SetField(values=["foo", "bar"])
+        self.Dummy = Dummy
+
+    def test_unknown_value_is_logged_at_debug(self):
+        with self.assertLogs("senaite.astm", level="DEBUG") as log:
+            obj = self.Dummy()
+            obj.field = "boo"
+        self.assertTrue(
+            any("unexpected value 'boo'" in line for line in log.output),
+            "expected DEBUG log about unexpected value, got: %r"
+            "" % log.output)
+
+
+class MultiFormatDateFieldTest(ASTMTestBase):
+    """Date fields accept extra formats via parse_formats."""
+
+    def test_date_field_accepts_extra_format(self):
+        class IsoDateField(fields.DateField):
+            parse_formats = ("%Y-%m-%d",)
+
+        class Dummy(Mapping):
+            field = IsoDateField()
+
+        obj = Dummy()
+        obj.field = "2026-05-09"
+        self.assertEqual(obj._data["field"], "20260509")
+
+    def test_date_field_canonical_format_still_works(self):
+        class IsoDateField(fields.DateField):
+            parse_formats = ("%Y-%m-%d",)
+
+        class Dummy(Mapping):
+            field = IsoDateField()
+
+        obj = Dummy()
+        obj.field = "20260509"
+        self.assertEqual(obj._data["field"], "20260509")
+
+    def test_datetime_field_tries_each_format_in_order(self):
+        class FlexibleDT(fields.DateTimeField):
+            parse_formats = ("%Y-%m-%dT%H:%M:%S", "%d/%m/%Y %H:%M:%S")
+
+        class Dummy(Mapping):
+            field = FlexibleDT()
+
+        obj = Dummy()
+        obj.field = "09/05/2026 14:30:00"
+        self.assertEqual(obj._data["field"], "20260509143000")
+
+    def test_date_field_raises_when_no_format_matches(self):
+        class IsoDateField(fields.DateField):
+            parse_formats = ("%Y-%m-%d",)
+
+        class Dummy(Mapping):
+            field = IsoDateField()
+
+        obj = Dummy()
+        self.assertRaises(ValueError, setattr, obj, "field", "nope")
 
 
 class ComponentFieldTestCase(ASTMTestBase):
