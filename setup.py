@@ -31,7 +31,6 @@ setup(
     install_requires=[
         "pydantic>=2",
         "requests",
-        "zope.interface",
     ],
     test_suite='senaite.astm.tests',
     # List additional groups of dependencies here (e.g. development

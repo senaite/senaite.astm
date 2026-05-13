@@ -74,28 +74,30 @@ class InstrumentRegistryTest(unittest.TestCase):
         with self.assertRaises(AmbiguousInstrumentError):
             find_instrument(b"1H|\\^&|||Shared^v|||")
 
-    def test_preparse_defaults_to_passthrough(self):
+    def test_handle_raw_data_defaults_to_none(self):
         @self._register
         class FakeGamma(Instrument):
             name = "test:gamma"
             header_regex = re.compile(rb".*Gamma\^")
             record_map = _make_record_map()
 
-        raw = b"1H|\\^&|||Gamma^|||"
-        self.assertEqual(FakeGamma().preparse(raw), raw)
+        self.assertIsNone(FakeGamma().handle_raw_data(None, b"any"))
 
-    def test_preparse_hook_can_rewrite_bytes(self):
+    def test_can_handle_raw_uses_raw_data_regex(self):
+        from senaite.astm.core.instrument import find_raw_data_handler
+
         @self._register
         class FakeDelta(Instrument):
             name = "test:delta"
             header_regex = re.compile(rb".*Delta\^")
+            raw_data_regex = re.compile(rb"^\x02DELTA")
             record_map = _make_record_map()
 
-            def preparse(self, raw):
-                return raw.upper()
+            def handle_raw_data(self, protocol, data):
+                return b"OK"
 
-        out = FakeDelta().preparse(b"hello")
-        self.assertEqual(out, b"HELLO")
+        self.assertIsNotNone(find_raw_data_handler(b"\x02DELTA-payload"))
+        self.assertIsNone(find_raw_data_handler(b"unrelated"))
 
     def test_metadata_defaults_to_empty(self):
         @self._register
@@ -136,9 +138,7 @@ class InstrumentRegistryTest(unittest.TestCase):
 
 
 class WrapperRegistryIntegrationTest(unittest.TestCase):
-    """Wrapper should consult the registry before falling back to
-    the legacy pkgutil discovery.
-    """
+    """Wrapper resolves the mapping entirely through the registry."""
 
     def setUp(self):
         self._registered = []
@@ -166,13 +166,10 @@ class WrapperRegistryIntegrationTest(unittest.TestCase):
         self.assertIs(wrapper.instrument.__class__, FakeMega)
         self.assertEqual(set(wrapper.mapping), {"H"})
 
-    def test_wrapper_falls_back_to_legacy_discovery(self):
+    def test_unknown_header_falls_back_to_default_mapping(self):
+        from senaite.astm.wrapper import DEFAULT_MAPPING
         from senaite.astm.wrapper import Wrapper
 
-        # Header that matches the existing pkgutil-discovered
-        # Afinion 2 module; no registry entry needed.
-        header = b"1H|\\^&|||Afinion 2 Analyzer^^AF0000030|||||EPR||P|1|"
-        wrapper = Wrapper([header])
+        wrapper = Wrapper([b"1H|\\^&|||TotallyUnknown^|||"])
         self.assertIsNone(wrapper.instrument)
-        # Legacy mapping must still resolve through pkgutil.
-        self.assertIn("H", wrapper.mapping)
+        self.assertEqual(wrapper.mapping, DEFAULT_MAPPING)

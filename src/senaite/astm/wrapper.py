@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import pkgutil
-import re
 from collections import defaultdict
 
 from senaite.astm import codec
-from senaite.astm import instruments
+from senaite.astm import instruments  # noqa: F401  (triggers registry)
 from senaite.astm import records
 from senaite.astm.constants import ENCODING
 from senaite.astm.core.envelope import Envelope
@@ -31,46 +29,24 @@ class Wrapper(object):
     def __init__(self, messages):
         self.messages = messages
         self.instrument = None
-        self.module = None
         self.mapping = self.get_mapping(messages)
 
     def get_mapping(self, messages):
-        """Returns the record mapping for the message.
+        """Return the record mapping for the message.
 
-        Resolution order:
-
-        1. The instrument registry populated by
-           :func:`senaite.astm.core.instrument.register_instrument`.
-        2. Legacy ``pkgutil``-based discovery of
-           :mod:`senaite.astm.instruments` modules (kept until
-           every instrument is migrated; will be removed in PR-E2).
-        3. The :data:`DEFAULT_MAPPING` fallback.
+        Resolved against the instrument registry populated at import
+        time by :func:`senaite.astm.core.instrument.register_instrument`.
+        Falls back to :data:`DEFAULT_MAPPING` when no registered
+        instrument claims the header (e.g. unknown device, empty
+        message list).
         """
         if not messages:
             return DEFAULT_MAPPING
-        header = messages[0]
-
-        instrument = find_instrument(header)
-        if instrument is not None:
-            self.instrument = instrument
-            return dict(instrument.record_map)
-
-        return self._legacy_mapping(header)
-
-    def _legacy_mapping(self, header):
-        for importer, modname, ispkg in pkgutil.iter_modules(
-                instruments.__path__, instruments.__name__ + "."):
-            module = __import__(modname, fromlist="dummy")
-            # get the regular expression to match the header message
-            regex = getattr(module, "HEADER_RX", None)
-            if regex and re.match(regex, header.decode()):
-                mapping = getattr(module, "get_mapping", None)
-                if callable(mapping):
-                    return mapping()
-                # remember the matching module
-                self.module = module
-
-        return DEFAULT_MAPPING
+        instrument = find_instrument(messages[0])
+        if instrument is None:
+            return DEFAULT_MAPPING
+        self.instrument = instrument
+        return dict(instrument.record_map)
 
     def to_lis2a(self, encoding=ENCODING):
         out = b""
@@ -116,16 +92,9 @@ class Wrapper(object):
         )
 
     def _collect_instrument_metadata(self):
-        """Merge instrument-specific metadata from whichever
-        mechanism resolved the mapping.
-        """
-        if self.instrument is not None:
-            extras = self.instrument.get_metadata(self)
-            return dict(extras or {})
-        get_metadata = getattr(self.module, "get_metadata", None)
-        if callable(get_metadata):
-            return dict(get_metadata(self) or {})
-        return {}
+        if self.instrument is None:
+            return {}
+        return dict(self.instrument.get_metadata(self) or {})
 
     def to_dict(self):
         """Return the envelope as a plain JSON-serialisable dict.

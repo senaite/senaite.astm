@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import re
+
 from senaite.astm import records
+from senaite.astm.core.instrument import Instrument
+from senaite.astm.core.instrument import register_instrument
 from senaite.astm.fields import ComponentField
 from senaite.astm.fields import ConstantField
 from senaite.astm.fields import DateTimeField
@@ -16,7 +20,7 @@ VERSION = "1.0.0"
 # Supports XP-100 or XP-300
 # Sysmex Corporation, XP Series ASTM Communication Specifications (ASTM
 # E1394-97, E1381-02/94), Revision 1.0, 2012
-HEADER_RX = r".*XP-(100|300)\^"
+HEADER_RX = re.compile(rb".*XP-(100|300)\^")
 
 SAMPLE_ID_ATTRIBUTES = (
     "M",  # M: Manual input
@@ -42,33 +46,6 @@ RESULT_ABNORMAL_FLAGS = (
     "A",   # A: Masked data
     "W",   # W: “*” flagged data
 )
-
-
-def get_metadata(wrapper):
-    """Additional metadata
-
-    :param wrapper: The wrapper instance
-    :returns: dictionary of additional metadata
-    """
-    return {
-        "version": VERSION,
-        "header_rx": HEADER_RX,
-    }
-
-
-def get_mapping():
-    """Returns the wrappers for this instrument
-    """
-    return {
-        "H": HeaderRecord,
-        "P": PatientRecord,
-        "O": OrderRecord,
-        "R": ResultRecord,
-        "C": CommentRecord,
-        "Q": RequestInformationRecord,
-        "M": ManufacturerInfoRecord,
-        "L": TerminatorRecord,
-    }
 
 
 class HeaderRecord(records.HeaderRecord):
@@ -165,3 +142,26 @@ class ManufacturerInfoRecord(records.ManufacturerInfoRecord):
 class TerminatorRecord(records.TerminatorRecord):
     """Message Termination Record (L)
     """
+
+
+@register_instrument
+class SysmexXP(Instrument):
+    name = "sysmex_xp"
+    header_regex = HEADER_RX
+    record_map = {
+        "H": HeaderRecord,
+        "P": PatientRecord,
+        "O": OrderRecord,
+        "R": ResultRecord,
+        "C": CommentRecord,
+        "Q": RequestInformationRecord,
+        "M": ManufacturerInfoRecord,
+        "L": TerminatorRecord,
+    }
+
+    def get_metadata(self, wrapper):
+        return {"version": VERSION,
+                "header_rx": HEADER_RX.pattern.decode()}
+
+
+INSTRUMENT = SysmexXP()

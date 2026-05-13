@@ -25,7 +25,7 @@ class PentraXLR(ASTMTestBase):
         # Mock transport and protocol objects
         self.transport = self.get_mock_transport()
         self.protocol.transport = self.transport
-        self.mapping = horiba_pentra_xlr.get_mapping()
+        self.mapping = horiba_pentra_xlr.INSTRUMENT.record_map
 
     def get_mock_transport(self, ip="127.0.0.1", port=12345):
         transport = MagicMock()

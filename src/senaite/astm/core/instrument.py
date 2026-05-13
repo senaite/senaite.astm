@@ -46,6 +46,10 @@ class Instrument(object):
     name = None
     header_regex = None
     record_map = None
+    #: Optional bytes regex used by :func:`find_raw_data_handler`
+    #: to dispatch non-ASTM transport packets to this instrument
+    #: before the standard ENQ/STX/EOT state machine sees them.
+    raw_data_regex = None
 
     def can_handle(self, raw_header):
         """Return True if this instrument owns *raw_header*.
@@ -57,14 +61,29 @@ class Instrument(object):
             return False
         return re.match(self.header_regex, raw_header) is not None
 
-    def preparse(self, raw):
+    def can_handle_raw(self, data):
+        """Return True if this instrument owns the raw, non-ASTM
+        packet in *data*. Used by transports that wrap a custom
+        wire format (mini_vidas, spotchem se1520) and need a shot
+        at the bytes before the protocol's STX/ENQ dispatch.
+        """
+        if self.raw_data_regex is None:
+            return False
+        return re.match(self.raw_data_regex, data) is not None
+
+    def handle_raw_data(self, protocol, data):
         """Hook for non-compliant transports.
 
-        Default: pass-through. Instruments whose wire format is not
-        valid ASTM (e.g. mini_vidas, spotchem) override this to
-        massage *raw* into a compliant message.
+        Default: ``None`` (no rewrite). Instruments whose wire
+        format is not valid ASTM override this to synthesise a
+        full ASTM session — typically by populating
+        ``protocol.messages`` and driving ``protocol.on_enq`` /
+        ``protocol.on_eot`` directly.
+
+        :returns: bytes to write back to the device, or ``None``
+            when the handler has already taken full responsibility.
         """
-        return raw
+        return None
 
     def get_metadata(self, wrapper):
         """Optional per-instrument metadata merged into the envelope.
@@ -117,6 +136,24 @@ def registered_instruments():
     return tuple(_REGISTRY.values())
 
 
+def find_raw_data_handler(data):
+    """Resolve a registered instrument that wants to handle the raw,
+    non-ASTM *data* packet directly. Mirrors :func:`find_instrument`
+    but consults :meth:`Instrument.can_handle_raw`.
+
+    :raises AmbiguousInstrumentError: when more than one match.
+    """
+    matches = [inst for inst in _REGISTRY.values()
+               if inst.can_handle_raw(data)]
+    if len(matches) > 1:
+        names = ", ".join(repr(m.name) for m in matches)
+        raise AmbiguousInstrumentError(
+            "Raw data matched multiple instruments: %s" % names)
+    if matches:
+        return matches[0]
+    return None
+
+
 def find_instrument(raw_header):
     """Resolve the instrument that owns *raw_header*.
 
@@ -141,6 +178,7 @@ __all__ = (
     "AmbiguousInstrumentError",
     "Instrument",
     "find_instrument",
+    "find_raw_data_handler",
     "register_instrument",
     "registered_instruments",
     "unregister_instrument",
