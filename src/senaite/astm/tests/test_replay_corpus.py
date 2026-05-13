@@ -22,16 +22,13 @@ import unittest
 from senaite.astm.core.envelope import ENVELOPE_VERSION
 from senaite.astm.wrapper import Wrapper
 
-REPLAY_DIR = os.environ.get(
-    "ASTM_REPLAY_DIR",
-    "/Users/rbartl/develop/buildout/instruments/astm_messages",
-)
+REPLAY_DIR = os.environ.get("ASTM_REPLAY_DIR")
 
-# Empirical baseline against ~50k CERMEL captures: ~3.1% fail (mostly
-# truncated Roche c111 sessions where the recorder flushed before the
-# trailing <CR><ETX>, plus a handful of malformed payloads). Verified
-# identical pre- and post-migration. Anything materially above this
-# threshold means a refactor regressed parsing for real traffic.
+# Empirical baseline against a ~50k-file production corpus: ~3.1% fail
+# (mostly truncated Roche c111 sessions where the recorder flushed
+# before the trailing <CR><ETX>, plus a handful of malformed payloads).
+# Anything materially above this threshold means a refactor regressed
+# parsing for real traffic.
 MAX_FAILURE_RATIO = 0.05
 
 
