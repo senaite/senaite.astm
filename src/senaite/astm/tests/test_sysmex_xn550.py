@@ -27,7 +27,7 @@ class SysmexXN550(ASTMTestBase):
         # Mock transport and protocol objects
         self.transport = self.get_mock_transport()
         self.protocol.transport = self.transport
-        self.mapping = sysmex_xn.get_mapping()
+        self.mapping = sysmex_xn.INSTRUMENT.record_map
 
     def get_mock_transport(self, ip="127.0.0.1", port=12345):
         transport = MagicMock()

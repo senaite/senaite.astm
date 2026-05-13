@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import re
+
 from senaite.astm import records
+from senaite.astm.core.instrument import Instrument
+from senaite.astm.core.instrument import register_instrument
 from senaite.astm.fields import ComponentField
 from senaite.astm.fields import ConstantField
 from senaite.astm.fields import DateTimeField
@@ -10,7 +14,7 @@ from senaite.astm.fields import TextField
 from senaite.astm.mapping import Component
 
 VERSION = "1.0.0"
-HEADER_RX = r".*c311\^"
+HEADER_RX = re.compile(rb".*c311\^")
 
 ABNORMAL_FLAGS = ["L", "H", "LL", "HH", "N", "A",]
 ACTION_CODES = ["N", "Q", "A", "C",]
@@ -20,33 +24,6 @@ MSG_MODES = ["REAL", "BATCH", "REPLY",]
 PRIORITIES = ["R", "S",]
 SAMPLE_TYPES = ["S1", "S2", "S3", "S4", "S5", "S0", "QC",]
 STATUS = ["F", "C",]
-
-
-def get_metadata(wrapper):
-    """Additional metadata
-
-    :param wrapper: The wrapper instance
-    :returns: dictionary of additional metadata
-    """
-    return {
-        "version": VERSION,
-        "header_rx": HEADER_RX,
-    }
-
-
-def get_mapping():
-    """Returns the wrappers for this instrument
-    """
-    return {
-        "H": HeaderRecord,
-        "P": PatientRecord,
-        "O": OrderRecord,
-        "R": ResultRecord,
-        "C": CommentRecord,
-        "Q": RequestInformationRecord,
-        "M": ManufacturerInfoRecord,
-        "L": TerminatorRecord,
-    }
 
 
 class HeaderRecord(records.HeaderRecord):
@@ -170,3 +147,26 @@ class ManufacturerInfoRecord(records.ManufacturerInfoRecord):
 class TerminatorRecord(records.TerminatorRecord):
     """Message Termination Record (L)
     """
+
+
+@register_instrument
+class RocheCobasC311(Instrument):
+    name = "roche_cobas_c311"
+    header_regex = HEADER_RX
+    record_map = {
+        "H": HeaderRecord,
+        "P": PatientRecord,
+        "O": OrderRecord,
+        "R": ResultRecord,
+        "C": CommentRecord,
+        "Q": RequestInformationRecord,
+        "M": ManufacturerInfoRecord,
+        "L": TerminatorRecord,
+    }
+
+    def get_metadata(self, wrapper):
+        return {"version": VERSION,
+                "header_rx": HEADER_RX.pattern.decode()}
+
+
+INSTRUMENT = RocheCobasC311()

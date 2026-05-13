@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import re
+
 from senaite.astm import records
+from senaite.astm.core.instrument import Instrument
+from senaite.astm.core.instrument import register_instrument
 from senaite.astm.fields import ComponentField
 from senaite.astm.fields import DateField
 from senaite.astm.fields import DateTimeField
@@ -16,7 +20,7 @@ VERSION = "1.0.0"
 # Supports XN-550, XN-530, XN-450, XN-430, XN-350, XN-330, XN-150, XN-110
 # Sysmex Corporation, Automated Hematology Analyzer XN-L series ASTM Host
 # Interface Specifications, Revision 6, 2017
-HEADER_RX = r".*XN-(550|530|450|430|350|330|150|110)\^"
+HEADER_RX = re.compile(rb".*XN-(550|530|450|430|350|330|150|110)\^")
 
 PATIENT_SEXES = (
     "M",  # M: male
@@ -74,33 +78,6 @@ STATUS_CODES = (
     "N",  # N: Real-time inquiry (sampler analysis) for initial analysis
     "C",  # C: Real-time inquiry (sampler analysis) for re-analysis
 )
-
-
-def get_metadata(wrapper):
-    """Additional metadata
-
-    :param wrapper: The wrapper instance
-    :returns: dictionary of additional metadata
-    """
-    return {
-        "version": VERSION,
-        "header_rx": HEADER_RX,
-    }
-
-
-def get_mapping():
-    """Returns the wrappers for this instrument
-    """
-    return {
-        "H": HeaderRecord,
-        "P": PatientRecord,
-        "O": OrderRecord,
-        "R": ResultRecord,
-        "C": CommentRecord,
-        "Q": RequestInformationRecord,
-        "M": ManufacturerInfoRecord,
-        "L": TerminatorRecord,
-    }
 
 
 class HeaderRecord(records.HeaderRecord):
@@ -231,3 +208,26 @@ class ManufacturerInfoRecord(records.ManufacturerInfoRecord):
 class TerminatorRecord(records.TerminatorRecord):
     """Message Termination Record (L)
     """
+
+
+@register_instrument
+class SysmexXN(Instrument):
+    name = "sysmex_xn"
+    header_regex = HEADER_RX
+    record_map = {
+        "H": HeaderRecord,
+        "P": PatientRecord,
+        "O": OrderRecord,
+        "R": ResultRecord,
+        "C": CommentRecord,
+        "Q": RequestInformationRecord,
+        "M": ManufacturerInfoRecord,
+        "L": TerminatorRecord,
+    }
+
+    def get_metadata(self, wrapper):
+        return {"version": VERSION,
+                "header_rx": HEADER_RX.pattern.decode()}
+
+
+INSTRUMENT = SysmexXN()

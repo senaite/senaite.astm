@@ -3,16 +3,15 @@
 import asyncio
 import os
 
-from senaite.astm import adapter_registry
 from senaite.astm import logger
 from senaite.astm.constants import ACK
 from senaite.astm.constants import ENQ
 from senaite.astm.constants import EOT
 from senaite.astm.constants import NAK
 from senaite.astm.constants import STX
+from senaite.astm.core.instrument import find_raw_data_handler
 from senaite.astm.exceptions import InvalidState
 from senaite.astm.exceptions import NotAccepted
-from senaite.astm.interfaces import IDataHandler
 from senaite.astm.utils import is_chunked_message
 from senaite.astm.utils import join
 from senaite.astm.utils import validate_checksum
@@ -115,11 +114,11 @@ class ASTMProtocol(asyncio.Protocol):
     def handle_data(self, data):
         """Process incoming data
         """
-        # lookup custom multi-adapter to handle the data
-        adapters = adapter_registry.getAdapters((self, data), IDataHandler)
-        for name, adapter in adapters:
-            if adapter and adapter.can_handle():
-                return adapter.handle_data()
+        # First chance: a registered instrument may own this raw,
+        # non-ASTM packet (mini_vidas, spotchem_el).
+        instrument = find_raw_data_handler(data)
+        if instrument is not None:
+            return instrument.handle_raw_data(self, data)
 
         response = None
         if data.startswith(ENQ):
