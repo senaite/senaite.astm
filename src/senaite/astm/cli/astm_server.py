@@ -21,9 +21,8 @@ import sys
 
 from senaite.astm import logger
 from senaite.astm.core import lims
-from senaite.astm.core.handlers import DiskCaptureHandler
-from senaite.astm.core.handlers import LimsPushHandler
-from senaite.astm.core.handlers import default_disk_capture_path
+from senaite.astm.core.lims import LimsPushHandler
+from senaite.astm.core.output import DiskCaptureHandler
 from senaite.astm.core.pipeline import Pipeline
 from senaite.astm.transports.astm.protocol import ASTMProtocol
 from senaite.astm.wrapper import Wrapper
@@ -124,9 +123,8 @@ def validate_lims(url):
 
 def build_pipeline(args, session):
     handlers = []
-    output_path = args.output or default_disk_capture_path()
-    if output_path:
-        handlers.append(DiskCaptureHandler(os.path.abspath(output_path)))
+    if args.output:
+        handlers.append(DiskCaptureHandler(os.path.abspath(args.output)))
     if session is not None:
         handlers.append(LimsPushHandler(
             session,

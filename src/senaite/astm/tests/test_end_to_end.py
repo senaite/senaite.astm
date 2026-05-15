@@ -15,7 +15,7 @@ from senaite.astm import logger
 from senaite.astm.constants import ACK
 from senaite.astm.constants import ENQ
 from senaite.astm.constants import EOT
-from senaite.astm.core.handlers import serialize_envelope
+from senaite.astm.core.envelope import serialize_envelope
 from senaite.astm.tests.base import ASTMTestBase
 from senaite.astm.transports.astm.protocol import ASTMProtocol
 from senaite.astm.wrapper import Wrapper

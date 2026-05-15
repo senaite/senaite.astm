@@ -64,3 +64,23 @@ class Envelope(BaseModel):
     M: List[Dict[str, Any]] = []
     L: List[Dict[str, Any]] = []
     Q: List[Dict[str, Any]] = []
+
+
+def serialize_envelope(envelope, message_format="json"):
+    """Serialise an :class:`Envelope` according to ``message_format``.
+
+    :param message_format: One of ``"json"`` (the typed envelope as
+        JSON), ``"astm"`` (the original framed bytes from
+        ``metadata.astm``) or ``"lis2a"`` (the LIS2-A flat string
+        from ``metadata.lis2a``).
+
+    :returns: A string ready for downstream consumption.
+    :raises ValueError: when the format is unknown.
+    """
+    if message_format == "json":
+        return envelope.model_dump_json()
+    if message_format == "astm":
+        return envelope.metadata.astm or ""
+    if message_format == "lis2a":
+        return envelope.metadata.lis2a or ""
+    raise ValueError("Unknown message_format: %r" % message_format)

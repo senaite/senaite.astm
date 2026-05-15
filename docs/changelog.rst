@@ -5,6 +5,10 @@ Changelog
 1.0.0 (unreleased)
 ------------------
 
+- #35 Disk capture is a first-class pipeline handler (PR-H).
+  **Migration note:** the implicit ``$CWD/astm_messages/``
+  directory is no longer auto-discovered. Pass ``--output <path>``
+  explicitly to enable raw-message capture.
 - #34 Server hardening: async main, sane log rotation, graceful
   shutdown of in-flight pipeline tasks (PR-G)
 - #33 Split transport from protocol semantics (PR-F)
