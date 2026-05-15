@@ -3,8 +3,9 @@
 
 Wires the slim ASTM transport (``transports/astm/protocol.py``) to
 the message :class:`Pipeline`. The transport emits complete frame
-batches; this module wraps them into an :class:`Envelope` and runs
-the pipeline against it.
+batches; this module wraps them into an :class:`Envelope`, dispatches
+the pipeline as a tracked task, and waits for in-flight work on
+shutdown.
 
 The CLI surface (arguments, default ports, logfile name) is
 preserved from the previous ``senaite.astm.server`` module.
@@ -12,10 +13,10 @@ preserved from the previous ``senaite.astm.server`` module.
 
 import argparse
 import asyncio
-import contextlib
 import logging
 import logging.handlers
 import os
+import signal
 import sys
 
 from senaite.astm import logger
@@ -28,6 +29,9 @@ from senaite.astm.transports.astm.protocol import ASTMProtocol
 from senaite.astm.wrapper import Wrapper
 
 LOGFILE = "senaite-astm-server.log"
+LOGFILE_MAX_BYTES = 10 * 1024 * 1024
+LOGFILE_BACKUP_COUNT = 5
+DEFAULT_SHUTDOWN_GRACE_SECONDS = 30
 
 
 def build_arg_parser():
@@ -46,6 +50,11 @@ def build_arg_parser():
     astm_group.add_argument(
         "-o", "--output", type=str,
         help="Output directory to write full messages")
+    astm_group.add_argument(
+        "--shutdown-grace-seconds", type=int,
+        default=DEFAULT_SHUTDOWN_GRACE_SECONDS,
+        help="Seconds to wait for in-flight handler tasks to "
+             "finish before forcefully cancelling them on shutdown.")
 
     lims_group.add_argument(
         "-u", "--url", type=str,
@@ -82,10 +91,10 @@ def build_arg_parser():
 
 def configure_logging(args):
     if args.logfile:
-        # NOTE: maxBytes=5 is preserved from the legacy server for
-        # behavioural parity. PR-G fixes this to a sane value.
         handler = logging.handlers.RotatingFileHandler(
-            args.logfile, maxBytes=5, backupCount=0)
+            args.logfile,
+            maxBytes=LOGFILE_MAX_BYTES,
+            backupCount=LOGFILE_BACKUP_COUNT)
         handler.setFormatter(logging.Formatter(
             "%(asctime)s %(levelname)-8s %(message)s"))
         logger.addHandler(handler)
@@ -129,27 +138,107 @@ def build_pipeline(args, session):
     return Pipeline(handlers)
 
 
-def make_frame_callback(loop, queue):
-    """Return a frame callback that pushes ``(client, frames)`` onto
-    the asyncio queue from the protocol's sync context.
+def make_frame_callback(loop, pipeline, task_set):
+    """Return a frame callback that dispatches a tracked pipeline run.
+
+    The protocol invokes the callback synchronously from the loop
+    thread (inside ``data_received``). We schedule the wrap + pipeline
+    work as a task so the protocol can return immediately, and we
+    register that task into ``task_set`` so shutdown can wait for it.
     """
     def frame_callback(client, frames):
-        loop.call_soon_threadsafe(queue.put_nowait, (client, frames))
+        task = loop.create_task(
+            _process_frames(client, frames, pipeline))
+        task_set.add(task)
+        task.add_done_callback(task_set.discard)
     return frame_callback
 
 
-async def consume(queue, pipeline):
-    """Consume frame batches off the queue and run the pipeline."""
-    while True:
-        client, frames = await queue.get()
+async def _process_frames(client, frames, pipeline):
+    try:
+        envelope = Wrapper(frames).to_envelope()
+    except Exception as exc:
+        logger.error(
+            "Failed to wrap %d frames from %s: %r",
+            len(frames), client, exc)
+        return
+    await pipeline.run(envelope)
+
+
+async def _drain_tasks(task_set, grace_seconds):
+    """Await all in-flight tasks up to ``grace_seconds``.
+
+    Tasks still running after the grace period are cancelled.
+    """
+    if not task_set:
+        return
+    logger.info(
+        "Waiting up to %ds for %d in-flight task(s) to finish...",
+        grace_seconds, len(task_set))
+    pending = list(task_set)
+    done, still_pending = await asyncio.wait(
+        pending, timeout=grace_seconds)
+    if still_pending:
+        logger.warning(
+            "Cancelling %d task(s) that did not finish within "
+            "the %ds grace period",
+            len(still_pending), grace_seconds)
+        for task in still_pending:
+            task.cancel()
+        await asyncio.gather(*still_pending, return_exceptions=True)
+
+
+async def amain(args, stop_event=None):
+    """Async entry point.
+
+    Boots the listener, installs signal handlers, and blocks until a
+    shutdown signal arrives.
+
+    :param stop_event: Optional pre-created :class:`asyncio.Event`
+        used to request shutdown. Tests can drive shutdown via this
+        event without going through OS signals.
+    """
+    loop = asyncio.get_running_loop()
+    task_set = set()
+    pipeline = build_pipeline(args, args.session)
+    frame_callback = make_frame_callback(loop, pipeline, task_set)
+
+    server = await loop.create_server(
+        lambda: ASTMProtocol(frame_callback=frame_callback),
+        host=args.listen, port=args.port)
+
+    for socket in server.sockets:
+        ip, port = socket.getsockname()
+        logger.info("Starting server on {}:{}".format(ip, port))
+    logger.info("ASTM server ready to handle connections ...")
+
+    if stop_event is None:
+        stop_event = asyncio.Event()
+
+    def request_shutdown(sig_name):
+        if stop_event.is_set():
+            return
+        logger.info("Received %s, initiating graceful shutdown", sig_name)
+        stop_event.set()
+
+    for sig in (signal.SIGINT, signal.SIGTERM):
         try:
-            envelope = Wrapper(frames).to_envelope()
-        except Exception as exc:
-            logger.error(
-                "Failed to wrap %d frames from %s: %r",
-                len(frames), client, exc)
-            continue
-        await pipeline.run(envelope)
+            loop.add_signal_handler(
+                sig, request_shutdown, sig.name)
+        except (NotImplementedError, RuntimeError):
+            # Windows or non-main-thread loops can't install loop-level
+            # signal handlers. Fall back to default behaviour; callers
+            # that need programmatic shutdown can pass ``stop_event``.
+            pass
+
+    try:
+        await stop_event.wait()
+    finally:
+        logger.info("Shutting down server...")
+        server.close()
+        await server.wait_closed()
+        await _drain_tasks(task_set, args.shutdown_grace_seconds)
+        logger.info("Server is now down...")
 
 
 def main():
@@ -158,38 +247,15 @@ def main():
 
     configure_logging(args)
     validate_output(args.output)
-    session = validate_lims(args.url)
-
-    loop = asyncio.get_event_loop()
-    queue = asyncio.Queue()
-    pipeline = build_pipeline(args, session)
-    frame_callback = make_frame_callback(loop, queue)
-
-    loop.create_task(consume(queue, pipeline))
-
-    server_coro = loop.create_server(
-        lambda: ASTMProtocol(frame_callback=frame_callback),
-        host=args.listen, port=args.port)
-    server = loop.run_until_complete(server_coro)
-
-    for socket in server.sockets:
-        ip, port = socket.getsockname()
-        logger.info("Starting server on {}:{}".format(ip, port))
-        logger.info("ASTM server ready to handle connections ...")
+    args.session = validate_lims(args.url)
 
     try:
-        loop.run_forever()
+        asyncio.run(amain(args))
     except KeyboardInterrupt:
-        logger.info("Shutting down server...")
-        all_tasks = asyncio.gather(
-            *asyncio.all_tasks(loop), return_exceptions=True)
-        all_tasks.cancel()
-        with contextlib.suppress(asyncio.CancelledError):
-            loop.run_until_complete(all_tasks)
-        loop.run_until_complete(loop.shutdown_asyncgens())
-    finally:
-        loop.close()
-        logger.info("Server is now down...")
+        # Reach this only on platforms where the loop's signal handler
+        # is unavailable (Windows). The graceful path runs via
+        # ``request_shutdown``.
+        logger.info("Interrupted; exiting.")
 
 
 if __name__ == "__main__":
