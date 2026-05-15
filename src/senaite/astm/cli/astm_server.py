@@ -7,19 +7,16 @@ batches; this module wraps them into an :class:`Envelope`, dispatches
 the pipeline as a tracked task, and waits for in-flight work on
 shutdown.
 
-The CLI surface (arguments, default ports, logfile name) is
-preserved from the previous ``senaite.astm.server`` module.
+Lifecycle helpers (logging, signal handlers, task draining) live in
+:mod:`senaite.astm.cli._runtime` and are shared with the HL7 CLI.
 """
 
 import argparse
 import asyncio
-import logging
-import logging.handlers
 import os
-import signal
-import sys
 
 from senaite.astm import logger
+from senaite.astm.cli import _runtime
 from senaite.astm.core import lims
 from senaite.astm.core.lims import LimsPushHandler
 from senaite.astm.core.output import DiskCaptureHandler
@@ -28,9 +25,6 @@ from senaite.astm.transports.astm.protocol import ASTMProtocol
 from senaite.astm.wrapper import Wrapper
 
 LOGFILE = "senaite-astm-server.log"
-LOGFILE_MAX_BYTES = 10 * 1024 * 1024
-LOGFILE_BACKUP_COUNT = 5
-DEFAULT_SHUTDOWN_GRACE_SECONDS = 30
 
 
 def build_arg_parser():
@@ -51,7 +45,7 @@ def build_arg_parser():
         help="Output directory to write full messages")
     astm_group.add_argument(
         "--shutdown-grace-seconds", type=int,
-        default=DEFAULT_SHUTDOWN_GRACE_SECONDS,
+        default=_runtime.DEFAULT_SHUTDOWN_GRACE_SECONDS,
         help="Seconds to wait for in-flight handler tasks to "
              "finish before forcefully cancelling them on shutdown.")
 
@@ -88,26 +82,6 @@ def build_arg_parser():
     return parser
 
 
-def configure_logging(args):
-    if args.logfile:
-        handler = logging.handlers.RotatingFileHandler(
-            args.logfile,
-            maxBytes=LOGFILE_MAX_BYTES,
-            backupCount=LOGFILE_BACKUP_COUNT)
-        handler.setFormatter(logging.Formatter(
-            "%(asctime)s %(levelname)-8s %(message)s"))
-        logger.addHandler(handler)
-
-    logger.setLevel(logging.DEBUG if args.verbose else logging.INFO)
-    logger.addHandler(logging.StreamHandler())
-
-
-def validate_output(output):
-    if output and not os.path.isdir(output):
-        logger.error("Output path must be an existing directory")
-        sys.exit(-1)
-
-
 def validate_lims(url):
     if not url:
         return None
@@ -117,7 +91,7 @@ def validate_lims(url):
         session.auth()
     except lims.SenaiteError as exc:
         logger.error("Could not connect to SENAITE: {}".format(exc))
-        sys.exit(-1)
+        raise SystemExit(-1)
     return session
 
 
@@ -137,12 +111,10 @@ def build_pipeline(args, session):
 
 
 def make_frame_callback(loop, pipeline, task_set):
-    """Return a frame callback that dispatches a tracked pipeline run.
+    """ASTM-specific frame callback.
 
-    The protocol invokes the callback synchronously from the loop
-    thread (inside ``data_received``). We schedule the wrap + pipeline
-    work as a task so the protocol can return immediately, and we
-    register that task into ``task_set`` so shutdown can wait for it.
+    The ASTM transport hands us a *list of frames* per session; we
+    wrap them into an :class:`Envelope` before running the pipeline.
     """
     def frame_callback(client, frames):
         task = loop.create_task(
@@ -161,29 +133,6 @@ async def _process_frames(client, frames, pipeline):
             len(frames), client, exc)
         return
     await pipeline.run(envelope)
-
-
-async def _drain_tasks(task_set, grace_seconds):
-    """Await all in-flight tasks up to ``grace_seconds``.
-
-    Tasks still running after the grace period are cancelled.
-    """
-    if not task_set:
-        return
-    logger.info(
-        "Waiting up to %ds for %d in-flight task(s) to finish...",
-        grace_seconds, len(task_set))
-    pending = list(task_set)
-    done, still_pending = await asyncio.wait(
-        pending, timeout=grace_seconds)
-    if still_pending:
-        logger.warning(
-            "Cancelling %d task(s) that did not finish within "
-            "the %ds grace period",
-            len(still_pending), grace_seconds)
-        for task in still_pending:
-            task.cancel()
-        await asyncio.gather(*still_pending, return_exceptions=True)
 
 
 async def amain(args, stop_event=None):
@@ -212,22 +161,7 @@ async def amain(args, stop_event=None):
 
     if stop_event is None:
         stop_event = asyncio.Event()
-
-    def request_shutdown(sig_name):
-        if stop_event.is_set():
-            return
-        logger.info("Received %s, initiating graceful shutdown", sig_name)
-        stop_event.set()
-
-    for sig in (signal.SIGINT, signal.SIGTERM):
-        try:
-            loop.add_signal_handler(
-                sig, request_shutdown, sig.name)
-        except (NotImplementedError, RuntimeError):
-            # Windows or non-main-thread loops can't install loop-level
-            # signal handlers. Fall back to default behaviour; callers
-            # that need programmatic shutdown can pass ``stop_event``.
-            pass
+    _runtime.install_shutdown_handlers(loop, stop_event)
 
     try:
         await stop_event.wait()
@@ -235,24 +169,31 @@ async def amain(args, stop_event=None):
         logger.info("Shutting down server...")
         server.close()
         await server.wait_closed()
-        await _drain_tasks(task_set, args.shutdown_grace_seconds)
+        await _runtime.drain_tasks(task_set, args.shutdown_grace_seconds)
         logger.info("Server is now down...")
+
+
+# Backwards compatibility for the lifecycle tests that import the
+# pre-extraction helper names directly.
+LOGFILE_MAX_BYTES = _runtime.LOGFILE_MAX_BYTES
+LOGFILE_BACKUP_COUNT = _runtime.LOGFILE_BACKUP_COUNT
+DEFAULT_SHUTDOWN_GRACE_SECONDS = _runtime.DEFAULT_SHUTDOWN_GRACE_SECONDS
+configure_logging = _runtime.configure_logging
+validate_output = _runtime.validate_output
+_drain_tasks = _runtime.drain_tasks
 
 
 def main():
     parser = build_arg_parser()
     args = parser.parse_args()
 
-    configure_logging(args)
-    validate_output(args.output)
+    _runtime.configure_logging(args)
+    _runtime.validate_output(args.output)
     args.session = validate_lims(args.url)
 
     try:
         asyncio.run(amain(args))
     except KeyboardInterrupt:
-        # Reach this only on platforms where the loop's signal handler
-        # is unavailable (Windows). The graceful path runs via
-        # ``request_shutdown``.
         logger.info("Interrupted; exiting.")
 
 
