@@ -5,6 +5,8 @@ Changelog
 1.0.0 (unreleased)
 ------------------
 
+- #34 Server hardening: async main, sane log rotation, graceful
+  shutdown of in-flight pipeline tasks (PR-G)
 - #33 Split transport from protocol semantics (PR-F)
 - #31 Migrate every instrument to the registry (PR-E2)
 - #30 Introduce the instrument registry (PR-E1)
