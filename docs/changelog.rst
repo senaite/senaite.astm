@@ -5,6 +5,11 @@ Changelog
 1.0.0 (unreleased)
 ------------------
 
+- #36 HL7-over-MLLP transport, passthrough only (PR-6 for the
+  HemoScreen integration). Adds ``senaite-hl7-server`` (default
+  port 2575) and ``senaite-hl7-simulator``. Captures each received
+  HL7 v2 message to ``--output`` and responds with a comm-level
+  ACK^R01. No parsing-to-envelope, no LIMS push (deferred to PR-7).
 - #35 Disk capture is a first-class pipeline handler (PR-H).
   **Migration note:** the implicit ``$CWD/astm_messages/``
   directory is no longer auto-discovered. Pass ``--output <path>``

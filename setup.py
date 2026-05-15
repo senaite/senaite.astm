@@ -49,6 +49,8 @@ setup(
             "senaite-astm-server=senaite.astm.cli.astm_server:main",
             "senaite-astm-send=senaite.astm.sender:main",
             "senaite-astm-simulator=senaite.astm.simulator:main",
+            "senaite-hl7-server=senaite.astm.cli.hl7_server:main",
+            "senaite-hl7-simulator=senaite.astm.cli.hl7_simulator:main",
         ]
     }
 )
