@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import asyncio
 from dataclasses import dataclass
 from time import sleep
 from typing import Optional
@@ -7,6 +8,7 @@ from typing import Optional
 import requests
 
 from senaite.astm import logger
+from senaite.astm.core.envelope import serialize_envelope
 
 # SENAITE.JSONAPI route
 API_BASE_URL = "@@API/senaite/v1"
@@ -190,3 +192,41 @@ def post_to_senaite(messages, session, **kwargs):
         retries))
     return PushResult(
         success=False, attempts=retries, last_error=last_error)
+
+
+class LimsPushHandler(object):
+    """Pipeline handler that pushes a serialised envelope to SENAITE.
+
+    The handler is async-callable so it slots into
+    :class:`senaite.astm.core.pipeline.Pipeline` directly. The
+    blocking ``post_to_senaite`` runs via :func:`asyncio.to_thread`
+    so the event loop remains responsive while requests are in
+    flight.
+    """
+
+    name = "lims_push"
+
+    def __init__(self, session, retries=DEFAULT_RETRIES,
+                 delay=DEFAULT_DELAY, consumer=DEFAULT_CONSUMER,
+                 message_format="json"):
+        self.session = session
+        self.retries = retries
+        self.delay = delay
+        self.consumer = consumer
+        self.message_format = message_format
+
+    async def __call__(self, envelope):
+        payload = serialize_envelope(envelope, self.message_format)
+        result = await asyncio.to_thread(
+            post_to_senaite,
+            payload,
+            self.session,
+            retries=self.retries,
+            delay=self.delay,
+            consumer=self.consumer,
+        )
+        if not result.success:
+            logger.error(
+                "LIMS push gave up after %d attempts: %r",
+                result.attempts, result.last_error)
+        return result

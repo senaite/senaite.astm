@@ -114,7 +114,7 @@ class HandlersTest(unittest.IsolatedAsyncioTestCase):
 
     def test_serialize_envelope_json(self):
         from senaite.astm.core.envelope import Envelope, Metadata
-        from senaite.astm.core.handlers import serialize_envelope
+        from senaite.astm.core.envelope import serialize_envelope
 
         envelope = Envelope(metadata=Metadata(astm="A", lis2a="L"))
         payload = serialize_envelope(envelope, "json")
@@ -123,7 +123,7 @@ class HandlersTest(unittest.IsolatedAsyncioTestCase):
 
     def test_serialize_envelope_astm_uses_metadata(self):
         from senaite.astm.core.envelope import Envelope, Metadata
-        from senaite.astm.core.handlers import serialize_envelope
+        from senaite.astm.core.envelope import serialize_envelope
 
         envelope = Envelope(metadata=Metadata(astm="raw-astm", lis2a="L"))
         self.assertEqual(
@@ -131,7 +131,7 @@ class HandlersTest(unittest.IsolatedAsyncioTestCase):
 
     def test_serialize_envelope_lis2a_uses_metadata(self):
         from senaite.astm.core.envelope import Envelope, Metadata
-        from senaite.astm.core.handlers import serialize_envelope
+        from senaite.astm.core.envelope import serialize_envelope
 
         envelope = Envelope(metadata=Metadata(astm="A", lis2a="raw-lis2a"))
         self.assertEqual(
@@ -139,7 +139,7 @@ class HandlersTest(unittest.IsolatedAsyncioTestCase):
 
     def test_serialize_envelope_unknown_format_raises(self):
         from senaite.astm.core.envelope import Envelope, Metadata
-        from senaite.astm.core.handlers import serialize_envelope
+        from senaite.astm.core.envelope import serialize_envelope
 
         envelope = Envelope(metadata=Metadata(astm="A", lis2a="L"))
         with self.assertRaises(ValueError):
@@ -147,7 +147,7 @@ class HandlersTest(unittest.IsolatedAsyncioTestCase):
 
     async def test_disk_capture_noop_without_path(self):
         from senaite.astm.core.envelope import Envelope, Metadata
-        from senaite.astm.core.handlers import DiskCaptureHandler
+        from senaite.astm.core.output import DiskCaptureHandler
 
         handler = DiskCaptureHandler(path=None)
         envelope = Envelope(metadata=Metadata(astm="A", lis2a="L"))
