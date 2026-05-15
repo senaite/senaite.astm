@@ -27,7 +27,7 @@ from typing import Any, Dict, List
 
 from pydantic import BaseModel, ConfigDict
 
-ENVELOPE_VERSION = "1.0"
+ENVELOPE_VERSION = "1.1"
 
 
 class Metadata(BaseModel):
@@ -36,13 +36,28 @@ class Metadata(BaseModel):
     Required keys are declared explicitly. Per-instrument extras
     (sender component, instrument type, etc.) are accepted via
     ``extra="allow"`` and surface unchanged in :meth:`model_dump`.
+
+    Transport-native raw representations live here so downstream
+    consumers can recover the exact bytes the instrument emitted.
+    Each transport populates the field that matches it and leaves
+    the others empty:
+
+    - :attr:`astm`  — ASTM frame batch, decoded.
+    - :attr:`lis2a` — LIS2-A flat string (ASTM payload without frame
+      headers and checksums).
+    - :attr:`hl7`   — HL7 v2 message bytes, decoded.
+
+    Soft defaults of ``""`` keep the schema backwards compatible:
+    consumers that read e.g. ``metadata["astm"]`` for an HL7
+    envelope get an empty string rather than a missing key.
     """
 
     model_config = ConfigDict(extra="allow")
 
     envelope_version: str = ENVELOPE_VERSION
-    astm: str
-    lis2a: str
+    astm: str = ""
+    lis2a: str = ""
+    hl7: str = ""
 
 
 class Envelope(BaseModel):
@@ -83,4 +98,6 @@ def serialize_envelope(envelope, message_format="json"):
         return envelope.metadata.astm or ""
     if message_format == "lis2a":
         return envelope.metadata.lis2a or ""
+    if message_format == "hl7":
+        return envelope.metadata.hl7 or ""
     raise ValueError("Unknown message_format: %r" % message_format)

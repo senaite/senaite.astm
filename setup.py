@@ -29,6 +29,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
+        "hl7",
         "pydantic>=2",
         "requests",
     ],

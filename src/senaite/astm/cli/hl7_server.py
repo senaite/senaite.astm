@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 """``senaite-hl7-server`` CLI entry point.
 
-Passthrough HL7-over-MLLP listener. Captures each received HL7 v2
-message verbatim to ``--output`` and responds with a comm-level
-ACK^R01. **No** parsing-to-envelope, **no** LIMS push — that arrives
-in PR-7 (parser) and PR-8 (HemoScreen adapter) once we have real
-device captures to validate against.
+Wires the HL7-over-MLLP transport
+(:mod:`senaite.astm.transports.hl7.protocol`) to the message
+pipeline. The transport hands us raw HL7 bytes per session; this
+module parses them into an :class:`Envelope` (same shape the ASTM
+transport produces) and runs the pipeline against it.
 
-The lifecycle scaffolding (logging, signal handlers, task draining)
-is reused from :mod:`senaite.astm.cli._runtime`.
+LIMS push is enabled via ``--url`` the same way as
+``senaite-astm-server``. Without ``--url`` the server stays
+capture-only (default-off LIMS push per the HemoScreen plan PR-7).
 """
 
 import argparse
@@ -17,56 +18,67 @@ import os
 
 from senaite.astm import logger
 from senaite.astm.cli import _runtime
+from senaite.astm.core import lims
+from senaite.astm.core.lims import LimsPushHandler
+from senaite.astm.core.output import DiskCaptureHandler
 from senaite.astm.core.pipeline import Pipeline
+from senaite.astm.transports.hl7.parser import parse as parse_hl7
 from senaite.astm.transports.hl7.protocol import HL7Protocol
-from senaite.astm.utils import write_message
 
 LOGFILE = "senaite-hl7-server.log"
 DEFAULT_PORT = "2575"
 
 
-class RawCaptureHandler(object):
-    """Persist a raw HL7 payload to disk, one file per message.
-
-    Mirrors :class:`senaite.astm.core.output.DiskCaptureHandler` but
-    operates on raw bytes rather than an :class:`Envelope`. Lives in
-    this module for now because PR-6 is HL7-passthrough-only; if a
-    second transport needs the same primitive it can promote to
-    :mod:`senaite.astm.core.output`.
-    """
-
-    name = "raw_capture"
-
-    def __init__(self, path, ext=".hl7"):
-        self.path = path
-        self.ext = ext
-
-    async def __call__(self, payload):
-        if not self.path:
-            return
-        await asyncio.to_thread(write_message, payload, self.path,
-                                ext=self.ext)
+def _hl7_payload(envelope):
+    """DiskCaptureHandler extractor — write the HL7 raw text."""
+    return envelope.metadata.hl7 or ""
 
 
 def build_arg_parser():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    parser.add_argument(
+    hl7_group = parser.add_argument_group("HL7 SERVER")
+    lims_group = parser.add_argument_group("SENAITE LIMS")
+
+    hl7_group.add_argument(
         "-l", "--listen", type=str, default="0.0.0.0",
         help="Listen IP address")
-    parser.add_argument(
+    hl7_group.add_argument(
         "-p", "--port", type=str, default=DEFAULT_PORT,
         help="Port to listen on (default: 2575, IANA-registered "
              "for HL7)")
-    parser.add_argument(
+    hl7_group.add_argument(
         "-o", "--output", type=str,
         help="Output directory to write captured HL7 messages")
-    parser.add_argument(
+    hl7_group.add_argument(
         "--shutdown-grace-seconds", type=int,
         default=_runtime.DEFAULT_SHUTDOWN_GRACE_SECONDS,
         help="Seconds to wait for in-flight handler tasks to "
              "finish before forcefully cancelling them on shutdown.")
+
+    lims_group.add_argument(
+        "-u", "--url", type=str,
+        help="SENAITE URL address including username and password in "
+             "the format: http(s)://<user>:<password>@<senaite_url>. "
+             "Without --url the server runs in capture-only mode.")
+    lims_group.add_argument(
+        "-c", "--consumer", type=str,
+        default="senaite.core.hl7.import",
+        help="SENAITE push consumer interface")
+    lims_group.add_argument(
+        "-m", "--message-format", type=str, default="json",
+        help="Message format to send to SENAITE. "
+             "Allowed formats: 'json', 'hl7'.")
+    lims_group.add_argument(
+        "-r", "--retries", type=int, default=3,
+        help="Number of push attempts on transient failures. Only "
+             "applies when --url is set.")
+    lims_group.add_argument(
+        "-d", "--delay", type=int, default=5,
+        help="Seconds between push retries. Only applies when "
+             "--url is set.")
+
     parser.add_argument(
         "-v", "--verbose", action="store_true",
         help="Verbose logging")
@@ -77,27 +89,81 @@ def build_arg_parser():
     return parser
 
 
-def build_pipeline(args):
+def validate_lims(url):
+    if not url:
+        return None
+    session = lims.Session(url)
+    logger.info("Checking connection to SENAITE ...")
+    try:
+        session.auth()
+    except lims.SenaiteError as exc:
+        logger.error("Could not connect to SENAITE: {}".format(exc))
+        raise SystemExit(-1)
+    return session
+
+
+def build_pipeline(args, session):
     handlers = []
     if args.output:
-        handlers.append(RawCaptureHandler(os.path.abspath(args.output)))
+        handlers.append(DiskCaptureHandler(
+            os.path.abspath(args.output),
+            payload=_hl7_payload,
+            ext=".hl7"))
+    if session is not None:
+        handlers.append(LimsPushHandler(
+            session,
+            retries=args.retries,
+            delay=args.delay,
+            consumer=args.consumer,
+            message_format=args.message_format,
+        ))
     return Pipeline(handlers)
+
+
+def make_frame_callback(loop, pipeline, task_set):
+    """Build the protocol callback that turns raw HL7 bytes into a
+    pipeline run.
+
+    The transport hands us bytes already stripped of MLLP framing.
+    We parse them into an envelope and schedule a tracked task so
+    shutdown can wait for in-flight handlers.
+    """
+    def frame_callback(client, hl7_bytes):
+        task = loop.create_task(
+            _process(client, hl7_bytes, pipeline))
+        task_set.add(task)
+        task.add_done_callback(task_set.discard)
+    return frame_callback
+
+
+async def _process(client, hl7_bytes, pipeline):
+    try:
+        envelope = parse_hl7(hl7_bytes)
+    except Exception as exc:
+        logger.error(
+            "Failed to parse HL7 message from %s: %r", client, exc)
+        return
+    await pipeline.run(envelope)
 
 
 async def amain(args, stop_event=None):
     loop = asyncio.get_running_loop()
     task_set = set()
-    pipeline = build_pipeline(args)
-    dispatch = _runtime.make_tracked_dispatcher(loop, pipeline, task_set)
+    pipeline = build_pipeline(args, args.session)
+    frame_callback = make_frame_callback(loop, pipeline, task_set)
 
     server = await loop.create_server(
-        lambda: HL7Protocol(frame_callback=dispatch),
+        lambda: HL7Protocol(frame_callback=frame_callback),
         host=args.listen, port=args.port)
 
     for socket in server.sockets:
         ip, port = socket.getsockname()
         logger.info("Starting HL7 server on {}:{}".format(ip, port))
-    logger.info("HL7 server ready to handle connections ...")
+    if args.session is None:
+        logger.info(
+            "HL7 server ready (capture-only; no --url configured)")
+    else:
+        logger.info("HL7 server ready to handle connections ...")
 
     if stop_event is None:
         stop_event = asyncio.Event()
@@ -119,6 +185,7 @@ def main():
 
     _runtime.configure_logging(args)
     _runtime.validate_output(args.output)
+    args.session = validate_lims(args.url)
 
     try:
         asyncio.run(amain(args))

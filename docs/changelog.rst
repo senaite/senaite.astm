@@ -5,6 +5,16 @@ Changelog
 1.0.0 (unreleased)
 ------------------
 
+- #37 HL7 v2 parser, envelope mapping, and LIMS push wiring for
+  the HL7 transport (PR-7). New ``transports/hl7/parser.py`` maps
+  MSH/PID/OBR/OBX/NTE into the existing Envelope buckets
+  H/P/O/R/C. ``Metadata`` gains a ``hl7`` field; ``astm`` and
+  ``lis2a`` are now soft-defaulted so HL7 envelopes validate.
+  ``ENVELOPE_VERSION`` bumped to ``1.1`` (additive; consumers that
+  pin to ``1.0`` keep working). ``serialize_envelope`` learns the
+  ``"hl7"`` format. ``DiskCaptureHandler`` gains a ``payload=``
+  extractor so the HL7 CLI writes ``metadata.hl7``. New ``hl7``
+  PyPI dependency.
 - #36 HL7-over-MLLP transport, passthrough only (PR-6 for the
   HemoScreen integration). Adds ``senaite-hl7-server`` (default
   port 2575) and ``senaite-hl7-simulator``. Captures each received

@@ -167,42 +167,36 @@ class HL7ServerTest(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.received, [first, second])
 
 
-class RawCaptureHandlerTest(unittest.IsolatedAsyncioTestCase):
-
-    async def test_writes_one_file_per_payload(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            handler = hl7_server.RawCaptureHandler(tmp)
-            await handler(b"first payload")
-            await asyncio.sleep(1.05)
-            await handler(b"second payload")
-            files = sorted(os.listdir(tmp))
-            self.assertEqual(len(files), 2)
-            for name in files:
-                self.assertTrue(name.endswith(".hl7"))
-
-    async def test_noop_when_path_empty(self):
-        handler = hl7_server.RawCaptureHandler(path=None)
-        # Must not raise and must not create anything.
-        await handler(b"payload")
-
-
 class CLIBuildPipelineTest(unittest.TestCase):
+    """``cli.hl7_server.build_pipeline`` now consumes parsed envelopes.
 
-    def test_no_output_means_empty_pipeline(self):
-        class _Args(object):
-            output = None
+    Without ``--url`` (no session) the pipeline only carries a disk
+    capture handler. The implicit ``$CWD/astm_messages`` magic was
+    already gone in PR-H and stays gone here too.
+    """
 
-        pipeline = hl7_server.build_pipeline(_Args())
+    def _args(self, **overrides):
+        defaults = dict(
+            output=None,
+            retries=1,
+            delay=0,
+            consumer="x",
+            message_format="json",
+        )
+        defaults.update(overrides)
+        return type("_Args", (object,), defaults)()
+
+    def test_no_output_no_session_means_empty_pipeline(self):
+        pipeline = hl7_server.build_pipeline(self._args(), session=None)
         self.assertEqual(len(pipeline), 0)
 
-    def test_with_output_adds_raw_capture(self):
+    def test_with_output_adds_disk_capture(self):
         with tempfile.TemporaryDirectory() as tmp:
-            class _Args(object):
-                output = tmp
-
-            pipeline = hl7_server.build_pipeline(_Args())
+            pipeline = hl7_server.build_pipeline(
+                self._args(output=tmp), session=None)
             self.assertEqual(len(pipeline), 1)
-            self.assertEqual(pipeline.handlers[0].name, "raw_capture")
+            self.assertEqual(pipeline.handlers[0].name, "disk_capture")
+            self.assertEqual(pipeline.handlers[0].ext, ".hl7")
 
 
 if __name__ == "__main__":

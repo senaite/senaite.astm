@@ -18,24 +18,39 @@ import asyncio
 from senaite.astm.utils import write_message
 
 
+def _default_payload(envelope):
+    """Default extractor: the raw ASTM payload from ``metadata.astm``."""
+    return envelope.metadata.astm or ""
+
+
 class DiskCaptureHandler(object):
-    """Persist the raw ASTM payload of every envelope to disk.
+    """Persist a per-envelope payload to disk.
 
     :param path: Target directory. May not yet exist; it will be
         created on first write. ``None`` or an empty string makes the
         handler a no-op (used by the CLI when ``--output`` is not set).
+    :param payload: Callable that extracts the bytes / string to
+        write from an envelope. Defaults to
+        :attr:`Envelope.metadata.astm` so the ASTM CLI keeps its
+        historical behaviour; the HL7 CLI passes a lambda for
+        :attr:`Envelope.metadata.hl7`.
+    :param ext: File extension. Defaults to ``.txt`` to keep existing
+        ASTM captures intact; HL7 callers typically pass ``.hl7``.
 
-    Each invocation writes one timestamped file containing the raw
-    ASTM bytes carried in :attr:`Envelope.metadata.astm`.
+    Each invocation writes one timestamped file containing the value
+    returned by ``payload(envelope)``.
     """
 
     name = "disk_capture"
 
-    def __init__(self, path):
+    def __init__(self, path, payload=_default_payload, ext=".txt"):
         self.path = path
+        self.payload = payload
+        self.ext = ext
 
     async def __call__(self, envelope):
         if not self.path:
             return
-        message = envelope.metadata.astm or ""
-        await asyncio.to_thread(write_message, message, self.path)
+        message = self.payload(envelope) or ""
+        await asyncio.to_thread(write_message, message, self.path,
+                                ext=self.ext)
