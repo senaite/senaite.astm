@@ -8,7 +8,7 @@ from senaite.astm.constants import CRLF
 from senaite.astm.constants import ENQ
 from senaite.astm.constants import EOT
 from senaite.astm.constants import NAK
-from senaite.astm.protocol import ASTMProtocol
+from senaite.astm.transports.astm.protocol import ASTMProtocol
 from senaite.astm.tests.base import ASTMTestBase
 
 

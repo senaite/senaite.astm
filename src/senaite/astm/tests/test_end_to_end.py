@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""End-to-end smoke test: client → ASTM server → queue → message.
+"""End-to-end smoke test: client → ASTM server → pipeline → handler.
 
 Locks the full pipeline in one place so a refactor that moves
-codec, protocol, wrapper, or queueing around cannot silently change
+codec, protocol, wrapper, or pipeline around cannot silently change
 the payload downstream consumers receive. Per-format checks live
 here; per-instrument record details live in the instrument-specific
 tests.
@@ -15,8 +15,10 @@ from senaite.astm import logger
 from senaite.astm.constants import ACK
 from senaite.astm.constants import ENQ
 from senaite.astm.constants import EOT
-from senaite.astm.protocol import ASTMProtocol
+from senaite.astm.core.handlers import serialize_envelope
 from senaite.astm.tests.base import ASTMTestBase
+from senaite.astm.transports.astm.protocol import ASTMProtocol
+from senaite.astm.wrapper import Wrapper
 
 
 async def send_session(test_case, port, fixture_name):
@@ -42,21 +44,37 @@ async def send_session(test_case, port, fixture_name):
     await writer.wait_closed()
 
 
-class EndToEndTest(ASTMTestBase):
-    """Full-pipeline smoke test against a representative fixture."""
+def make_serializing_callback(loop, queue, message_format):
+    """Build a frame_callback that wraps + serialises + enqueues.
 
-    PORT = 7981
+    Mirrors the wiring in :mod:`senaite.astm.cli.astm_server` so the
+    end-to-end test exercises the same path as the production server
+    without taking a dependency on the CLI module.
+    """
+    def callback(client, frames):
+        envelope = Wrapper(frames).to_envelope()
+        payload = serialize_envelope(envelope, message_format)
+        if message_format == "json":
+            payload = payload.encode()
+        loop.call_soon_threadsafe(queue.put_nowait, payload)
+    return callback
+
+
+class _FormatTestBase(ASTMTestBase):
+    """Shared scaffolding for the per-format end-to-end tests."""
+
+    PORT = None
+    MESSAGE_FORMAT = None
 
     async def asyncSetUp(self):
-        logger.info("\n------------> asyncSetUp e2e")
+        logger.info("\n------------> asyncSetUp e2e (%s)",
+                    self.MESSAGE_FORMAT)
         self.queue = asyncio.Queue()
-
         self.loop = asyncio.get_event_loop()
+        callback = make_serializing_callback(
+            self.loop, self.queue, self.MESSAGE_FORMAT)
         self.server = await self.loop.create_server(
-            lambda: ASTMProtocol(
-                queue=self.queue,
-                timeout=15,
-                message_format="json"),
+            lambda: ASTMProtocol(frame_callback=callback, timeout=15),
             host=self.HOST,
             port=self.PORT)
 
@@ -65,17 +83,17 @@ class EndToEndTest(ASTMTestBase):
         await self.server.wait_closed()
 
     async def send_fixture(self, filename):
-        """ENQ → data frames → EOT → close.
-
-        The inherited ``communicate`` omits the trailing EOT, so the
-        protocol never leaves transfer state and never pushes onto
-        the queue. Queue-based assertions need the full session.
-        """
         await send_session(self, self.PORT, filename)
 
     async def collect_one(self, timeout=2.0):
-        """Pull a single envelope off the queue, with a short bound."""
         return await asyncio.wait_for(self.queue.get(), timeout=timeout)
+
+
+class EndToEndTest(_FormatTestBase):
+    """Full-pipeline smoke test against a representative fixture."""
+
+    PORT = 7981
+    MESSAGE_FORMAT = "json"
 
     async def test_json_envelope_reaches_queue(self):
         """A captured Cobas C111 transcript flows through the server,
@@ -112,60 +130,32 @@ class EndToEndTest(ASTMTestBase):
         self.assertTrue(self.queue.empty())
 
 
-class LIS2AFormatTest(ASTMTestBase):
-    """The default message format ("lis2a") emits the LIS2-A
-    flat string, not the JSON envelope. Lock the format down so a
-    refactor cannot silently change the wire shape consumers see."""
+class LIS2AFormatTest(_FormatTestBase):
+    """The "lis2a" format emits the LIS2-A flat string, not the JSON
+    envelope. Lock the format down so a refactor cannot silently
+    change the wire shape consumers see."""
 
     PORT = 7982
-
-    async def asyncSetUp(self):
-        self.queue = asyncio.Queue()
-        self.loop = asyncio.get_event_loop()
-        self.server = await self.loop.create_server(
-            lambda: ASTMProtocol(
-                queue=self.queue,
-                timeout=15,
-                message_format="lis2a"),
-            host=self.HOST,
-            port=self.PORT)
-
-    async def asyncTearDown(self):
-        self.server.close()
-        await self.server.wait_closed()
+    MESSAGE_FORMAT = "lis2a"
 
     async def test_lis2a_payload_is_text(self):
-        await send_session(self, self.PORT, "cobas_c111.txt")
-        payload = await asyncio.wait_for(self.queue.get(), timeout=2.0)
+        await self.send_fixture("cobas_c111.txt")
+        payload = await self.collect_one()
         # lis2a payload is a decoded string, not bytes
         self.assertIsInstance(payload, str)
         # Must contain the H record marker
         self.assertIn("H|", payload)
 
 
-class ASTMFormatTest(ASTMTestBase):
+class ASTMFormatTest(_FormatTestBase):
     """The "astm" format emits the original framed payload as text."""
 
     PORT = 7983
-
-    async def asyncSetUp(self):
-        self.queue = asyncio.Queue()
-        self.loop = asyncio.get_event_loop()
-        self.server = await self.loop.create_server(
-            lambda: ASTMProtocol(
-                queue=self.queue,
-                timeout=15,
-                message_format="astm"),
-            host=self.HOST,
-            port=self.PORT)
-
-    async def asyncTearDown(self):
-        self.server.close()
-        await self.server.wait_closed()
+    MESSAGE_FORMAT = "astm"
 
     async def test_astm_payload_is_text(self):
-        await send_session(self, self.PORT, "cobas_c111.txt")
-        payload = await asyncio.wait_for(self.queue.get(), timeout=2.0)
+        await self.send_fixture("cobas_c111.txt")
+        payload = await self.collect_one()
         self.assertIsInstance(payload, str)
         # ASTM payload preserves STX framing
         self.assertIn("\x02", payload)

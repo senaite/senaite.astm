@@ -8,7 +8,7 @@ from senaite.astm import codec
 from senaite.astm.constants import ACK
 from senaite.astm.constants import ENQ
 from senaite.astm.instruments import horiba_yumizen_h5xx
-from senaite.astm.protocol import ASTMProtocol
+from senaite.astm.transports.astm.protocol import ASTMProtocol
 from senaite.astm.tests.base import ASTMTestBase
 from senaite.astm.wrapper import Wrapper
 
