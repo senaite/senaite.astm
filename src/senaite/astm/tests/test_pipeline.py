@@ -13,7 +13,6 @@ future archivers). The contract under test:
   when one is set, falling back to ``__name__`` / ``__class__``
 """
 
-import asyncio
 import unittest
 
 from senaite.astm.core.pipeline import Pipeline
