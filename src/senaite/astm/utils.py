@@ -30,8 +30,14 @@ def f(s, e="utf-8", **kw):
                        CRLF=u(CRLF), **kw).encode(e)
 
 
-def write_message(message, path, dateformat="%Y-%m-%d_%H:%M:%S", ext=".txt"):
+def write_message(message, path, dateformat="%Y-%m-%d_%H:%M:%S.%f",
+                  ext=".txt"):
     """Write ASTM Message to file
+
+    The default ``dateformat`` includes microseconds so two messages
+    that arrive within the same second do not silently overwrite
+    each other on disk. The HemoScreen HL7 instrument, for example,
+    pushes its OBS/LQC/PRF triplet within a few hundred milliseconds.
     """
     path = Path(path)
     if not path.exists():
