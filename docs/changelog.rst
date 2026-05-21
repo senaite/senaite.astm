@@ -2,41 +2,26 @@ Changelog
 =========
 
 
-1.0.0 (unreleased)
-------------------
+2.0.0
+-----
 
-- #38 Capture filename uses microsecond precision so messages
-  arriving within the same wall-clock second no longer overwrite
-  each other on disk. Observed on the HemoScreen HL7 instrument,
-  which sends its OBS/LQC/PRF triplet within ~200 ms.
-- #37 HL7 v2 parser, envelope mapping, and LIMS push wiring for
-  the HL7 transport (PR-7). New ``transports/hl7/parser.py`` maps
-  MSH/PID/OBR/OBX/NTE into the existing Envelope buckets
-  H/P/O/R/C. ``Metadata`` gains a ``hl7`` field; ``astm`` and
-  ``lis2a`` are now soft-defaulted so HL7 envelopes validate.
-  ``ENVELOPE_VERSION`` bumped to ``1.1`` (additive; consumers that
-  pin to ``1.0`` keep working). ``serialize_envelope`` learns the
-  ``"hl7"`` format. ``DiskCaptureHandler`` gains a ``payload=``
-  extractor so the HL7 CLI writes ``metadata.hl7``. New ``hl7``
-  PyPI dependency.
-- #36 HL7-over-MLLP transport, passthrough only (PR-6 for the
-  HemoScreen integration). Adds ``senaite-hl7-server`` (default
-  port 2575) and ``senaite-hl7-simulator``. Captures each received
-  HL7 v2 message to ``--output`` and responds with a comm-level
-  ACK^R01. No parsing-to-envelope, no LIMS push (deferred to PR-7).
-- #35 Disk capture is a first-class pipeline handler (PR-H).
-  **Migration note:** the implicit ``$CWD/astm_messages/``
-  directory is no longer auto-discovered. Pass ``--output <path>``
-  explicitly to enable raw-message capture.
-- #34 Server hardening: async main, sane log rotation, graceful
-  shutdown of in-flight pipeline tasks (PR-G)
+- #38 Use microsecond precision in capture filenames
+- #37 HL7 v2 parser, envelope mapping, LIMS push wiring (PR-7)
+- #36 HL7-over-MLLP transport, passthrough (PR-6, HemoScreen)
+- #35 Disk capture is a first-class pipeline handler (PR-H)
+- #34 Server hardening: async main, sane log rotation, graceful shutdown (PR-G)
 - #33 Split transport from protocol semantics (PR-F)
 - #31 Migrate every instrument to the registry (PR-E2)
 - #30 Introduce the instrument registry (PR-E1)
-- #29 Make field descriptors quiet and tolerant (PR-D)
-- #28 Define a typed Envelope schema for Wrapper.to_dict() (PR-C)
-- #27 Lift LIMS push into core/ with typed errors and PushResult (PR-B)
-- #26 Drop Python 2 compatibility shims (PR-A)
+- #29 Make field descriptors quiet and tolerant
+- #28 Define a typed Envelope schema for Wrapper.to_dict()
+- #27 Lift LIMS push into core/ with typed errors and PushResult
+- #26 Drop Python 2 compatibility shims
+
+
+1.0.0
+-----
+
 - #25 Add test scaffold for the ASTM pipeline
 - #23 Add Cepheid GeneXpert import schema
 - #22 Add Horiba Pentra XLR import schema
