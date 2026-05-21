@@ -5,6 +5,10 @@ Changelog
 1.0.0 (unreleased)
 ------------------
 
+- #38 Capture filename uses microsecond precision so messages
+  arriving within the same wall-clock second no longer overwrite
+  each other on disk. Observed on the HemoScreen HL7 instrument,
+  which sends its OBS/LQC/PRF triplet within ~200 ms.
 - #37 HL7 v2 parser, envelope mapping, and LIMS push wiring for
   the HL7 transport (PR-7). New ``transports/hl7/parser.py`` maps
   MSH/PID/OBR/OBX/NTE into the existing Envelope buckets
