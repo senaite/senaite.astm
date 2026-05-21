@@ -16,8 +16,6 @@ import json
 import os
 import unittest
 
-from pydantic import ValidationError
-
 from senaite.astm.core.envelope import ENVELOPE_VERSION
 from senaite.astm.core.envelope import Envelope
 
@@ -77,9 +75,15 @@ class EnvelopeDefaultsTest(unittest.TestCase):
         self.assertEqual(dumped["metadata"]["instrument_type"], "c111")
         self.assertEqual(dumped["metadata"]["vendor"], "Roche")
 
-    def test_metadata_requires_astm_and_lis2a(self):
-        with self.assertRaises(ValidationError):
-            Envelope(metadata={})
+    def test_metadata_raw_fields_default_to_empty_string(self):
+        # Pre-1.1 the astm/lis2a fields were required; from 1.1
+        # onward each transport populates only its native raw and
+        # the others default to "". Consumers may still ``.get()``
+        # them safely.
+        envelope = Envelope(metadata={})
+        self.assertEqual(envelope.metadata.astm, "")
+        self.assertEqual(envelope.metadata.lis2a, "")
+        self.assertEqual(envelope.metadata.hl7, "")
 
     def test_envelope_version_is_overridable(self):
         """Future schema bumps must keep older snapshots loadable
