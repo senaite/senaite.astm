@@ -5,6 +5,7 @@ Changelog
 2.0.0
 -----
 
+- #47 HL7 parser: preserve unmapped segments under metadata.unmapped_segments
 - #42 Wrapper: drop duplicate get_mapping call and chain ValueError with 'from exc'
 - #41 Document the HL7-over-MLLP transport and envelope bucket mapping
 - #38 Use microsecond precision in capture filenames
