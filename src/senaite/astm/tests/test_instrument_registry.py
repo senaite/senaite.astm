@@ -99,14 +99,17 @@ class InstrumentRegistryTest(unittest.TestCase):
         self.assertIsNotNone(find_raw_data_handler(b"\x02DELTA-payload"))
         self.assertIsNone(find_raw_data_handler(b"unrelated"))
 
-    def test_metadata_defaults_to_empty(self):
+    def test_metadata_defaults_expose_version_and_header_rx(self):
         @self._register
         class FakeEpsilon(Instrument):
             name = "test:epsilon"
             header_regex = re.compile(rb".*Epsilon\^")
             record_map = _make_record_map()
 
-        self.assertEqual(FakeEpsilon().get_metadata(wrapper=None), {})
+        self.assertEqual(
+            FakeEpsilon().get_metadata(wrapper=None),
+            {"version": "1.0.0", "header_rx": ".*Epsilon\\^"},
+        )
 
     def test_registration_validates_required_attributes(self):
         class Missing(Instrument):

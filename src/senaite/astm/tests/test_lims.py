@@ -77,7 +77,8 @@ class SessionAuthTest(unittest.TestCase):
     @responses.activate
     def test_auth_happy_path(self):
         auth_ok()
-        self.assertTrue(Session(URL).auth())
+        # auth() returns None on success and raises on failure.
+        self.assertIsNone(Session(URL).auth())
 
     @responses.activate
     def test_auth_raises_when_jsonapi_missing(self):

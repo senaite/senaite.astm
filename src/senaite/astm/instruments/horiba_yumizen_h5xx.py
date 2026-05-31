@@ -131,6 +131,7 @@ class TerminatorRecord(records.TerminatorRecord):
 class HoribaYumizenH5xx(Instrument):
     name = "horiba_yumizen_h5xx"
     header_regex = HEADER_RX
+    version = VERSION
     record_map = {
         "H": HeaderRecord,
         "P": PatientRecord,
@@ -141,10 +142,6 @@ class HoribaYumizenH5xx(Instrument):
         "M": ManufacturerInfoRecord,
         "L": TerminatorRecord,
     }
-
-    def get_metadata(self, wrapper):
-        return {"version": VERSION,
-                "header_rx": HEADER_RX.pattern.decode()}
 
 
 INSTRUMENT = HoribaYumizenH5xx()
