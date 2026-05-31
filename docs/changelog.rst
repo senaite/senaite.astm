@@ -5,6 +5,7 @@ Changelog
 2.0.0
 -----
 
+- #49 Lift validate_lims, frame_callback dispatch, and LIMS arg group into _runtime
 - #42 Wrapper: drop duplicate get_mapping call and chain ValueError with 'from exc'
 - #41 Document the HL7-over-MLLP transport and envelope bucket mapping
 - #38 Use microsecond precision in capture filenames
