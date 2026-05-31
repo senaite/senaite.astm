@@ -4,12 +4,10 @@ import re
 from datetime import datetime
 
 from senaite.astm import records
-from senaite.astm import utils
-from senaite.astm.constants import ENQ
-from senaite.astm.constants import EOT
 from senaite.astm.constants import NAK
 from senaite.astm.core.instrument import Instrument
 from senaite.astm.core.instrument import register_instrument
+from senaite.astm.transports.astm.synthesizer import synthesize_session
 from senaite.astm.fields import ComponentField, DateField
 from senaite.astm.fields import DateTimeField
 from senaite.astm.fields import TextField
@@ -120,13 +118,11 @@ class BiomerieuxMiniVidas(Instrument):
 
     def handle_raw_data(self, protocol, data):
         """Synthesise a complete ASTM session from a single non-ASTM
-        packet emitted by the miniVidas. Drives ``protocol`` directly.
+        packet emitted by the miniVidas.
         """
         parts = re.match(RAW_DATA_RX, data)
         if not parts:
             return NAK
-        if not protocol.in_transfer_state:
-            protocol.on_enq(ENQ)
 
         values = {k: (u(v) if v else "")
                   for k, v in parts.groupdict().items()}
@@ -148,14 +144,7 @@ class BiomerieuxMiniVidas(Instrument):
                 **values),
             fmt("5L|1|N{CR}{ETX}"),
         ]
-        messages = []
-        for frame in frames:
-            cs = utils.make_checksum(frame)
-            messages.append(
-                fmt("{STX}{frame}{cs}{CRLF}", frame=u(frame), cs=u(cs)))
-
-        protocol.messages = messages
-        protocol.on_eot(EOT)
+        synthesize_session(protocol, frames)
         return None
 
 

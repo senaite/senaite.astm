@@ -5,6 +5,7 @@ Changelog
 2.0.0
 -----
 
+- #48 Synthetic ASTM adapters: extract framing dance into synthesize_session helper
 - #42 Wrapper: drop duplicate get_mapping call and chain ValueError with 'from exc'
 - #41 Document the HL7-over-MLLP transport and envelope bucket mapping
 - #38 Use microsecond precision in capture filenames
