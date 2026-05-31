@@ -65,8 +65,6 @@ class Wrapper(object):
         See :mod:`senaite.astm.core.envelope` for the schema and
         the contract guarantees.
         """
-        mapping = self.get_mapping(self.messages)
-
         metadata_extras = {
             "astm": self.to_astm(),
             "lis2a": self.to_lis2a(),
@@ -77,13 +75,13 @@ class Wrapper(object):
         for message in self.messages:
             for record in codec.decode(message):
                 rtype = record[0]
-                if rtype not in mapping:
+                if rtype not in self.mapping:
                     continue
                 try:
-                    wrapped = mapping[rtype](*record)
+                    wrapped = self.mapping[rtype](*record)
                 except ValueError as exc:
-                    raise ValueError("Could not wrap '%s' record! (%s)"
-                                     % (rtype, str(exc)))
+                    raise ValueError(
+                        "Could not wrap '%s' record" % rtype) from exc
                 buckets[rtype].append(wrapped.to_dict())
 
         return Envelope(
