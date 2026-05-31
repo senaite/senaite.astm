@@ -109,6 +109,62 @@ class PipelineTest(unittest.IsolatedAsyncioTestCase):
         pipeline.add(h)
         self.assertEqual(len(pipeline), 1)
 
+    async def test_dead_letter_called_when_handler_fails(self):
+        seen = []
+
+        async def boom(env):
+            raise RuntimeError("nope")
+
+        async def dl(env, name, exc):
+            seen.append((env, name, type(exc)))
+
+        pipeline = Pipeline(handlers=[boom], dead_letter=dl)
+        await pipeline.run("env-1")
+        self.assertEqual(seen, [("env-1", "boom", RuntimeError)])
+
+    async def test_dead_letter_not_called_when_handler_succeeds(self):
+        seen = []
+
+        async def ok(env):
+            pass
+
+        async def dl(env, name, exc):
+            seen.append(name)
+
+        pipeline = Pipeline(handlers=[ok], dead_letter=dl)
+        await pipeline.run("env-1")
+        self.assertEqual(seen, [])
+
+    async def test_dead_letter_exception_does_not_break_pipeline(self):
+        async def boom(env):
+            raise RuntimeError("nope")
+
+        async def broken_dl(env, name, exc):
+            raise ValueError("dead letter is itself broken")
+
+        async def later(env):
+            pass
+
+        pipeline = Pipeline(
+            handlers=[boom, later], dead_letter=broken_dl)
+        results = await pipeline.run("env-1")
+        self.assertEqual(results[0][0], "boom")
+        self.assertIsInstance(results[0][1], RuntimeError)
+        self.assertEqual(results[1], ("later", None))
+
+    async def test_sync_dead_letter_is_supported(self):
+        seen = []
+
+        async def boom(env):
+            raise RuntimeError("nope")
+
+        def dl(env, name, exc):
+            seen.append(name)
+
+        pipeline = Pipeline(handlers=[boom], dead_letter=dl)
+        await pipeline.run("env-1")
+        self.assertEqual(seen, ["boom"])
+
 
 class HandlersTest(unittest.IsolatedAsyncioTestCase):
 
