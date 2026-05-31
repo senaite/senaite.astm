@@ -148,6 +148,7 @@ class TerminatorRecord(records.TerminatorRecord):
 class SysmexXP(Instrument):
     name = "sysmex_xp"
     header_regex = HEADER_RX
+    version = VERSION
     record_map = {
         "H": HeaderRecord,
         "P": PatientRecord,
@@ -158,10 +159,6 @@ class SysmexXP(Instrument):
         "M": ManufacturerInfoRecord,
         "L": TerminatorRecord,
     }
-
-    def get_metadata(self, wrapper):
-        return {"version": VERSION,
-                "header_rx": HEADER_RX.pattern.decode()}
 
 
 INSTRUMENT = SysmexXP()
