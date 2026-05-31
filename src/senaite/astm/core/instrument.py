@@ -46,6 +46,10 @@ class Instrument(object):
     name = None
     header_regex = None
     record_map = None
+    #: Schema version of the per-instrument record map. Bump in the
+    #: subclass when the record layout changes in a way consumers
+    #: must adapt to.
+    version = "1.0.0"
     #: Optional bytes regex used by :func:`find_raw_data_handler`
     #: to dispatch non-ASTM transport packets to this instrument
     #: before the standard ENQ/STX/EOT state machine sees them.
@@ -86,11 +90,17 @@ class Instrument(object):
         return None
 
     def get_metadata(self, wrapper):
-        """Optional per-instrument metadata merged into the envelope.
+        """Per-instrument metadata merged into the envelope.
 
-        Default returns an empty dict.
+        Default exposes the schema :attr:`version` and the
+        :attr:`header_regex` pattern. Override to add vendor-specific
+        keys; call ``super().get_metadata(wrapper)`` first to keep
+        the defaults.
         """
-        return {}
+        pattern = self.header_regex.pattern
+        if isinstance(pattern, bytes):
+            pattern = pattern.decode()
+        return {"version": self.version, "header_rx": pattern}
 
 
 def register_instrument(cls):
