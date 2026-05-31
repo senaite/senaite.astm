@@ -5,8 +5,8 @@ Changelog
 2.0.0
 -----
 
-- Wrapper: drop duplicate get_mapping call and chain ValueError with 'from exc'
-- Document the HL7-over-MLLP transport and envelope bucket mapping
+- #42 Wrapper: drop duplicate get_mapping call and chain ValueError with 'from exc'
+- #41 Document the HL7-over-MLLP transport and envelope bucket mapping
 - #38 Use microsecond precision in capture filenames
 - #37 HL7 v2 parser, envelope mapping, LIMS push wiring (PR-7)
 - #36 HL7-over-MLLP transport, passthrough (PR-6, HemoScreen)
