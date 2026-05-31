@@ -92,6 +92,61 @@ Send data to the server:
     Done
 
 
+## HL7-over-MLLP transport
+
+Some instruments (e.g. PixCell HemoScreen) speak HL7 v2 over MLLP
+instead of ASTM. The `senaite-hl7-server` script listens on the
+IANA-registered HL7 port and turns each received message into the
+same envelope shape the ASTM transport produces, so a single
+downstream consumer can handle both:
+
+    $ senaite-hl7-server --help
+
+    usage: senaite-hl7-server [-h] [-l LISTEN] [-p PORT] [-o OUTPUT] [-u URL]
+                              [-c CONSUMER] [-m MESSAGE_FORMAT] [-r RETRIES]
+                              [-d DELAY] [-v] [--logfile LOGFILE]
+
+    HL7 SERVER:
+      -l LISTEN             Listen IP address (default: 0.0.0.0)
+      -p PORT               Port to listen on (default: 2575)
+      -o OUTPUT             Output directory to write captured HL7 messages
+
+    SENAITE LIMS:
+      -u URL                SENAITE URL with credentials. Without --url the
+                            server runs in capture-only mode.
+      -c CONSUMER           SENAITE push consumer interface
+                            (default: senaite.core.hl7.import)
+      -m MESSAGE_FORMAT     Format sent to SENAITE: "json" or "hl7"
+                            (default: json)
+
+Without `--url` the server runs capture-only: every message is
+ACKed at the MLLP level and written to `--output` if set, but
+nothing is pushed to a LIMS.
+
+### Envelope mapping
+
+HL7 segments are routed into the same buckets the ASTM parser
+produces, so consumers can ignore the transport:
+
+| HL7 segment | Envelope bucket |
+| ----------- | --------------- |
+| MSH         | H               |
+| PID         | P               |
+| OBR         | O               |
+| OBX         | R               |
+| NTE         | C               |
+
+Within each bucket, fields are keyed by their HL7 field number as a
+string. For example, MSH-9 (message type) is available as
+`envelope.H[0]["9"]`, OBX-3 (observation identifier) as
+`envelope.R[i]["3"]`. The original HL7 text is preserved verbatim
+in `envelope.metadata.hl7` so capture and "push the original bytes"
+flows keep working.
+
+Worked fixtures live under `src/senaite/astm/tests/data/hl7/` and
+are exercised by `tests/test_hl7_parser.py`.
+
+
 ## Custom push consumer
 
 A push consumer is registered as an adapter in `configure.zcml`:
