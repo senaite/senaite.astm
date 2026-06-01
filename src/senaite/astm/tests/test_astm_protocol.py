@@ -85,3 +85,34 @@ class ASTMProtocolTest(ASTMTestBase):
 
         # Protocol should be no longer in transfer state
         self.assertFalse(self.protocol.in_transfer_state)
+
+    def test_empty_session_disconnect_logs_at_debug(self):
+        """A TCP probe (connect + close, no data) must not fire a
+        WARNING — it's routine noise from Zabbix / load balancers."""
+        transport = self.get_mock_transport()
+        self.protocol.connection_made(transport)
+
+        with self.assertLogs("senaite.astm", level="DEBUG") as cm:
+            self.protocol.connection_lost(None)
+
+        levels = [r.levelname for r in cm.records]
+        messages = [r.getMessage() for r in cm.records]
+        self.assertNotIn("WARNING", levels)
+        self.assertTrue(
+            any("without data" in m for m in messages),
+            "expected an empty-session debug line, got %r" % messages,
+        )
+
+    def test_mid_session_disconnect_logs_at_warning(self):
+        """A real session cut mid-message stays at WARNING so it
+        remains visible in operational logs."""
+        transport = self.get_mock_transport()
+        self.protocol.connection_made(transport)
+        # Simulate a partial session: ENQ received, frames buffered.
+        self.protocol.in_transfer_state = True
+        self.protocol.messages = [b"1H|"]
+
+        with self.assertLogs("senaite.astm", level="DEBUG") as cm:
+            self.protocol.connection_lost(None)
+
+        self.assertIn("WARNING", [r.levelname for r in cm.records])

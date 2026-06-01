@@ -62,6 +62,31 @@ class BuildAckTest(unittest.TestCase):
         self.assertIn(b"MSA|AA|", ack)
 
 
+class HL7ConnectionLostTest(unittest.TestCase):
+    """Empty-buffer disconnects (TCP probes) must not log WARNING."""
+
+    def _make_protocol(self):
+        proto = HL7Protocol()
+        proto.client = "127.0.0.1:54321"
+        return proto
+
+    def test_empty_buffer_disconnect_logs_at_debug(self):
+        proto = self._make_protocol()
+        with self.assertLogs("senaite.astm", level="DEBUG") as cm:
+            proto.connection_lost(None)
+        self.assertNotIn(
+            "WARNING", [r.levelname for r in cm.records])
+        self.assertTrue(
+            any("without data" in r.getMessage() for r in cm.records))
+
+    def test_buffered_data_disconnect_logs_at_warning(self):
+        proto = self._make_protocol()
+        proto.buffer = b"MSH|^~\\&|partial"
+        with self.assertLogs("senaite.astm", level="DEBUG") as cm:
+            proto.connection_lost(None)
+        self.assertIn("WARNING", [r.levelname for r in cm.records])
+
+
 class HL7ServerTest(unittest.IsolatedAsyncioTestCase):
 
     PORT = 7985
