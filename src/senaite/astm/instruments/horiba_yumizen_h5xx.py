@@ -129,11 +129,11 @@ class RequestInformationRecord(records.RequestInformationRecord):
 #
 # The slot semantics depend on the `kind` tag in M-3:
 #
-#   M-3 kind     M-4         M-5            M-6                 M-7
-#   ---------    --------    -----------    ----------------    ----------------
-#   HISTOGRAM    domain      stream         axis_x (stream)     axis_y (stream)
-#   MATRIX       domain      stream         axis_x (stream)     axis_y (stream)
-#   REAGENT      list        repeated cmps  (unused)            (unused)
+#   M-3 kind     M-4         M-5            M-6              M-7
+#   ---------    --------    -----------    --------------   --------------
+#   HISTOGRAM    domain      stream         axis_x (stream)  axis_y (stream)
+#   MATRIX       domain      stream         axis_x (stream)  axis_y (stream)
+#   REAGENT      list        repeated cmps  (unused)         (unused)
 #
 # `kind` is always a string tag. `domain` and `stream` may be plain
 # strings, backslash-separated lists, or repeated components — so
