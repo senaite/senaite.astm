@@ -102,15 +102,21 @@ def parse(raw):
             "Failed to parse HL7 message: {}".format(exc)) from exc
 
     buckets = {bucket: [] for bucket in SEGMENT_BUCKETS.values()}
+    unmapped = {}
     for segment in message:
         name = str(segment[0])
         bucket = SEGMENT_BUCKETS.get(name)
         if bucket is None:
-            # Unknown segment — preserve as a generic dict under its
-            # own key so consumers can still see it without us
-            # silently dropping data.
+            unmapped.setdefault(name, []).append(
+                _segment_to_dict(segment))
             continue
         buckets[bucket].append(_segment_to_dict(segment))
 
-    metadata = Metadata(hl7=text.rstrip("\r"))
+    metadata_kwargs = {"hl7": text.rstrip("\r")}
+    if unmapped:
+        # Metadata accepts extras (extra="allow"). Surface segments
+        # the bucket map doesn't know about so consumers can decide
+        # what to do with them instead of us silently dropping them.
+        metadata_kwargs["unmapped_segments"] = unmapped
+    metadata = Metadata(**metadata_kwargs)
     return Envelope(metadata=metadata, **buckets)

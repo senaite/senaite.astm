@@ -94,6 +94,7 @@ class TerminatorRecord(records.TerminatorRecord):
 class BiomerieuxMiniVidas(Instrument):
     name = "biomerieux_mini_vidas"
     header_regex = HEADER_RX
+    version = VERSION
     raw_data_regex = RAW_DATA_RX
     record_map = {
         "H": HeaderRecord,
@@ -102,10 +103,6 @@ class BiomerieuxMiniVidas(Instrument):
         "R": ResultRecord,
         "L": TerminatorRecord,
     }
-
-    def get_metadata(self, wrapper):
-        return {"version": VERSION,
-                "header_rx": HEADER_RX.pattern.decode()}
 
     def _to_timestamp(self, date, time):
         dt = datetime.now()

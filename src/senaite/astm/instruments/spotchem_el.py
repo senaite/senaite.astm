@@ -82,6 +82,7 @@ class TerminatorRecord(records.TerminatorRecord):
 class SpotchemEL(Instrument):
     name = "spotchem_el"
     header_regex = HEADER_RX
+    version = VERSION
     raw_data_regex = RAW_DATA_RX
     record_map = {
         "H": HeaderRecord,
@@ -89,10 +90,6 @@ class SpotchemEL(Instrument):
         "R": ResultRecord,
         "L": TerminatorRecord,
     }
-
-    def get_metadata(self, wrapper):
-        return {"version": VERSION,
-                "header_rx": HEADER_RX.pattern.decode()}
 
     def handle_raw_data(self, protocol, data):
         """Synthesise a complete ASTM session from a single non-ASTM

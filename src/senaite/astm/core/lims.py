@@ -60,7 +60,7 @@ class Session(object):
     connection rather than being repeated for every request.
     """
 
-    def __init__(self, url, **kw):
+    def __init__(self, url):
         auth = requests.utils.get_auth_from_url(url)
         self.username = auth[0]
         self.password = auth[1]
@@ -75,7 +75,6 @@ class Session(object):
     def auth(self):
         """Authenticate against SENAITE.
 
-        :returns: True on success.
         :raises SenaiteAuthError: when the JSON API is missing or the
             credentials are rejected.
         :raises SenaiteUnreachableError: when the host cannot be
@@ -95,7 +94,6 @@ class Session(object):
 
         logger.info("Session established ('{}') with '{}'"
                     .format(self.username, self.url))
-        return True
 
     def post(self, endpoint, payload):
         """Send a POST request to SENAITE.
@@ -143,7 +141,8 @@ class Session(object):
         return "{}/{}/{}".format(self.url, API_BASE_URL, endpoint)
 
 
-def post_to_senaite(messages, session, **kwargs):
+def post_to_senaite(messages, session, retries=DEFAULT_RETRIES,
+                    delay=DEFAULT_DELAY, consumer=DEFAULT_CONSUMER):
     """POST ASTM messages to SENAITE.
 
     Authenticates **once** per call. Retries on push failure only
@@ -151,10 +150,6 @@ def post_to_senaite(messages, session, **kwargs):
 
     :returns: A :class:`PushResult` describing the outcome.
     """
-    retries = kwargs.get("retries", DEFAULT_RETRIES)
-    delay = kwargs.get("delay", DEFAULT_DELAY)
-    consumer = kwargs.get("consumer", DEFAULT_CONSUMER)
-
     try:
         session.auth()
     except SenaiteError as exc:

@@ -181,6 +181,7 @@ class TerminatorRecord(records.TerminatorRecord):
 class AbbottAfinion2(Instrument):
     name = "abbott_afinion2"
     header_regex = HEADER_RX
+    version = VERSION
     record_map = {
         "H": HeaderRecord,
         "P": PatientRecord,
@@ -190,9 +191,6 @@ class AbbottAfinion2(Instrument):
         "M": ManufacturerInfoRecord,
         "L": TerminatorRecord,
     }
-
-    def get_metadata(self, wrapper):
-        return {"version": VERSION, "header_rx": HEADER_RX.pattern.decode()}
 
 
 INSTRUMENT = AbbottAfinion2()
