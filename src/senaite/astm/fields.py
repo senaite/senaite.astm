@@ -108,6 +108,60 @@ class TextField(Field):
         return super(TextField, self)._set_value(value)
 
 
+class PassthroughField(Field):
+    """Field that preserves the original value shape on set.
+
+    The default :class:`Field` stringifies any non-bytes value. That
+    is lossy for instruments whose M-record slots may hold a plain
+    string, a backslash-separated list, or a repeated component
+    structure depending on the row type (e.g. the Horiba Yumizen
+    sends HISTOGRAM, MATRIX and REAGENT records through the same
+    schema). Use this for slots whose type can't be pinned down
+    upfront.
+    """
+
+    def _set_value(self, value):
+        if isinstance(value, bytes):
+            value = value.decode("utf-8")
+        return value
+
+
+class EncodedStreamField(PassthroughField):
+    """Field whose value is a self-describing encoded numeric stream.
+
+    Decodes the `<DTYPE>-stream/<COMPRESSION>:<ENCODING>^<payload>`
+    payload at parse time and stores the decoded list of numeric
+    values. See :mod:`senaite.astm.encoded_streams` for the format.
+
+    ASTM uses `^` as its component separator, so the codec splits
+    the field into two components (`[prefix, payload]`) before it
+    reaches us. We rejoin them with `^` before decoding.
+
+    Decoding happens in `_set_value` rather than `_get_value`
+    because :meth:`Mapping.to_dict` reads `obj._data[key]` directly
+    and bypasses the descriptor — anything we want to surface in
+    the envelope has to be the stored value, not a derived view.
+
+    Falls back to the raw value when it does not look like an
+    encoded stream (so a vendor that occasionally puts a plain text
+    annotation or a repeated-component structure in the same slot
+    does not break the envelope).
+    """
+
+    def _set_value(self, value):
+        from senaite.astm.encoded_streams import is_encoded_stream
+        from senaite.astm.encoded_streams import decode_stream
+        if isinstance(value, bytes):
+            value = value.decode("utf-8")
+        if (isinstance(value, list) and len(value) == 2
+                and isinstance(value[0], str)
+                and "-stream/" in value[0]):
+            value = "{}^{}".format(value[0], value[1])
+        if is_encoded_stream(value):
+            return decode_stream(value)
+        return value
+
+
 class JSONListField(Field):
     """Converts the value into a JSON list
     """

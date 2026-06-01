@@ -147,7 +147,15 @@ class Mapping(_MappingProxy):
             if isinstance(value, Mapping):
                 out[key] = self.to_dict(value)
             elif isinstance(value, list):
-                out[key] = [self.to_dict(val) for val in value]
+                # Recurse into Mapping elements (typical for
+                # RepeatedComponentField) but pass non-Mapping
+                # elements through — PassthroughField can hold a
+                # plain list of strings from a backslash-separated
+                # ASTM repeat (e.g. Yumizen REAGENT).
+                out[key] = [
+                    self.to_dict(val) if isinstance(val, Mapping)
+                    else val
+                    for val in value]
             elif value is None and field.required:
                 raise ValueError("Field %r value should not be None" % key)
             else:
