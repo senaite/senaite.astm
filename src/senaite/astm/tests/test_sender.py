@@ -41,9 +41,13 @@ class SenderMainTest(unittest.TestCase):
         session_cls.assert_not_called()
 
     def test_url_triggers_post(self):
+        # Default message-format is `astm` for fixtures that don't
+        # carry STX/ETX framing — the raw bytes path. Use `-m astm`
+        # explicitly so this test stays independent of the default.
         post, session_cls = self.run_main([
             "senaite-astm-send",
             "-i", self.input_path,
+            "-m", "astm",
             "-u", "http://admin:admin@senaite.example.com",
         ])
         session_cls.assert_called_once_with(
@@ -57,17 +61,22 @@ class SenderMainTest(unittest.TestCase):
         post, _ = self.run_main([
             "senaite-astm-send",
             "-i", self.input_path,
+            "-m", "astm",
             "-u", "http://admin:admin@senaite.example.com",
         ])
         kwargs = post.call_args[1]
         self.assertEqual(kwargs["retries"], 3)
         self.assertEqual(kwargs["delay"], 5)
-        self.assertEqual(kwargs["consumer"], "senaite.lis2a.import")
+        # The default consumer mirrors `senaite-astm-server` —
+        # `senaite.core.lis2a.import` is what `senaite.core/astm`
+        # registers.
+        self.assertEqual(kwargs["consumer"], "senaite.core.lis2a.import")
 
     def test_overridden_session_args(self):
         post, _ = self.run_main([
             "senaite-astm-send",
             "-i", self.input_path,
+            "-m", "astm",
             "-u", "http://admin:admin@senaite.example.com",
             "-r", "10",
             "-d", "1",
@@ -84,10 +93,30 @@ class SenderMainTest(unittest.TestCase):
         post, _ = self.run_main([
             "senaite-astm-send",
             "-i", self.input_path, second,
+            "-m", "astm",
             "-u", "http://admin:admin@senaite.example.com",
         ])
         messages, _ = post.call_args[0]
         self.assertEqual(len(messages), 2)
+
+    def test_json_format_parses_envelope(self):
+        # With -m json the sender feeds the captured frames through
+        # Wrapper and POSTs the typed envelope JSON. Use a real
+        # STX/ETX-framed fixture so parse_capture has something to
+        # work with.
+        fixture = os.path.join(
+            os.path.dirname(__file__), "data", "cobas_c111.txt")
+        post, _ = self.run_main([
+            "senaite-astm-send",
+            "-i", fixture,
+            "-m", "json",
+            "-u", "http://admin:admin@senaite.example.com",
+        ])
+        messages, _ = post.call_args[0]
+        self.assertEqual(len(messages), 1)
+        # The envelope JSON always starts with the metadata block.
+        self.assertTrue(messages[0].startswith('{"metadata"'),
+                        "Expected JSON envelope, got %r" % messages[0][:60])
 
     def test_help_exits_cleanly(self):
         with patch.object(sys, "argv", ["senaite-astm-send", "--help"]):

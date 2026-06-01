@@ -5,6 +5,7 @@ Changelog
 2.0.0
 -----
 
+- senaite-astm-send: add -m / --message-format (json / astm / lis2a) for replaying captures into a LIMS
 - Decode Yumizen HISTOGRAM and MATRIX encoded streams into float lists in the envelope
 - Quiet empty-session disconnects: log TCP-probe drops at DEBUG, keep WARNING for mid-session cuts
 - #49 Lift validate_lims, frame_callback dispatch, and LIMS arg group into _runtime

@@ -53,6 +53,45 @@ def write_message(message, path, dateformat="%Y-%m-%d_%H:%M:%S.%f",
         f.write(message)
 
 
+def parse_capture(raw):
+    """Split a captured ASTM byte stream into individual frames.
+
+    Capture files contain raw bytes off the wire — STX + sequence
+    + record + (possibly embedded CR) + ETX-or-ETB + 2-byte
+    checksum + CRLF — repeated for every frame, plus the leading
+    ENQ and trailing EOT. Naive line splitting falls apart
+    because record-terminator CRs land mid-frame.
+
+    Each frame returned starts at STX and ends right after the
+    two checksum bytes, ready for :class:`senaite.astm.wrapper.Wrapper`
+    to consume. Both ETX-terminated (final) and ETB-terminated
+    (intermediate, chunked) frames are recognised.
+
+    :param raw: full file bytes
+    :returns: list of frame bytes (one per ASTM frame in the file)
+    """
+    frames = []
+    pos = 0
+    while True:
+        stx = raw.find(STX, pos)
+        if stx < 0:
+            break
+        # ASTM final frames terminate with ETX; chunked frames
+        # terminate with ETB. Pick whichever marker comes first
+        # after the STX.
+        etx = raw.find(ETX, stx)
+        etb = raw.find(ETB, stx)
+        candidates = [c for c in (etx, etb) if c >= 0]
+        if not candidates:
+            break
+        terminator = min(candidates)
+        # terminator byte + 2-byte hex checksum
+        end = terminator + 3
+        frames.append(raw[stx:end])
+        pos = end
+    return frames
+
+
 def is_chunked_message(message):
     """Checks plain message for chunked byte.
     """
