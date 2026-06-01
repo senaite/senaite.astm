@@ -56,11 +56,16 @@ class ASTMProtocol(asyncio.Protocol):
     # ------------------------------------------------------------------
 
     def connection_made(self, transport):
-        # NOTE: ``asyncio.get_event_loop()`` is preserved here for
-        # behavioural parity with the legacy protocol; PR-G replaces
-        # this with ``asyncio.get_running_loop()`` and a properly
-        # async ``main()``.
-        self.loop = asyncio.get_event_loop()
+        # In production the server is always running inside an
+        # asyncio loop, so ``get_running_loop()`` is the right
+        # call and avoids the ``DeprecationWarning`` emitted by
+        # ``get_event_loop()`` on Python 3.12+. Synchronous unit
+        # tests instantiate the protocol outside a loop; fall back
+        # to a fresh loop so they keep working.
+        try:
+            self.loop = asyncio.get_running_loop()
+        except RuntimeError:
+            self.loop = asyncio.new_event_loop()
         self.transport = transport
         self.client = self.get_client_key(transport)
         logger.debug("Connection from {!s}".format(self.client))
@@ -109,14 +114,16 @@ class ASTMProtocol(asyncio.Protocol):
         return "{:s}:{:d}".format(*peername)
 
     def close_connection(self):
-        self.discard_env()
+        self.reset_session_state()
         if self.transport is not None:
             self.transport.close()
 
     def discard_chunked_messages(self):
         self.chunks = []
 
-    def discard_env(self):
+    def reset_session_state(self):
+        """Drop any partial session state so the protocol is ready
+        for the next ENQ/STX/EOT cycle."""
         self.chunks = []
         self.messages = []
         self.in_transfer_state = False
@@ -175,12 +182,12 @@ class ASTMProtocol(asyncio.Protocol):
         # XXX: Seen from Yumizen H550: EOT right after ENQ.
         #      Maybe this is some kind of keepalive?
         if not self.messages:
-            self.discard_env()
+            self.reset_session_state()
             return
 
         frames = list(self.messages)
         self.dispatch_frames(frames)
-        self.discard_env()
+        self.reset_session_state()
 
     def on_message(self, data):
         logger.debug("on_message: %r", data)

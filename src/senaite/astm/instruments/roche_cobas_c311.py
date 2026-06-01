@@ -153,6 +153,7 @@ class TerminatorRecord(records.TerminatorRecord):
 class RocheCobasC311(Instrument):
     name = "roche_cobas_c311"
     header_regex = HEADER_RX
+    version = VERSION
     record_map = {
         "H": HeaderRecord,
         "P": PatientRecord,
@@ -163,10 +164,6 @@ class RocheCobasC311(Instrument):
         "M": ManufacturerInfoRecord,
         "L": TerminatorRecord,
     }
-
-    def get_metadata(self, wrapper):
-        return {"version": VERSION,
-                "header_rx": HEADER_RX.pattern.decode()}
 
 
 INSTRUMENT = RocheCobasC311()
