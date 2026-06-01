@@ -113,7 +113,17 @@ class HL7Protocol(asyncio.Protocol):
         logger.debug("HL7 connection from %s", self.client)
 
     def connection_lost(self, ex):
-        logger.warning("Lost HL7 connection for %s", self.client)
+        # Empty-buffer disconnect = TCP probe (Zabbix, load balancer,
+        # etc.). Log at DEBUG so the routine churn doesn't drown out
+        # the operationally-interesting case of a real client
+        # dropping mid-message.
+        if not self.buffer:
+            logger.debug(
+                "HL7 connection closed without data from %s", self.client)
+        else:
+            logger.warning(
+                "Lost HL7 connection for %s with %d byte(s) buffered",
+                self.client, len(self.buffer))
         self.buffer = b""
 
     def data_received(self, data):

@@ -71,8 +71,24 @@ class ASTMProtocol(asyncio.Protocol):
         logger.debug("Connection from {!s}".format(self.client))
 
     def connection_lost(self, ex):
-        logger.warning("Lost connection for {!s}".format(self.client))
+        # Distinguish "client closed without sending data" (typical
+        # TCP health probe from Zabbix / load balancer / k8s liveness
+        # check) from "an in-flight session was cut mid-message". The
+        # former is routine noise; the latter is operationally
+        # interesting and stays at WARNING.
+        if self._session_was_empty():
+            logger.debug(
+                "Connection closed without data from %s", self.client)
+        else:
+            logger.warning(
+                "Lost connection for %s", self.client)
         self.close_connection()
+
+    def _session_was_empty(self):
+        """True when nothing was received between connect and close."""
+        return (not self.in_transfer_state
+                and not self.chunks
+                and not self.messages)
 
     def data_received(self, data):
         logger.debug("-> Data received from {!s}: {!r}".format(
