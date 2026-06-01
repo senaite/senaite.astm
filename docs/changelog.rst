@@ -5,6 +5,7 @@ Changelog
 2.0.0
 -----
 
+- #47 HL7 parser: preserve unmapped segments under metadata.unmapped_segments
 - #46 Pipeline: add optional dead_letter sink for failed handlers
 - #45 lims.Session: drop unused **kw, return None from auth(), promote post_to_senaite kwargs
 - #44 ASTMProtocol: rename discard_env to reset_session_state and prefer get_running_loop
