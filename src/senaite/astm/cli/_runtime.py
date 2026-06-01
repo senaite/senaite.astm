@@ -24,6 +24,7 @@ import signal
 import sys
 
 from senaite.astm import logger
+from senaite.astm.core import lims
 
 LOGFILE_MAX_BYTES = 10 * 1024 * 1024
 LOGFILE_BACKUP_COUNT = 5
@@ -120,3 +121,84 @@ async def _run(payload, pipeline):
         await pipeline.run(payload)
     except Exception as exc:
         logger.error("Pipeline run failed: %r", exc)
+
+
+def make_frame_callback(loop, pipeline, task_set, to_envelope):
+    """Build a transport-agnostic frame callback.
+
+    The ASTM and HL7 transports differ only in how their per-session
+    payload is turned into an :class:`Envelope`. ``to_envelope`` does
+    that conversion; the rest (tracked-task scheduling, parse-error
+    isolation, pipeline dispatch) is shared.
+
+    :param to_envelope: Callable taking the transport payload (a list
+        of ASTM frames or raw HL7 bytes) and returning an
+        :class:`Envelope`. May raise — failures are logged and the
+        envelope is dropped, but the transport stays up.
+    """
+    def frame_callback(client, payload):
+        task = loop.create_task(
+            _run_with_envelope(client, payload, pipeline, to_envelope))
+        task_set.add(task)
+        task.add_done_callback(task_set.discard)
+    return frame_callback
+
+
+async def _run_with_envelope(client, payload, pipeline, to_envelope):
+    try:
+        envelope = to_envelope(payload)
+    except Exception as exc:
+        logger.error(
+            "Failed to build envelope from %s: %r", client, exc)
+        return
+    await pipeline.run(envelope)
+
+
+def add_lims_arg_group(parser, default_consumer):
+    """Append the shared SENAITE LIMS option group to ``parser``.
+
+    All transports take the same connection / auth / retry flags;
+    only the default push-consumer name differs (the ASTM and HL7
+    transports are wired to different consumers in SENAITE.CORE).
+    """
+    group = parser.add_argument_group("SENAITE LIMS")
+    group.add_argument(
+        "-u", "--url", type=str,
+        help="SENAITE URL address including username and password "
+             "in the format: "
+             "http(s)://<user>:<password>@<senaite_url>. Without "
+             "--url the server runs in capture-only mode.")
+    group.add_argument(
+        "-c", "--consumer", type=str, default=default_consumer,
+        help="SENAITE push consumer interface")
+    group.add_argument(
+        "-m", "--message-format", type=str, default="json",
+        help="Message format to send to SENAITE.")
+    group.add_argument(
+        "-r", "--retries", type=int, default=3,
+        help="Number of push attempts on transient failures. Only "
+             "applies when --url is set.")
+    group.add_argument(
+        "-d", "--delay", type=int, default=5,
+        help="Seconds between push retries. Only applies when "
+             "--url is set.")
+    return group
+
+
+def validate_lims(url):
+    """Authenticate against SENAITE and return the session, or
+    ``None`` when ``url`` is empty.
+
+    Exits the process with status -1 on auth failure so the server
+    never starts up half-configured.
+    """
+    if not url:
+        return None
+    session = lims.Session(url)
+    logger.info("Checking connection to SENAITE ...")
+    try:
+        session.auth()
+    except lims.SenaiteError as exc:
+        logger.error("Could not connect to SENAITE: {}".format(exc))
+        raise SystemExit(-1)
+    return session

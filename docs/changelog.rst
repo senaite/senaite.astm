@@ -5,6 +5,7 @@ Changelog
 2.0.0
 -----
 
+- #49 Lift validate_lims, frame_callback dispatch, and LIMS arg group into _runtime
 - #48 Synthetic ASTM adapters: extract framing dance into synthesize_session helper
 - #47 HL7 parser: preserve unmapped segments under metadata.unmapped_segments
 - #46 Pipeline: add optional dead_letter sink for failed handlers

@@ -18,7 +18,6 @@ import os
 
 from senaite.astm import logger
 from senaite.astm.cli import _runtime
-from senaite.astm.core import lims
 from senaite.astm.core.lims import LimsPushHandler
 from senaite.astm.core.output import DiskCaptureHandler
 from senaite.astm.core.pipeline import Pipeline
@@ -39,8 +38,6 @@ def build_arg_parser():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     hl7_group = parser.add_argument_group("HL7 SERVER")
-    lims_group = parser.add_argument_group("SENAITE LIMS")
-
     hl7_group.add_argument(
         "-l", "--listen", type=str, default="0.0.0.0",
         help="Listen IP address")
@@ -57,27 +54,8 @@ def build_arg_parser():
         help="Seconds to wait for in-flight handler tasks to "
              "finish before forcefully cancelling them on shutdown.")
 
-    lims_group.add_argument(
-        "-u", "--url", type=str,
-        help="SENAITE URL address including username and password in "
-             "the format: http(s)://<user>:<password>@<senaite_url>. "
-             "Without --url the server runs in capture-only mode.")
-    lims_group.add_argument(
-        "-c", "--consumer", type=str,
-        default="senaite.core.hl7.import",
-        help="SENAITE push consumer interface")
-    lims_group.add_argument(
-        "-m", "--message-format", type=str, default="json",
-        help="Message format to send to SENAITE. "
-             "Allowed formats: 'json', 'hl7'.")
-    lims_group.add_argument(
-        "-r", "--retries", type=int, default=3,
-        help="Number of push attempts on transient failures. Only "
-             "applies when --url is set.")
-    lims_group.add_argument(
-        "-d", "--delay", type=int, default=5,
-        help="Seconds between push retries. Only applies when "
-             "--url is set.")
+    _runtime.add_lims_arg_group(
+        parser, default_consumer="senaite.core.hl7.import")
 
     parser.add_argument(
         "-v", "--verbose", action="store_true",
@@ -89,17 +67,7 @@ def build_arg_parser():
     return parser
 
 
-def validate_lims(url):
-    if not url:
-        return None
-    session = lims.Session(url)
-    logger.info("Checking connection to SENAITE ...")
-    try:
-        session.auth()
-    except lims.SenaiteError as exc:
-        logger.error("Could not connect to SENAITE: {}".format(exc))
-        raise SystemExit(-1)
-    return session
+validate_lims = _runtime.validate_lims
 
 
 def build_pipeline(args, session):
@@ -128,22 +96,8 @@ def make_frame_callback(loop, pipeline, task_set):
     We parse them into an envelope and schedule a tracked task so
     shutdown can wait for in-flight handlers.
     """
-    def frame_callback(client, hl7_bytes):
-        task = loop.create_task(
-            _process(client, hl7_bytes, pipeline))
-        task_set.add(task)
-        task.add_done_callback(task_set.discard)
-    return frame_callback
-
-
-async def _process(client, hl7_bytes, pipeline):
-    try:
-        envelope = parse_hl7(hl7_bytes)
-    except Exception as exc:
-        logger.error(
-            "Failed to parse HL7 message from %s: %r", client, exc)
-        return
-    await pipeline.run(envelope)
+    return _runtime.make_frame_callback(
+        loop, pipeline, task_set, to_envelope=parse_hl7)
 
 
 async def amain(args, stop_event=None):
@@ -185,7 +139,7 @@ def main():
 
     _runtime.configure_logging(args)
     _runtime.validate_output(args.output)
-    args.session = validate_lims(args.url)
+    args.session = _runtime.validate_lims(args.url)
 
     try:
         asyncio.run(amain(args))
