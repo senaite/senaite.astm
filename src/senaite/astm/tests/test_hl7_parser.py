@@ -216,6 +216,25 @@ class ParserRobustnessTest(unittest.TestCase):
         envelope = parse(lf_version)
         self.assertEqual(len(envelope.R), 20)
 
+    def test_unknown_segments_are_preserved_in_metadata(self):
+        # Inject a Z-segment (vendor-defined; not in SEGMENT_BUCKETS)
+        # and an unknown ABC segment. Both must surface under
+        # metadata.unmapped_segments instead of being dropped.
+        raw = load_fixture("hemoscreen_fresh_blood.hl7").decode("utf-8")
+        raw = raw.rstrip("\r") + "\rZDS|1|2|3\rABC|hello|world\r"
+        envelope = parse(raw)
+        extras = envelope.metadata.model_extra or {}
+        unmapped = extras.get("unmapped_segments", {})
+        self.assertIn("ZDS", unmapped)
+        self.assertIn("ABC", unmapped)
+        self.assertEqual(unmapped["ZDS"][0]["1"], "1")
+        self.assertEqual(unmapped["ABC"][0]["2"], "world")
+
+    def test_no_unmapped_segments_key_when_all_are_known(self):
+        envelope = parse(load_fixture("hemoscreen_fresh_blood.hl7"))
+        extras = envelope.metadata.model_extra or {}
+        self.assertNotIn("unmapped_segments", extras)
+
 
 if __name__ == "__main__":
     unittest.main()

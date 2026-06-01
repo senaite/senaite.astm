@@ -4,18 +4,15 @@ import re
 from datetime import datetime
 
 from senaite.astm import records
-from senaite.astm import utils
-from senaite.astm.constants import ENQ
-from senaite.astm.constants import EOT
 from senaite.astm.constants import NAK
 from senaite.astm.core.instrument import Instrument
 from senaite.astm.core.instrument import register_instrument
+from senaite.astm.transports.astm.synthesizer import synthesize_session
 from senaite.astm.fields import ComponentField
 from senaite.astm.fields import DateTimeField
 from senaite.astm.fields import TextField
 from senaite.astm.mapping import Component
 from senaite.astm.utils import f as fmt
-from senaite.astm.utils import u
 
 VERSION = "1.0.0"
 # Supports SE1520
@@ -85,6 +82,7 @@ class TerminatorRecord(records.TerminatorRecord):
 class SpotchemEL(Instrument):
     name = "spotchem_el"
     header_regex = HEADER_RX
+    version = VERSION
     raw_data_regex = RAW_DATA_RX
     record_map = {
         "H": HeaderRecord,
@@ -93,22 +91,13 @@ class SpotchemEL(Instrument):
         "L": TerminatorRecord,
     }
 
-    def get_metadata(self, wrapper):
-        return {"version": VERSION,
-                "header_rx": HEADER_RX.pattern.decode()}
-
     def handle_raw_data(self, protocol, data):
         """Synthesise a complete ASTM session from a single non-ASTM
         packet emitted by the Spotchem SE-1520.
-
-        Drives ``protocol`` directly: ENQ, queue the synthetic ASTM
-        frames, EOT.
         """
         parts = re.match(RAW_DATA_RX, data)
         if not parts:
             return NAK
-        if not protocol.in_transfer_state:
-            protocol.on_enq(ENQ)
 
         date = parts.group(1).decode("utf-8")
         time = parts.group(2).decode("utf-8")
@@ -142,14 +131,7 @@ class SpotchemEL(Instrument):
                 result=cl_result, unit=cl_unit, ts=timestamp),
             fmt("6L|1|N{CR}{ETX}"),
         ]
-        messages = []
-        for frame in frames:
-            cs = utils.make_checksum(frame)
-            messages.append(
-                fmt("{STX}{frame}{cs}{CRLF}", frame=u(frame), cs=u(cs)))
-
-        protocol.messages = messages
-        protocol.on_eot(EOT)
+        synthesize_session(protocol, frames)
         return None
 
 
