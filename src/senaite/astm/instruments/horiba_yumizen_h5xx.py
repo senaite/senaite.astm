@@ -6,11 +6,16 @@ from senaite.astm import records
 from senaite.astm.core.instrument import Instrument
 from senaite.astm.core.instrument import register_instrument
 from senaite.astm.fields import ComponentField
+from senaite.astm.fields import ConstantField
 from senaite.astm.fields import DateTimeField
+from senaite.astm.fields import EncodedStreamField
+from senaite.astm.fields import IntegerField
 from senaite.astm.fields import NotUsedField
+from senaite.astm.fields import PassthroughField
 from senaite.astm.fields import SetField
 from senaite.astm.fields import TextField
 from senaite.astm.mapping import Component
+from senaite.astm.mapping import Record
 
 VERSION = "1.0.0"
 # Supports H500 and H550
@@ -117,9 +122,37 @@ class RequestInformationRecord(records.RequestInformationRecord):
     """
 
 
-class ManufacturerInfoRecord(records.ManufacturerInfoRecord):
-    """Manufacturer Specific Records (M)
-    """
+# The Yumizen overloads the M record across several row types
+# (HISTOGRAM, MATRIX, REAGENT, ...). Each row looks like:
+#
+#   1M|1|HISTOGRAM|RBC/PLT|RbcAlongRes|FLOATLE-stream/...|FLOATLE-stream/...
+#
+# The slot semantics depend on the `kind` tag in M-3:
+#
+#   M-3 kind     M-4         M-5            M-6                 M-7
+#   ---------    --------    -----------    ----------------    ----------------
+#   HISTOGRAM    domain      stream         axis_x (stream)     axis_y (stream)
+#   MATRIX       domain      stream         axis_x (stream)     axis_y (stream)
+#   REAGENT      list        repeated cmps  (unused)            (unused)
+#
+# `kind` is always a string tag. `domain` and `stream` may be plain
+# strings, backslash-separated lists, or repeated components — so
+# they use PassthroughField, which preserves the original shape.
+# axis_x / axis_y are encoded streams for HISTOGRAM / MATRIX and
+# something else for REAGENT; EncodedStreamField decodes only when
+# the prefix matches and passes other values through.
+#
+# Rebuild rather than subclass: the base ManufacturerInfoRecord is
+# all NotUsedField, which would discard everything we care about.
+ManufacturerInfoRecord = Record.build(
+    ConstantField(name="type", default="M"),
+    IntegerField(name="seq", default=1, required=True),
+    TextField(name="kind"),
+    PassthroughField(name="domain"),
+    PassthroughField(name="stream"),
+    EncodedStreamField(name="axis_x"),
+    EncodedStreamField(name="axis_y"),
+)
 
 
 class TerminatorRecord(records.TerminatorRecord):

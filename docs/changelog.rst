@@ -5,6 +5,7 @@ Changelog
 2.0.0
 -----
 
+- Decode Yumizen HISTOGRAM and MATRIX encoded streams into float lists in the envelope
 - Quiet empty-session disconnects: log TCP-probe drops at DEBUG, keep WARNING for mid-session cuts
 - #49 Lift validate_lims, frame_callback dispatch, and LIMS arg group into _runtime
 - #48 Synthetic ASTM adapters: extract framing dance into synthesize_session helper
