@@ -1,22 +1,26 @@
 # -*- coding: utf-8 -*-
-"""`senaite-astm-send` CLI — push captured ASTM files to a SENAITE
-LIMS push endpoint without running a TCP listener.
+"""`senaite-astm-send` CLI — push captured ASTM **or HL7 v2**
+files to a SENAITE LIMS push endpoint without running a TCP
+listener.
 
-Useful for replaying messages from `astm_messages/` directly into a
-dev / staging SENAITE instance so the consumer-side adapter (e.g.
+Useful for replaying messages from `astm_messages/` or
+`hl7_messages/` directly into a dev / staging SENAITE instance so
+the consumer-side adapter (e.g.
 `cermel.lims.adapters.astm_importer.ASTMImporter`) can be
 exercised end-to-end without the device on the wire.
 
-The `-m / --message-format` option mirrors `senaite-astm-server`'s
-flag: choose what the LIMS receives.
+The wire format is auto-detected from the leading bytes (files
+starting with ``MSH`` are HL7; everything else is ASTM). The
+`-m / --message-format` option chooses what the LIMS receives:
 
 - `json`  (default): parse each input file into an :class:`Envelope`
   and POST the typed JSON. This is what the
   `senaite.core.lis2a.import` consumer expects today.
-- `astm`  : POST the original framed ASTM bytes verbatim (legacy
-  consumers that re-parse raw payloads).
+- `astm`  : POST the original framed ASTM (or HL7) bytes verbatim
+  (legacy consumers that re-parse raw payloads).
 - `lis2a` : POST the framed-free LIS2-A flat string from
-  `metadata.lis2a` (other legacy paths).
+  `metadata.lis2a` (other legacy paths). HL7 inputs produce an
+  empty `lis2a` field and should use `json` instead.
 """
 
 import argparse
@@ -28,6 +32,7 @@ from senaite.astm import logger
 from senaite.astm.core import lims
 from senaite.astm.core.envelope import serialize_envelope
 from senaite.astm.core.lims import post_to_senaite
+from senaite.astm.transports.hl7.parser import parse as parse_hl7
 from senaite.astm.utils import parse_capture
 from senaite.astm.utils import rebuild_checksums
 from senaite.astm.wrapper import Wrapper
@@ -69,14 +74,15 @@ def _file_to_message(fh, message_format, rebuild=False,
                      substitutions=None,
                      scrub_phi=False, phi_keep=(),
                      keep_records=None, drop_records=None):
-    """Read a captured ASTM file and produce one message for
-    `post_to_senaite`.
+    """Read a captured ASTM or HL7 v2 file and produce one
+    message for `post_to_senaite`.
 
-    Captures contain raw STX/ETX-framed bytes off the wire (the
-    same format `senaite-astm-simulator` writes when it sends a
-    fixture to a listener). :func:`senaite.astm.utils.parse_capture`
-    extracts the individual frames; `Wrapper` turns them into the
-    typed envelope.
+    The wire format is auto-detected from the leading bytes:
+    inputs that start with ``MSH`` are routed through the HL7
+    parser, everything else through :func:`parse_capture` +
+    :class:`Wrapper`. Both paths converge on the same typed
+    :class:`Envelope`, so the downstream serialisation /
+    scrubbing / record-filtering logic is shared.
 
     `rebuild=True` runs :func:`rebuild_checksums` over the input
     bytes first so a hand-edited capture (sample-id swap, PHI
@@ -116,18 +122,42 @@ def _file_to_message(fh, message_format, rebuild=False,
     raw = fh.read()
     if substitutions:
         raw = _apply_substitutions(raw, substitutions)
-    if rebuild:
+    wire = _detect_wire_format(raw)
+    if wire == "astm" and rebuild:
         raw = rebuild_checksums(raw)
     if message_format == "astm":
         return raw
 
-    frames = parse_capture(raw)
-    envelope = Wrapper(frames).to_envelope()
+    envelope = _parse_envelope(raw, wire)
     if scrub_phi:
         _scrub_envelope_phi(envelope, phi_keep)
     if keep_records or drop_records:
         _filter_envelope_records(envelope, keep_records, drop_records)
     return serialize_envelope(envelope, message_format)
+
+
+def _detect_wire_format(raw):
+    """Return ``"hl7"`` when the input is an HL7 v2 message,
+    ``"astm"`` otherwise.
+
+    HL7 v2 messages start with an MSH segment (literal ``b"MSH"``).
+    ASTM captures start with ENQ / STX or a leading newline. The
+    sniff is deliberately cheap — no full parse — so a slightly
+    weird input still flows through the existing ASTM path and
+    the parser's own error becomes the failure mode.
+    """
+    if raw.lstrip().startswith(b"MSH"):
+        return "hl7"
+    return "astm"
+
+
+def _parse_envelope(raw, wire):
+    """Parse ``raw`` into an :class:`Envelope` using the parser
+    appropriate to ``wire``."""
+    if wire == "hl7":
+        return parse_hl7(raw)
+    frames = parse_capture(raw)
+    return Wrapper(frames).to_envelope()
 
 
 def _apply_substitutions(raw, substitutions):
@@ -181,6 +211,8 @@ def _scrub_envelope_phi(envelope, keep_keys=()):
         envelope.metadata.astm = ""
     if envelope.metadata.lis2a:
         envelope.metadata.lis2a = ""
+    if envelope.metadata.hl7:
+        envelope.metadata.hl7 = ""
 
 
 def _filter_envelope_records(envelope, keep, drop):
@@ -229,7 +261,9 @@ def main():
     astm_group.add_argument(
         "-i", "--infile",
         type=argparse.FileType("rb"), nargs="+",
-        help="ASTM file(s) to send to SENAITE")
+        help="ASTM or HL7 v2 file(s) to send to SENAITE. The "
+             "wire format is auto-detected from the leading "
+             "bytes (files starting with 'MSH' are HL7).")
 
     astm_group.add_argument(
         "--substitute-sample-id", dest="substitutions",
