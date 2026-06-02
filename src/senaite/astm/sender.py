@@ -128,6 +128,16 @@ def main():
              "checksum, so combine with --rebuild-checksums.")
 
     astm_group.add_argument(
+        "--validate-only", action="store_true",
+        help="Parse each input file into the typed envelope and "
+             "report success or failure per file. Does not push to "
+             "a LIMS and does not write any output. Exits with a "
+             "non-zero status equal to the number of files that "
+             "failed to parse. Useful as a CI check that a captured "
+             "fixture still rounds through the codec + envelope "
+             "schema after changes to either.")
+
+    astm_group.add_argument(
         "--rebuild-checksums", action="store_true",
         help="Recompute the 2-byte trailer of every ASTM frame "
              "before parsing. Use this when replaying a capture "
@@ -184,6 +194,10 @@ def main():
 
     if not args.infile:
         return
+
+    if args.validate_only:
+        sys.exit(_validate_only(args.infile, args.rebuild_checksums))
+
     if not args.output and not args.url:
         logger.error("No --url or --output provided; nothing to do.")
         return
@@ -253,6 +267,23 @@ def _write_outputs(messages, output, message_format):
         return
     with open(output, "wb") as fh:
         _write_one(fh, messages[0][1])
+
+
+def _validate_only(infiles, rebuild):
+    """Parse each capture into the typed envelope and report
+    success or failure per file. Returns the number of failures
+    (so the CLI exit code is `failure-count`)."""
+    failures = 0
+    for fh in infiles:
+        name = getattr(fh, "name", "<stream>")
+        try:
+            _file_to_message(fh, "json", rebuild=rebuild)
+        except Exception as exc:
+            failures += 1
+            logger.error("INVALID %s: %s", name, exc)
+            continue
+        logger.info("OK      %s", name)
+    return failures
 
 
 def _write_one(fh, msg):
