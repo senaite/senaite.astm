@@ -78,6 +78,7 @@ def get_mapping():
         "P": PatientRecord,
         "O": OrderRecord,
         "R": ResultRecord,
+        "C": CommentRecord,
         "Q": RequestInformationRecord,
         "M": ManufacturerInfoRecord,
         "L": TerminatorRecord,
