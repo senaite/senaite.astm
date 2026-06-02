@@ -23,7 +23,6 @@ import json
 import sys
 
 import senaite.astm.instruments  # noqa: F401  side-effect: register
-from senaite.astm.core.envelope import Envelope
 from senaite.astm.core.instrument import find_instrument
 from senaite.astm.core.envelope import serialize_envelope
 from senaite.astm.utils import parse_capture
