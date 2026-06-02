@@ -2,7 +2,6 @@
 """Tests for `senaite-astm-send --dry-run` and the URL password
 masking helper it relies on."""
 
-import io
 import logging
 import os
 import sys
