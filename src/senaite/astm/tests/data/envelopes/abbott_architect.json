@@ -1,0 +1,246 @@
+{
+  "C": [
+    {
+      "ctype": "G",
+      "data": "Example Result Comment",
+      "seq": "1",
+      "source": "I",
+      "type": "C"
+    }
+  ],
+  "H": [
+    {
+      "address": null,
+      "caps": null,
+      "comments": null,
+      "delimeter": [
+        {
+          "_": "",
+          "__": null
+        },
+        {
+          "_": "",
+          "__": "&"
+        }
+      ],
+      "message_id": null,
+      "password": null,
+      "phone": null,
+      "processing_id": "P",
+      "receiver": null,
+      "reserved": null,
+      "sender": {
+        "interface": "H1P1O1R1C1Q1L1",
+        "name": "ARCHITECT",
+        "serial": "123456789",
+        "version": "1.00"
+      },
+      "timestamp": "<volatile>",
+      "type": "H",
+      "version": "1"
+    }
+  ],
+  "L": [
+    {
+      "code": "N",
+      "seq": "1",
+      "type": "L"
+    }
+  ],
+  "O": [
+    {
+      "action_code": null,
+      "biomaterial": null,
+      "clinical_info": null,
+      "collected_at": null,
+      "collector": null,
+      "danger_code": null,
+      "infection_flag": null,
+      "instrument": {
+        "carrier": "A123",
+        "position": "5",
+        "specimen": "SID3"
+      },
+      "instrument_charge": null,
+      "instrument_section": null,
+      "laboratory": null,
+      "laboratory_field_1": null,
+      "laboratory_field_2": null,
+      "location_ward": null,
+      "physician": null,
+      "physician_phone": null,
+      "priority": "R",
+      "received_at": null,
+      "report_type": "F",
+      "reported_at": null,
+      "requested_at": null,
+      "reserved": null,
+      "sample_id": "SID13",
+      "sampled_at": "20010223081223",
+      "seq": "1",
+      "specimen_service": null,
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "dilution": "UNDILUTED",
+        "name": "Assay1",
+        "num": "123",
+        "status": "P"
+      },
+      "type": "O",
+      "user_field_1": null,
+      "user_field_2": null,
+      "volume": null
+    }
+  ],
+  "P": [
+    {
+      "address": null,
+      "admission_date": null,
+      "admission_status": null,
+      "birthdate": "19320122",
+      "diagnosis": null,
+      "diagnostic_code": null,
+      "diagnostic_code_nature": null,
+      "diet": null,
+      "dosage_category": null,
+      "height": null,
+      "hospital_institution": null,
+      "hospital_service": null,
+      "id": "PIDSID13",
+      "isolation_status": null,
+      "laboratory_id": null,
+      "language": null,
+      "location": "ParkClinic",
+      "maiden_name": null,
+      "martial_status": null,
+      "medication": null,
+      "name": {
+        "first": "Im",
+        "last": "Patient",
+        "middle": "A"
+      },
+      "phone": null,
+      "physician_id": "Dr.Amesbury",
+      "practice_field_1": null,
+      "practice_field_2": null,
+      "practice_id": null,
+      "race": null,
+      "religion": null,
+      "reserved": null,
+      "seq": "1",
+      "sex": "F",
+      "special_1": null,
+      "special_2": null,
+      "type": "P",
+      "weight": null
+    }
+  ],
+  "R": [
+    {
+      "abnormal_flag": [
+        {
+          "flag": "EXP"
+        },
+        {
+          "flag": "<"
+        }
+      ],
+      "abnormality_nature": null,
+      "completed_at": "19990715081030",
+      "instrument": "I20100",
+      "norms_changed_at": null,
+      "operator": {
+        "order_operator": null,
+        "release_operator": null
+      },
+      "references": "0.35 TO 4.94",
+      "seq": "1",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "control_lot": null,
+        "dilution": "UNDILUTED",
+        "name": "B-hCG",
+        "num": "21",
+        "reagent_lot": "47331M100",
+        "reagent_serial": "00788",
+        "result_type": "F",
+        "status": "P"
+      },
+      "type": "R",
+      "units": "mIU/mL",
+      "value": "< 1.20"
+    },
+    {
+      "abnormal_flag": [],
+      "abnormality_nature": null,
+      "completed_at": "19990715081030",
+      "instrument": "I20100",
+      "norms_changed_at": null,
+      "operator": {
+        "order_operator": null,
+        "release_operator": null
+      },
+      "references": null,
+      "seq": "2",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "control_lot": null,
+        "dilution": "UNDILUTED",
+        "name": "B-hCG",
+        "num": "21",
+        "reagent_lot": "47331M100",
+        "reagent_serial": "00788",
+        "result_type": "I",
+        "status": "P"
+      },
+      "type": "R",
+      "units": null,
+      "value": "NEGATIVE"
+    },
+    {
+      "abnormal_flag": [],
+      "abnormality_nature": null,
+      "completed_at": "19990715081030",
+      "instrument": "I20100",
+      "norms_changed_at": null,
+      "operator": {
+        "order_operator": null,
+        "release_operator": null
+      },
+      "references": null,
+      "seq": "3",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "control_lot": null,
+        "dilution": "UNDILUTED",
+        "name": "B-hCG",
+        "num": "21",
+        "reagent_lot": "47331M100",
+        "reagent_serial": "00788",
+        "result_type": "P",
+        "status": "P"
+      },
+      "type": "R",
+      "units": "RLU",
+      "value": "9245"
+    }
+  ],
+  "metadata": {
+    "astm": "\u00021H|\\^&|||ARCHITECT^1.00^123456789^H1P1O1R1C1Q1L1|||||||P|1|19930330133346\rP|1|||PIDSID13|Patient^Im^A||19320122|F|||||Dr.Amesbury||||||||||||ParkClinic\rO|1|SID13|SID3^A123^5|^^^123^Assay1^UNDILUTED^P|R||20010223081223||||||||||||||||||F\rR|1|^^^0021^B-hCG^UNDILUTED^P^47331M100^00788^^F|< 1.20|mIU/mL|0.35 TO 4.94|EXP^<||F||||19990715081030|I20100\rC|1|I|Example Result Comment|G\rR|2|^^^0021^B-hCG^UNDILUTED^P^47331M100^00788^^I|NEGATIVE|||||F||||19990715081030|I20100\rR|3|^^^0021^B-hCG^UNDILUTED^P^47331M100^00788^^P|9245|RLU||||F||||19990715081030|I20100\rL|1|N\r\u000302\r",
+    "lis2a": "H|\\^&|||ARCHITECT^1.00^123456789^H1P1O1R1C1Q1L1|||||||P|1|19930330133346\rP|1|||PIDSID13|Patient^Im^A||19320122|F|||||Dr.Amesbury||||||||||||ParkClinic\rO|1|SID13|SID3^A123^5|^^^123^Assay1^UNDILUTED^P|R||20010223081223||||||||||||||||||F\rR|1|^^^0021^B-hCG^UNDILUTED^P^47331M100^00788^^F|< 1.20|mIU/mL|0.35 TO 4.94|EXP^<||F||||19990715081030|I20100\rC|1|I|Example Result Comment|G\rR|2|^^^0021^B-hCG^UNDILUTED^P^47331M100^00788^^I|NEGATIVE|||||F||||19990715081030|I20100\rR|3|^^^0021^B-hCG^UNDILUTED^P^47331M100^00788^^P|9245|RLU||||F||||19990715081030|I20100\rL|1|N\r\u0003"
+  }
+}

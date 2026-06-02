@@ -5,6 +5,7 @@ Changelog
 1.0.0 (unreleased)
 ------------------
 
+- #24 Add Abbott ARCHITECT System import schema
 - #23 Add Cepheid GeneXpert import schema
 - #22 Add Horiba Pentra XLR import schema
 - #21 Add Biomérieux MINI VIDAS® import schema
