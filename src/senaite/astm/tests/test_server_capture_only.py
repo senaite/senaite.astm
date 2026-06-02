@@ -69,9 +69,17 @@ class CaptureOnlyConflictTest(unittest.TestCase):
 
     def setUp(self):
         self._saved_argv = sys.argv
+        # `main()` calls `_runtime.configure_logging` which attaches
+        # handlers to the package logger; snapshot them so we can
+        # restore the original list in tearDown and avoid polluting
+        # later tests in the same process.
+        from senaite.astm import logger as pkg_logger
+        self._pkg_logger = pkg_logger
+        self._saved_handlers = list(pkg_logger.handlers)
 
     def tearDown(self):
         sys.argv = self._saved_argv
+        self._pkg_logger.handlers = self._saved_handlers
 
     def test_main_rejects_capture_only_with_url(self):
         sys.argv = [
