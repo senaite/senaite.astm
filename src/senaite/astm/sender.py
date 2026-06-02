@@ -21,6 +21,8 @@ flag: choose what the LIMS receives.
 
 import argparse
 import logging
+import os
+import sys
 
 from senaite.astm import logger
 from senaite.astm.core import lims
@@ -81,6 +83,15 @@ def main():
              "by default so genuine wire corruption is not "
              "silently masked.")
 
+    astm_group.add_argument(
+        "-o", "--output", type=str, default=None,
+        help="Write the converted message(s) instead of pushing "
+             "to a LIMS. Use `-` for stdout (single input only); "
+             "a directory path to write one file per input "
+             "(named <input-stem>.<ext> for the chosen "
+             "--message-format); or a regular file path (single "
+             "input only). When set, --url is ignored.")
+
     lims_group.add_argument(
         "-u", "--url", type=str,
         help="SENAITE URL with credentials in the format "
@@ -119,16 +130,18 @@ def main():
 
     if not args.infile:
         return
-    if not args.url:
-        logger.error("No --url provided; nothing to do.")
+    if not args.output and not args.url:
+        logger.error("No --url or --output provided; nothing to do.")
         return
 
     messages = []
     for fh in args.infile:
         try:
-            messages.append(_file_to_message(
-                fh, args.message_format,
-                rebuild=args.rebuild_checksums))
+            messages.append((
+                getattr(fh, "name", "<stream>"),
+                _file_to_message(
+                    fh, args.message_format,
+                    rebuild=args.rebuild_checksums)))
         except Exception as exc:
             logger.error(
                 "Failed to prepare %s as %s: %s",
@@ -138,11 +151,64 @@ def main():
     if not messages:
         return
 
+    if args.output:
+        _write_outputs(messages, args.output, args.message_format)
+        return
+
     session = lims.Session(args.url)
     post_to_senaite(
-        messages, session,
+        [m for _, m in messages], session,
         retries=args.retries, delay=args.delay,
         consumer=args.consumer)
+
+
+def _write_outputs(messages, output, message_format):
+    """Write converted `messages` to `output` instead of pushing.
+
+    `output` resolves to:
+
+    - `-` — write to stdout. Single input only.
+    - existing directory — one file per input named
+      `<input-stem>.<ext>` where `<ext>` is derived from the
+      message format.
+    - any other path — write to that file. Single input only.
+    """
+    if output == "-":
+        if len(messages) > 1:
+            logger.error(
+                "--output - (stdout) requires a single input; "
+                "got %d.", len(messages))
+            return
+        _write_one(sys.stdout.buffer, messages[0][1])
+        return
+
+    if os.path.isdir(output):
+        ext = _format_extension(message_format)
+        for path, msg in messages:
+            stem = os.path.splitext(os.path.basename(path))[0]
+            target = os.path.join(output, "{}.{}".format(stem, ext))
+            with open(target, "wb") as fh:
+                _write_one(fh, msg)
+        return
+
+    if len(messages) > 1:
+        logger.error(
+            "--output %s must be a directory for multi-input "
+            "runs; got %d inputs.", output, len(messages))
+        return
+    with open(output, "wb") as fh:
+        _write_one(fh, messages[0][1])
+
+
+def _write_one(fh, msg):
+    if isinstance(msg, str):
+        msg = msg.encode("utf-8")
+    fh.write(msg)
+
+
+def _format_extension(message_format):
+    return {"json": "json", "astm": "astm", "lis2a": "txt"}.get(
+        message_format, "txt")
 
 
 if __name__ == "__main__":
