@@ -5,7 +5,7 @@ Changelog
 1.0.0 (unreleased)
 ------------------
 
-- #25 Add client (connect) mode to actively connect out to passive instruments
+- #61 Add client (connect) mode to actively connect out to passive instruments
 - #23 Add Cepheid GeneXpert import schema
 - #22 Add Horiba Pentra XLR import schema
 - #21 Add Biomérieux MINI VIDAS® import schema
