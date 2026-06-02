@@ -32,9 +32,28 @@ from senaite.astm.utils import parse_capture
 from senaite.astm.utils import rebuild_checksums
 from senaite.astm.wrapper import Wrapper
 
+# Conservative default set of P-record keys that almost always
+# carry identifying / medical information. The full P record has
+# 30+ fields (see senaite.astm.records.PatientRecord); this set
+# targets the obvious ones. Use --scrub-phi-extra-fields to add
+# vendor-specific keys not covered here.
+PHI_KEYS = (
+    "name",
+    "maiden_name",
+    "birthdate",
+    "address",
+    "phone",
+    "id",
+    "physician_id",
+    "diagnosis",
+    "medication",
+)
+PHI_REDACTION = "<REDACTED>"
+
 
 def _file_to_message(fh, message_format, rebuild=False,
-                     substitutions=None):
+                     substitutions=None,
+                     scrub_phi=False, phi_extra=()):
     """Read a captured ASTM file and produce one message for
     `post_to_senaite`.
 
@@ -57,6 +76,14 @@ def _file_to_message(fh, message_format, rebuild=False,
     replayed against successive registrations. Any substitution
     that changes a frame body invalidates the trailing checksum,
     so the typical companion flag is `--rebuild-checksums`.
+
+    `scrub_phi=True` replaces the values of well-known
+    patient-identifying keys in every P record with `<REDACTED>`
+    before the envelope is serialised. Only the parsed-JSON path
+    can be scrubbed safely; raw ASTM bytes and the flat LIS2-A
+    text in `metadata.*` are not rewritten, so the caller should
+    use `-m json`. `phi_extra` adds vendor-specific keys to the
+    default set (see :data:`PHI_KEYS`).
     """
     raw = fh.read()
     if substitutions:
@@ -68,6 +95,8 @@ def _file_to_message(fh, message_format, rebuild=False,
 
     frames = parse_capture(raw)
     envelope = Wrapper(frames).to_envelope()
+    if scrub_phi:
+        _scrub_envelope_phi(envelope, phi_extra)
     return serialize_envelope(envelope, message_format)
 
 
@@ -100,6 +129,26 @@ def _parse_substitution(value):
         raise argparse.ArgumentTypeError(
             "OLD side of substitution is empty: %r" % value)
     return (old.encode("latin-1"), new.encode("latin-1"))
+
+
+def _scrub_envelope_phi(envelope, extra_keys=()):
+    """Replace the values of PHI keys in every P record of
+    `envelope` with :data:`PHI_REDACTION`, in place.
+
+    Also drops the verbatim flat-text payloads in `metadata.astm`
+    and `metadata.lis2a` so a JSON-scrubbed message can't be
+    pulled back to its un-scrubbed raw form by a downstream
+    consumer that only looks at metadata.
+    """
+    keys = set(PHI_KEYS) | set(extra_keys)
+    for patient in envelope.P:
+        for key in list(patient.keys()):
+            if key in keys and patient[key]:
+                patient[key] = PHI_REDACTION
+    if envelope.metadata.astm:
+        envelope.metadata.astm = ""
+    if envelope.metadata.lis2a:
+        envelope.metadata.lis2a = ""
 
 
 def main():
@@ -136,6 +185,23 @@ def main():
              "failed to parse. Useful as a CI check that a captured "
              "fixture still rounds through the codec + envelope "
              "schema after changes to either.")
+
+    astm_group.add_argument(
+        "--scrub-phi", action="store_true",
+        help="Redact patient-identifying fields in every P record "
+             "(name, birthdate, address, phone, IDs, diagnosis, "
+             "medication) with '<REDACTED>' before serialising. "
+             "Also clears the verbatim metadata.astm / "
+             "metadata.lis2a payloads so the un-scrubbed bytes "
+             "do not leak through. Requires --message-format json; "
+             "the raw / flat formats cannot be rewritten safely.")
+
+    astm_group.add_argument(
+        "--scrub-phi-extra-field", dest="phi_extra",
+        action="append", default=[], metavar="KEY",
+        help="Additional P-record key to redact under --scrub-phi. "
+             "Repeatable; vendor-specific keys not covered by the "
+             "default set go here.")
 
     astm_group.add_argument(
         "--rebuild-checksums", action="store_true",
@@ -198,6 +264,12 @@ def main():
     if args.validate_only:
         sys.exit(_validate_only(args.infile, args.rebuild_checksums))
 
+    if args.scrub_phi and args.message_format != "json":
+        logger.error(
+            "--scrub-phi requires --message-format json; "
+            "raw ASTM bytes and the flat LIS2-A text cannot be "
+            "rewritten safely.")
+        return
     if not args.output and not args.url:
         logger.error("No --url or --output provided; nothing to do.")
         return
@@ -210,7 +282,9 @@ def main():
                 _file_to_message(
                     fh, args.message_format,
                     rebuild=args.rebuild_checksums,
-                    substitutions=args.substitutions)))
+                    substitutions=args.substitutions,
+                    scrub_phi=args.scrub_phi,
+                    phi_extra=args.phi_extra)))
         except Exception as exc:
             logger.error(
                 "Failed to prepare %s as %s: %s",
