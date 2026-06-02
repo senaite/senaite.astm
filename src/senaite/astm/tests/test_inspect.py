@@ -38,6 +38,9 @@ class InstrumentTest(unittest.TestCase):
         rc, out = _run(["instrument", "/no/such/file.astm"])
         self.assertEqual(rc, 0)
         self.assertIn("ERROR", out)
+        # The error line names the exception type so operators
+        # can distinguish file/parse/checksum failure modes.
+        self.assertIn("FileNotFoundError", out)
 
 
 class SummaryTest(unittest.TestCase):

@@ -33,26 +33,46 @@ DEFAULT_SHUTDOWN_GRACE_SECONDS = 30
 
 def configure_logging(args):
     """Attach the rotating logfile + stream handlers to the package
-    logger and set the verbosity from ``args.verbose``."""
+    logger and set the verbosity from ``args.verbose``.
+
+    Idempotent: a StreamHandler is added only if the logger has
+    none already, and the rotating file handler is added only when
+    no existing handler points at the same file. Without these
+    guards a test suite that invokes the CLI repeatedly piles up
+    duplicate handlers and prints every log line N times."""
     if getattr(args, "logfile", None):
-        handler = logging.handlers.RotatingFileHandler(
-            args.logfile,
-            maxBytes=LOGFILE_MAX_BYTES,
-            backupCount=LOGFILE_BACKUP_COUNT)
-        handler.setFormatter(logging.Formatter(
-            "%(asctime)s %(levelname)-8s %(message)s"))
-        logger.addHandler(handler)
+        already_pointed_at_file = any(
+            isinstance(h, logging.handlers.RotatingFileHandler)
+            and h.baseFilename == os.path.abspath(args.logfile)
+            for h in logger.handlers)
+        if not already_pointed_at_file:
+            handler = logging.handlers.RotatingFileHandler(
+                args.logfile,
+                maxBytes=LOGFILE_MAX_BYTES,
+                backupCount=LOGFILE_BACKUP_COUNT)
+            handler.setFormatter(logging.Formatter(
+                "%(asctime)s %(levelname)-8s %(message)s"))
+            logger.addHandler(handler)
 
     logger.setLevel(
         logging.DEBUG if getattr(args, "verbose", False) else logging.INFO)
-    logger.addHandler(logging.StreamHandler())
+    if not any(isinstance(h, logging.StreamHandler)
+               and not isinstance(h, logging.FileHandler)
+               for h in logger.handlers):
+        logger.addHandler(logging.StreamHandler())
 
 
 def validate_output(output):
-    """Exit with an error if ``output`` is set but not a directory."""
+    """Exit with an error if ``output`` is set but not a directory.
+
+    Uses ``sys.exit(1)`` rather than ``sys.exit(-1)``: on POSIX the
+    negative value is sign-flipped to 255 by the C runtime, which
+    some monitoring tools interpret as "killed by signal" rather
+    than "exited cleanly with an error".
+    """
     if output and not os.path.isdir(output):
         logger.error("Output path must be an existing directory")
-        sys.exit(-1)
+        sys.exit(1)
 
 
 def install_shutdown_handlers(loop, stop_event):
@@ -200,5 +220,5 @@ def validate_lims(url):
         session.auth()
     except lims.SenaiteError as exc:
         logger.error("Could not connect to SENAITE: {}".format(exc))
-        raise SystemExit(-1)
+        raise SystemExit(1)
     return session
