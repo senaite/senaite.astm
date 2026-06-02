@@ -5,6 +5,7 @@ Changelog
 1.0.0 (unreleased)
 ------------------
 
+- #61 Add client (connect) mode to actively connect out to passive instruments
 - #24 Add Abbott ARCHITECT System import schema
 - #23 Add Cepheid GeneXpert import schema
 - #22 Add Horiba Pentra XLR import schema

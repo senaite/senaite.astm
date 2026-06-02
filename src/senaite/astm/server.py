@@ -25,6 +25,40 @@ async def consume(queue, callback=None):
             callback(message)
 
 
+async def connect_forever(loop, host, port, protocol_factory, reconnect_delay):
+    """Client (connect) mode main coroutine.
+
+    Actively opens an outbound connection to an instrument or serial-to-LAN
+    gateway at ``host:port`` (useful when the device is configured as a passive
+    TCP server and expects the LIS to initiate the connection). Keeps the
+    connection open and transparently reconnects when it drops.
+    """
+    while True:
+        # Future resolved by the protocol when the connection is lost
+        on_connection_lost = loop.create_future()
+        try:
+            logger.info(
+                'Connecting to instrument at {}:{} ...'.format(host, port))
+            await loop.create_connection(
+                lambda: protocol_factory(on_connection_lost),
+                host=host, port=port)
+        except OSError as exc:
+            logger.warning(
+                'Connection to {}:{} failed: {}. Retrying in {}s ...'.format(
+                    host, port, exc, reconnect_delay))
+            await asyncio.sleep(reconnect_delay)
+            continue
+
+        logger.info('Connected to instrument at {}:{}'.format(host, port))
+        logger.info('ASTM client ready to receive messages ...')
+        # Block until the connection drops, then reconnect
+        await on_connection_lost
+        logger.warning(
+            'Connection to {}:{} lost. Reconnecting in {}s ...'.format(
+                host, port, reconnect_delay))
+        await asyncio.sleep(reconnect_delay)
+
+
 def main():
     # Argument parser
     parser = argparse.ArgumentParser(
@@ -53,6 +87,23 @@ def main():
         '--output',
         type=str,
         help='Output directory to write full messages')
+
+    astm_group.add_argument(
+        '--connect',
+        type=str,
+        default=None,
+        metavar='HOST:PORT',
+        help='Client mode: actively connect OUT to an instrument or '
+             'serial-to-LAN gateway at HOST:PORT instead of listening. Use '
+             'this when the device is a passive TCP server and expects the '
+             'LIS to initiate the connection. Mutually exclusive with '
+             '--listen/--port.')
+
+    astm_group.add_argument(
+        '--reconnect-delay',
+        type=int,
+        default=5,
+        help='Seconds to wait before (re)connecting in --connect mode')
 
     lims_group.add_argument(
         '-u',
@@ -167,6 +218,31 @@ def main():
     queue = asyncio.Queue()
     loop.create_task(consume(queue, callback=dispatch_astm_message))
 
+    if args.connect:
+        # CLIENT (connect) mode: actively connect out to the instrument/gateway
+        host, sep, port = args.connect.partition(':')
+        if not sep or not host or not port:
+            logger.error('--connect requires the format HOST:PORT')
+            return sys.exit(-1)
+
+        def protocol_factory(on_connection_lost):
+            return ASTMProtocol(
+                queue=queue,
+                message_format=args.message_format,
+                on_connection_lost=on_connection_lost)
+
+        try:
+            loop.run_until_complete(
+                connect_forever(loop, host, int(port), protocol_factory,
+                                args.reconnect_delay))
+        except KeyboardInterrupt:
+            logger.info('Shutting down client...')
+        finally:
+            loop.close()
+            logger.info('Client is now down...')
+        return
+
+    # SERVER (listen) mode
     # Create a TCP server coroutine listening on port of the host address.
     # IMPORTANT: We create a new Protocol for every connection!
     server_coro = loop.create_server(
