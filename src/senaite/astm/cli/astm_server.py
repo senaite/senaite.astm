@@ -174,9 +174,21 @@ def main():
     args = parser.parse_args()
 
     _runtime.configure_logging(args)
-    _runtime.validate_output(args.output)
     if args.capture_only and not args.output:
         parser.error("--capture-only requires --output")
+    if args.capture_only and args.url:
+        # The modes are conceptually mutually exclusive: capture-
+        # only persists captures and stops there, --url tells the
+        # pipeline where to forward them. Letting them coexist
+        # silently means a misconfigured systemd unit (e.g. left
+        # --url in the line after adding --capture-only) ships
+        # with both flags and the operator never notices results
+        # aren't reaching the LIMS until somebody investigates.
+        parser.error(
+            "--capture-only is mutually exclusive with --url; "
+            "either drop --url to confirm capture-only, or drop "
+            "--capture-only to forward to the LIMS.")
+    _runtime.validate_output(args.output)
     if args.capture_only:
         logger.info(
             "Capture-only mode: LIMS push disabled; "
