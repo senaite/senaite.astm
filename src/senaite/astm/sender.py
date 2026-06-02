@@ -27,10 +27,11 @@ from senaite.astm.core import lims
 from senaite.astm.core.envelope import serialize_envelope
 from senaite.astm.core.lims import post_to_senaite
 from senaite.astm.utils import parse_capture
+from senaite.astm.utils import rebuild_checksums
 from senaite.astm.wrapper import Wrapper
 
 
-def _file_to_message(fh, message_format):
+def _file_to_message(fh, message_format, rebuild=False):
     """Read a captured ASTM file and produce one message for
     `post_to_senaite`.
 
@@ -39,8 +40,16 @@ def _file_to_message(fh, message_format):
     fixture to a listener). :func:`senaite.astm.utils.parse_capture`
     extracts the individual frames; `Wrapper` turns them into the
     typed envelope.
+
+    `rebuild=True` runs :func:`rebuild_checksums` over the input
+    bytes first so a hand-edited capture (sample-id swap, PHI
+    scrub) decodes without the codec asserting on the stale 2-byte
+    trailer. Off by default so real wire captures aren't silently
+    masked when the bytes were genuinely corrupt.
     """
     raw = fh.read()
+    if rebuild:
+        raw = rebuild_checksums(raw)
     if message_format == "astm":
         return raw
 
@@ -61,6 +70,16 @@ def main():
         "-i", "--infile",
         type=argparse.FileType("rb"), nargs="+",
         help="ASTM file(s) to send to SENAITE")
+
+    astm_group.add_argument(
+        "--rebuild-checksums", action="store_true",
+        help="Recompute the 2-byte trailer of every ASTM frame "
+             "before parsing. Use this when replaying a capture "
+             "that has been hand-edited (sample-id swap, PHI "
+             "scrub, etc.) — the edit invalidates the original "
+             "checksum and the codec asserts at parse time. Off "
+             "by default so genuine wire corruption is not "
+             "silently masked.")
 
     lims_group.add_argument(
         "-u", "--url", type=str,
@@ -107,7 +126,9 @@ def main():
     messages = []
     for fh in args.infile:
         try:
-            messages.append(_file_to_message(fh, args.message_format))
+            messages.append(_file_to_message(
+                fh, args.message_format,
+                rebuild=args.rebuild_checksums))
         except Exception as exc:
             logger.error(
                 "Failed to prepare %s as %s: %s",
