@@ -21,4 +21,4 @@ senaite.astm ships three CLIs:
 - [CLI reference](cli.md) — every flag on every command.
 - [Deployment](deployment.md) — systemd / supervisord units,
   admin endpoint, PHI scrubbing, recovery workflows.
-- [Changelog](../CHANGES.rst) — release notes (at the repo root).
+- [Changelog](../CHANGES.md) — release notes (at the repo root).
