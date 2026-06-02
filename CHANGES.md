@@ -3,6 +3,7 @@
 ## 2.0.0
 
 - astm transport: buffer data_received across TCP segments so chunked ASTM frames are reassembled instead of NAKed
+- horiba_pentra_xlr: widen OrderRecord.report_type to accept the spec value 'I' (unvalidated) and fix CommentRecord.source values to be a 1-tuple
 - roche_cobas_c111: declare Order test (repeated), Patient laboratory_id and Comment source/data/ctype, rename Order modified_at to reported_at
 - roche_cobas_c311: use DateField for PatientRecord.birthdate to match the spec DT (YYYYMMDD) type
 - senaite-astm-send: auto-detect ASTM vs HL7 v2 inputs so HL7 captures can be replayed with the same CLI
