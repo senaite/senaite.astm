@@ -2,6 +2,7 @@
 
 ## 2.0.0
 
+- roche_cobas_c311: use DateField for PatientRecord.birthdate to match the spec DT (YYYYMMDD) type
 - senaite-astm-send: auto-detect ASTM vs HL7 v2 inputs so HL7 captures can be replayed with the same CLI
 - core: include CHANGES.md in setup.py long_description and add MANIFEST.in so the changelog ships in the sdist and renders on PyPI
 - #64 core/lims: enforce a default HTTP timeout on Session.post / .get to prevent thread-pool starvation on a hung LIMS
