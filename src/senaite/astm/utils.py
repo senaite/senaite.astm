@@ -92,6 +92,56 @@ def parse_capture(raw):
     return frames
 
 
+def rebuild_checksums(raw):
+    """Return a copy of `raw` with every ASTM frame's 2-byte
+    checksum recomputed against the (possibly edited) frame body.
+
+    Captured files often need light edits to be useful in tests —
+    sample-id swaps to retarget an existing sample, PHI scrubbing,
+    bin-value tweaks for renderer smoke tests. Each edit
+    invalidates the trailing 2-byte ASTM checksum of the affected
+    frame, and the codec's `decode()` then asserts at parse time
+    (`Checksum wrong: expected ..., got ...`).
+
+    This helper walks the byte stream the same way
+    :func:`parse_capture` does — STX -> ETX or ETB -> rewrite the
+    next 2 bytes with the fresh checksum. Non-frame bytes (ENQ,
+    EOT, CRLF separators, leading/trailing junk) pass through
+    untouched.
+
+    :param raw: full file bytes
+    :returns: bytes, same length as input (checksums are 2-byte
+        hex strings, so no size change)
+    """
+    out = bytearray()
+    pos = 0
+    while True:
+        stx = raw.find(STX, pos)
+        if stx < 0:
+            out.extend(raw[pos:])
+            break
+        # bytes between the previous frame and this STX (ENQ, EOT,
+        # separators) carry through unchanged
+        out.extend(raw[pos:stx])
+        etx = raw.find(ETX, stx)
+        etb = raw.find(ETB, stx)
+        ends = [e for e in (etx, etb) if e >= 0]
+        if not ends:
+            # truncated frame at the tail — pass through as-is
+            out.extend(raw[stx:])
+            break
+        terminator = min(ends)
+        # body is STX + seq + record + terminator (no leading STX
+        # in the hashed slice; matches the codec's checksum scope)
+        body = raw[stx + 1:terminator + 1]
+        new_cs = make_checksum(body)
+        out.extend(raw[stx:terminator + 1])
+        out.extend(new_cs)
+        # skip past the old 2-byte checksum in the input
+        pos = terminator + 3
+    return bytes(out)
+
+
 def is_chunked_message(message):
     """Checks plain message for chunked byte.
     """
