@@ -5,6 +5,7 @@ Changelog
 2.0.0
 -----
 
+- senaite-astm-send: add --substitute-sample-id OLD=NEW for retargeting a captured fixture without editing the file
 - senaite-astm-send: add -o / --output to convert captures to disk or stdout instead of pushing to a LIMS
 - senaite-astm-send: add --rebuild-checksums to repair hand-edited captures before parsing
 - senaite-astm-send: add -m / --message-format (json / astm / lis2a) for replaying captures into a LIMS
