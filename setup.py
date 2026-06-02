@@ -6,11 +6,21 @@ from setuptools import setup
 
 version = "2.0.0"
 
+
+def _long_description():
+    """README + CHANGES rendered as one markdown document on PyPI."""
+    with open("README.md") as fh:
+        readme = fh.read()
+    with open("CHANGES.md") as fh:
+        changes = fh.read()
+    return readme + "\n\n" + changes
+
+
 setup(
     name="senaite.astm",
     version=version,
     description="",
-    long_description=open("README.md").read(),
+    long_description=_long_description(),
     long_description_content_type="text/markdown",
     license="GPLv2",
     # Get more strings from

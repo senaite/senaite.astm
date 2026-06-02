@@ -1,10 +1,8 @@
-Changelog
-=========
+# Changelog
 
+## 2.0.0
 
-2.0.0
------
-
+- core: include CHANGES.md in setup.py long_description and add MANIFEST.in so the changelog ships in the sdist and renders on PyPI
 - #64 core/lims: enforce a default HTTP timeout on Session.post / .get to prevent thread-pool starvation on a hung LIMS
 - #66 admin: bound /stats request reads with a 5s timeout + 2 KiB cap and narrow except blocks to drop slowloris peers
 - #67 senaite-astm-server: reject --capture-only combined with --url so a misconfigured systemd unit fails loudly
@@ -46,9 +44,7 @@ Changelog
 - #27 Lift LIMS push into core/ with typed errors and PushResult
 - #26 Drop Python 2 compatibility shims
 
-
-1.0.0
------
+## 1.0.0
 
 - #25 Add test scaffold for the ASTM pipeline
 - #23 Add Cepheid GeneXpert import schema
