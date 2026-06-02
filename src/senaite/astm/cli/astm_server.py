@@ -16,6 +16,8 @@ import asyncio
 import os
 
 from senaite.astm import logger
+from senaite.astm.admin import AdminStats
+from senaite.astm.admin import start_admin_server
 from senaite.astm.cli import _runtime
 from senaite.astm.core.lims import LimsPushHandler
 from senaite.astm.core.output import DiskCaptureHandler
@@ -40,6 +42,19 @@ def build_arg_parser():
     astm_group.add_argument(
         "-o", "--output", type=str,
         help="Output directory to write full messages")
+    astm_group.add_argument(
+        "--admin-port", type=int, default=None,
+        help="Open a read-only HTTP admin endpoint on this port "
+             "(GET /stats returns JSON: uptime, active sessions, "
+             "frames dispatched). Off by default. The admin "
+             "listener binds to --admin-listen; set that to a "
+             "non-public interface — no authentication is "
+             "performed.")
+
+    astm_group.add_argument(
+        "--admin-listen", type=str, default="127.0.0.1",
+        help="Bind address for the --admin-port endpoint.")
+
     astm_group.add_argument(
         "--shutdown-grace-seconds", type=int,
         default=_runtime.DEFAULT_SHUTDOWN_GRACE_SECONDS,
@@ -109,6 +124,15 @@ async def amain(args, stop_event=None):
         logger.info("Starting server on {}:{}".format(ip, port))
     logger.info("ASTM server ready to handle connections ...")
 
+    admin_server = None
+    if getattr(args, "admin_port", None):
+        stats = AdminStats()
+        # When stats hooks are wired into the protocol /
+        # pipeline, this is where the wrapping happens. The
+        # current minimum is to surface uptime + last_dispatch.
+        admin_server = await start_admin_server(
+            args.admin_listen, args.admin_port, stats)
+
     if stop_event is None:
         stop_event = asyncio.Event()
     _runtime.install_shutdown_handlers(loop, stop_event)
@@ -117,6 +141,9 @@ async def amain(args, stop_event=None):
         await stop_event.wait()
     finally:
         logger.info("Shutting down server...")
+        if admin_server is not None:
+            admin_server.close()
+            await admin_server.wait_closed()
         server.close()
         await server.wait_closed()
         await _runtime.drain_tasks(task_set, args.shutdown_grace_seconds)
