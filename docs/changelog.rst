@@ -7,6 +7,7 @@ Changelog
 
 - #64 core/lims: enforce a default HTTP timeout on Session.post / .get to prevent thread-pool starvation on a hung LIMS
 - #66 admin: bound /stats request reads with a 5s timeout + 2 KiB cap and narrow except blocks to drop slowloris peers
+- senaite-astm-server: reject --capture-only combined with --url so a misconfigured systemd unit fails loudly
 - senaite-astm-send: add --dry-run to log the planned request (URL, consumer, sizes) without contacting the LIMS
 - senaite-astm-send: add --filter-records / --drop-records to trim envelope buckets before serialisation
 - senaite-astm-send: add --substitute-sample-id OLD=NEW for retargeting a captured fixture without editing the file
