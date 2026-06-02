@@ -11,19 +11,19 @@ Changelog
 - #65 senaite-astm-send: switch --scrub-phi to a redact-by-allowlist policy so unknown P-record fields no longer leak
 - #68 senaite-astm-server: wire AdminStats into ASTMProtocol and the frame callback so /stats reports real session and dispatch counts
 - #69 core: bundled should-fix items — idempotent log handlers, sys.exit(1) on validate failure, --validate-only exit code capped, narrower transport / inspect except logging
-- senaite-astm-send: add --dry-run to log the planned request (URL, consumer, sizes) without contacting the LIMS
-- senaite-astm-send: add --filter-records / --drop-records to trim envelope buckets before serialisation
-- senaite-astm-send: add --substitute-sample-id OLD=NEW for retargeting a captured fixture without editing the file
-- senaite-astm-server: add --admin-port for a read-only HTTP /stats endpoint (uptime, sessions, dispatches)
-- senaite-astm-send: add --validate-only to parse + envelope-check captures without pushing to a LIMS
-- senaite-astm-send: add --scrub-phi to redact patient identifiers in the JSON envelope before pushing
-- senaite-astm-inspect: new read-only CLI for instrument / summary / diff over captured ASTM files
-- senaite-astm-server: add --capture-only to persist captures without forwarding them to the LIMS
-- senaite-astm-send: add -o / --output to convert captures to disk or stdout instead of pushing to a LIMS
-- senaite-astm-send: add --rebuild-checksums to repair hand-edited captures before parsing
-- senaite-astm-send: add -m / --message-format (json / astm / lis2a) for replaying captures into a LIMS
-- Decode Yumizen HISTOGRAM and MATRIX encoded streams into float lists in the envelope
-- Quiet empty-session disconnects: log TCP-probe drops at DEBUG, keep WARNING for mid-session cuts
+- #63 senaite-astm-server: add --capture-only to persist captures without forwarding them to the LIMS
+- #62 senaite-astm-server: add --admin-port for a read-only HTTP /stats endpoint (uptime, sessions, dispatches)
+- #60 senaite-astm-inspect: new read-only CLI for instrument / summary / diff over captured ASTM files
+- #59 senaite-astm-send: add --dry-run to log the planned request (URL, consumer, sizes) without contacting the LIMS
+- #58 senaite-astm-send: add --filter-records / --drop-records to trim envelope buckets before serialisation
+- #57 senaite-astm-send: add --scrub-phi to redact patient identifiers in the JSON envelope before pushing
+- #56 senaite-astm-send: add --validate-only to parse + envelope-check captures without pushing to a LIMS
+- #55 senaite-astm-send: add --substitute-sample-id OLD=NEW for retargeting a captured fixture without editing the file
+- #54 senaite-astm-send: add -o / --output to convert captures to disk or stdout instead of pushing to a LIMS
+- #53 senaite-astm-send: add --rebuild-checksums to repair hand-edited captures before parsing
+- #52 senaite-astm-send: add -m / --message-format (json / astm / lis2a) for replaying captures into a LIMS
+- #51 Decode Yumizen HISTOGRAM and MATRIX encoded streams into float lists in the envelope
+- #50 Quiet empty-session disconnects: log TCP-probe drops at DEBUG, keep WARNING for mid-session cuts
 - #49 Lift validate_lims, frame_callback dispatch, and LIMS arg group into _runtime
 - #48 Synthetic ASTM adapters: extract framing dance into synthesize_session helper
 - #47 HL7 parser: preserve unmapped segments under metadata.unmapped_segments
