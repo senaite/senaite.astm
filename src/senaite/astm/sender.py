@@ -320,6 +320,14 @@ def main():
         "-d", "--delay", type=int, default=5,
         help="Seconds between push retries")
 
+    lims_group.add_argument(
+        "--dry-run", action="store_true",
+        help="Log the URL, consumer, message count and per-message "
+             "format + byte size that would be pushed to the LIMS, "
+             "then exit without opening a connection. The URL "
+             "password is masked. Useful for confirming the right "
+             "target and payload before committing.")
+
     parser.add_argument(
         "-v", "--verbose", action="store_true",
         help="Verbose logging")
@@ -384,6 +392,12 @@ def main():
         _write_outputs(messages, args.output, args.message_format)
         return
 
+    if args.dry_run:
+        _print_dry_run(
+            messages, args.url, args.consumer,
+            args.message_format)
+        return
+
     session = lims.Session(args.url)
     post_to_senaite(
         [m for _, m in messages], session,
@@ -427,6 +441,38 @@ def _write_outputs(messages, output, message_format):
         return
     with open(output, "wb") as fh:
         _write_one(fh, messages[0][1])
+
+
+def _print_dry_run(messages, url, consumer, message_format):
+    """Log what would be sent to the LIMS without opening a
+    connection. The URL's password component is masked so the
+    output is safe to paste into a bug report."""
+    logger.info("DRY RUN — no request will be sent")
+    logger.info("  url:      %s", _mask_url_password(url))
+    logger.info("  consumer: %s", consumer)
+    logger.info("  format:   %s", message_format)
+    logger.info("  messages: %d", len(messages))
+    for path, msg in messages:
+        size = len(msg) if msg is not None else 0
+        logger.info("    - %s (%d bytes)", path, size)
+
+
+def _mask_url_password(url):
+    """Return `url` with the password component replaced by ***.
+
+    Accepts the project's standard form
+    `http(s)://user:password@host[:port]/path`. Returns the URL
+    unchanged when no credentials are embedded."""
+    if not url or "@" not in url:
+        return url or ""
+    scheme, _, rest = url.partition("://")
+    if "@" not in rest:
+        return url
+    creds, _, tail = rest.partition("@")
+    if ":" not in creds:
+        return url
+    user, _, _ = creds.partition(":")
+    return "{}://{}:***@{}".format(scheme, user, tail)
 
 
 def _validate_only(infiles, rebuild):
