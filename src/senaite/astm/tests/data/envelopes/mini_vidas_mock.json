@@ -1,0 +1,140 @@
+{
+  "H": [
+    {
+      "address": null,
+      "caps": null,
+      "comments": null,
+      "delimeter": [
+        {
+          "_": "",
+          "__": null
+        },
+        {
+          "_": "",
+          "__": null
+        },
+        {
+          "_": "",
+          "__": "&"
+        }
+      ],
+      "message_id": null,
+      "password": null,
+      "phone": null,
+      "processing_id": "P",
+      "receiver": null,
+      "reserved": null,
+      "sender": {
+        "manufacturer": "biomerieux",
+        "name": "miniVidas",
+        "version": "1.0.0"
+      },
+      "timestamp": "<volatile>",
+      "type": "H",
+      "version": null
+    }
+  ],
+  "L": [
+    {
+      "code": "N",
+      "seq": "1",
+      "type": "L"
+    }
+  ],
+  "O": [
+    {
+      "action_code": null,
+      "biomaterial": null,
+      "clinical_info": null,
+      "collected_at": null,
+      "collector": null,
+      "danger_code": null,
+      "infection_flag": null,
+      "instrument": null,
+      "instrument_charge": null,
+      "instrument_section": null,
+      "laboratory": null,
+      "laboratory_field_1": null,
+      "laboratory_field_2": null,
+      "location_ward": null,
+      "physician": null,
+      "physician_phone": null,
+      "priority": null,
+      "received_at": null,
+      "report_type": null,
+      "reported_at": "20241025183500",
+      "requested_at": null,
+      "reserved": null,
+      "sample_id": "Z1G021SCR",
+      "sampled_at": null,
+      "seq": "1",
+      "specimen_service": null,
+      "test": "Anti-HBc Total II",
+      "type": "O",
+      "user_field_1": null,
+      "user_field_2": null,
+      "volume": null
+    }
+  ],
+  "P": [
+    {
+      "address": null,
+      "admission_date": null,
+      "admission_status": null,
+      "birthdate": null,
+      "diagnosis": null,
+      "diagnostic_code": null,
+      "diagnostic_code_nature": null,
+      "diet": null,
+      "dosage_category": null,
+      "height": null,
+      "hospital_institution": null,
+      "hospital_service": null,
+      "id": null,
+      "isolation_status": null,
+      "laboratory_id": null,
+      "language": null,
+      "location": null,
+      "maiden_name": null,
+      "martial_status": null,
+      "medication": null,
+      "name": "test_patient",
+      "phone": null,
+      "physician_id": null,
+      "practice_field_1": null,
+      "practice_field_2": null,
+      "practice_id": null,
+      "race": null,
+      "religion": null,
+      "reserved": null,
+      "seq": "1",
+      "sex": null,
+      "special_1": null,
+      "special_2": null,
+      "type": "P",
+      "weight": null
+    }
+  ],
+  "R": [
+    {
+      "abnormal_flag": null,
+      "abnormality_nature": null,
+      "completed_at": "20241025183500",
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "1",
+      "started_at": null,
+      "status": "Positif",
+      "test": "HBCT",
+      "type": "R",
+      "units": null,
+      "value": "0.05"
+    }
+  ],
+  "metadata": {
+    "astm": "\u00021H|\\\\^&|||miniVidas^biomerieux^1.0.0|||||||||20241025183500\r\u000358\n\u00022P|1||||test_patient|||||||||||||||||||||||||||||\r\u00034F\n\u00023O|1|Z1G021SCR||Anti-HBc Total II||||||||||||||||||20241025183500||||||||\r\u0003D5\n\u00024R|1|HBCT|0.05|||||Positif||||20241025183500|\r\u000396\n\u00025L|1|N\r\u000308",
+    "lis2a": "H|\\\\^&|||miniVidas^biomerieux^1.0.0|||||||||20241025183500\r\u0003P|1||||test_patient|||||||||||||||||||||||||||||\r\u0003O|1|Z1G021SCR||Anti-HBc Total II||||||||||||||||||20241025183500||||||||\r\u0003R|1|HBCT|0.05|||||Positif||||20241025183500|\r\u0003L|1|N\r\u0003"
+  }
+}

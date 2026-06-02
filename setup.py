@@ -26,7 +26,6 @@ setup(
     url="",
     packages=find_packages("src"),
     package_dir={"": "src"},
-    namespace_packages=["senaite"],
     include_package_data=True,
     zip_safe=False,
     install_requires=[
@@ -42,6 +41,7 @@ setup(
         "dev": [
             "pytest",
             "coverage",
+            "responses",
         ]
     },
     entry_points={
