@@ -33,7 +33,8 @@ from senaite.astm.utils import rebuild_checksums
 from senaite.astm.wrapper import Wrapper
 
 
-def _file_to_message(fh, message_format, rebuild=False):
+def _file_to_message(fh, message_format, rebuild=False,
+                     substitutions=None):
     """Read a captured ASTM file and produce one message for
     `post_to_senaite`.
 
@@ -48,8 +49,18 @@ def _file_to_message(fh, message_format, rebuild=False):
     scrub) decodes without the codec asserting on the stale 2-byte
     trailer. Off by default so real wire captures aren't silently
     masked when the bytes were genuinely corrupt.
+
+    `substitutions` is an optional list of `(old, new)` byte pairs
+    applied to the raw bytes before any other processing. Used
+    primarily to retarget the sample id of a captured message
+    (`CLVB262200 -> CLVB262205`) so the same fixture can be
+    replayed against successive registrations. Any substitution
+    that changes a frame body invalidates the trailing checksum,
+    so the typical companion flag is `--rebuild-checksums`.
     """
     raw = fh.read()
+    if substitutions:
+        raw = _apply_substitutions(raw, substitutions)
     if rebuild:
         raw = rebuild_checksums(raw)
     if message_format == "astm":
@@ -58,6 +69,37 @@ def _file_to_message(fh, message_format, rebuild=False):
     frames = parse_capture(raw)
     envelope = Wrapper(frames).to_envelope()
     return serialize_envelope(envelope, message_format)
+
+
+def _apply_substitutions(raw, substitutions):
+    """Apply each `(old, new)` byte pair to `raw` in order.
+
+    Plain `bytes.replace` — global, literal, no regex. Order
+    matters only when the user supplies pairs that overlap each
+    other, in which case the explicit ordering is the only sane
+    contract.
+    """
+    for old, new in substitutions:
+        raw = raw.replace(old, new)
+    return raw
+
+
+def _parse_substitution(value):
+    """Argparse type converter for `--substitute-sample-id`.
+
+    Accepts `OLD=NEW`; rejects forms with no `=` or an empty side.
+    Returns the pair as bytes (latin-1; ASTM payloads are 8-bit
+    clean), so the substitution can be applied directly to the
+    raw capture stream without an intermediate decode.
+    """
+    if "=" not in value:
+        raise argparse.ArgumentTypeError(
+            "expected OLD=NEW, got %r" % value)
+    old, new = value.split("=", 1)
+    if not old:
+        raise argparse.ArgumentTypeError(
+            "OLD side of substitution is empty: %r" % value)
+    return (old.encode("latin-1"), new.encode("latin-1"))
 
 
 def main():
@@ -72,6 +114,18 @@ def main():
         "-i", "--infile",
         type=argparse.FileType("rb"), nargs="+",
         help="ASTM file(s) to send to SENAITE")
+
+    astm_group.add_argument(
+        "--substitute-sample-id", dest="substitutions",
+        action="append", default=[], metavar="OLD=NEW",
+        type=_parse_substitution,
+        help="Replace every occurrence of OLD with NEW in the raw "
+             "capture before parsing. Repeatable. Primary use: "
+             "retarget a captured ASTM file to a different sample "
+             "id so the same fixture can be replayed against a "
+             "fresh registration without editing the file. The "
+             "substitution invalidates the affected frame's "
+             "checksum, so combine with --rebuild-checksums.")
 
     astm_group.add_argument(
         "--rebuild-checksums", action="store_true",
@@ -141,7 +195,8 @@ def main():
                 getattr(fh, "name", "<stream>"),
                 _file_to_message(
                     fh, args.message_format,
-                    rebuild=args.rebuild_checksums)))
+                    rebuild=args.rebuild_checksums,
+                    substitutions=args.substitutions)))
         except Exception as exc:
             logger.error(
                 "Failed to prepare %s as %s: %s",
