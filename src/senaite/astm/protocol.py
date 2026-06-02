@@ -44,6 +44,10 @@ class ASTMProtocol(asyncio.Protocol):
         self.chunks = []
         self.messages = []
         self.in_transfer_state = False
+        # Optional future, set by the client (connect) mode, that gets resolved
+        # when the connection is lost so the caller can reconnect. Stays None
+        # in server (listen) mode, where each connection is independent.
+        self.on_connection_lost = kwargs.get("on_connection_lost", None)
 
     def connection_made(self, transport):
         """Called when a connection is made.
@@ -258,4 +262,8 @@ class ASTMProtocol(asyncio.Protocol):
         """Called when the connection is lost or closed.
         """
         logger.warning("Lost connection for {!s}".format(self.client))
-        self.close_connection()
+        self.cancel_timer()
+        self.discard_env()
+        # Notify client (connect) mode so it can reconnect
+        if self.on_connection_lost and not self.on_connection_lost.done():
+            self.on_connection_lost.set_result(ex)
