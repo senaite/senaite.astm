@@ -5,6 +5,7 @@ Changelog
 2.0.0
 -----
 
+- senaite-astm-send: add --filter-records / --drop-records to trim envelope buckets before serialisation
 - senaite-astm-send: add --substitute-sample-id OLD=NEW for retargeting a captured fixture without editing the file
 - senaite-astm-server: add --admin-port for a read-only HTTP /stats endpoint (uptime, sessions, dispatches)
 - senaite-astm-send: add --validate-only to parse + envelope-check captures without pushing to a LIMS

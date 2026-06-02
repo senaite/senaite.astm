@@ -50,10 +50,17 @@ PHI_KEYS = (
 )
 PHI_REDACTION = "<REDACTED>"
 
+# Record buckets the envelope splits frames into. Used to validate
+# --filter-records / --drop-records arguments at parse time so a
+# typo (e.g. "X") fails immediately instead of silently doing
+# nothing.
+RECORD_TYPES = ("H", "P", "O", "R", "C", "M", "L", "Q")
+
 
 def _file_to_message(fh, message_format, rebuild=False,
                      substitutions=None,
-                     scrub_phi=False, phi_extra=()):
+                     scrub_phi=False, phi_extra=(),
+                     keep_records=None, drop_records=None):
     """Read a captured ASTM file and produce one message for
     `post_to_senaite`.
 
@@ -84,6 +91,14 @@ def _file_to_message(fh, message_format, rebuild=False,
     text in `metadata.*` are not rewritten, so the caller should
     use `-m json`. `phi_extra` adds vendor-specific keys to the
     default set (see :data:`PHI_KEYS`).
+
+    `keep_records` / `drop_records` (mutually exclusive; pass at
+    most one) trim the parsed envelope's per-type buckets before
+    serialisation. Useful for producing a stripped fixture that
+    exercises one specific consumer path. Only the JSON output
+    reflects the trimming — raw ASTM bytes and the flat LIS2-A
+    text are vendor-specific and cannot be re-emitted from a
+    pruned envelope.
     """
     raw = fh.read()
     if substitutions:
@@ -97,6 +112,8 @@ def _file_to_message(fh, message_format, rebuild=False,
     envelope = Wrapper(frames).to_envelope()
     if scrub_phi:
         _scrub_envelope_phi(envelope, phi_extra)
+    if keep_records or drop_records:
+        _filter_envelope_records(envelope, keep_records, drop_records)
     return serialize_envelope(envelope, message_format)
 
 
@@ -151,6 +168,41 @@ def _scrub_envelope_phi(envelope, extra_keys=()):
         envelope.metadata.lis2a = ""
 
 
+def _filter_envelope_records(envelope, keep, drop):
+    """Trim per-type buckets on `envelope` in place.
+
+    Exactly one of `keep` / `drop` is honoured; the caller has
+    already validated they are not both set.
+    """
+    if keep:
+        for rt in RECORD_TYPES:
+            if rt not in keep:
+                getattr(envelope, rt)[:] = []
+    elif drop:
+        for rt in drop:
+            getattr(envelope, rt)[:] = []
+
+
+def _parse_record_list(value):
+    """Argparse type converter for `--filter-records` / `--drop-records`.
+
+    Accepts a comma-separated list of record-type letters. Each
+    letter is normalised to upper-case; unknown letters fail
+    parsing so a typo can't silently no-op.
+    """
+    parts = [p.strip().upper() for p in value.split(",") if p.strip()]
+    if not parts:
+        raise argparse.ArgumentTypeError(
+            "expected a comma-separated list of record types, "
+            "got %r" % value)
+    bad = [p for p in parts if p not in RECORD_TYPES]
+    if bad:
+        raise argparse.ArgumentTypeError(
+            "unknown record type(s) %s; known: %s"
+            % (",".join(bad), ",".join(RECORD_TYPES)))
+    return tuple(parts)
+
+
 def main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -202,6 +254,26 @@ def main():
         help="Additional P-record key to redact under --scrub-phi. "
              "Repeatable; vendor-specific keys not covered by the "
              "default set go here.")
+
+    astm_group.add_argument(
+        "--filter-records", type=_parse_record_list, default=None,
+        metavar="TYPES",
+        help="Keep only the listed record-type buckets in the "
+             "parsed envelope; drop the rest. Example: "
+             "--filter-records H,O,R keeps headers, orders, "
+             "results. Mutually exclusive with --drop-records. "
+             "Requires --message-format json (raw and flat "
+             "outputs cannot be re-emitted from a pruned "
+             "envelope).")
+
+    astm_group.add_argument(
+        "--drop-records", type=_parse_record_list, default=None,
+        metavar="TYPES",
+        help="Drop the listed record-type buckets from the parsed "
+             "envelope; keep the rest. Example: --drop-records C,M "
+             "drops comments and manufacturer rows. Mutually "
+             "exclusive with --filter-records. Requires "
+             "--message-format json.")
 
     astm_group.add_argument(
         "--rebuild-checksums", action="store_true",
@@ -270,6 +342,18 @@ def main():
             "raw ASTM bytes and the flat LIS2-A text cannot be "
             "rewritten safely.")
         return
+    if args.filter_records and args.drop_records:
+        logger.error(
+            "--filter-records and --drop-records are mutually "
+            "exclusive; pass at most one.")
+        return
+    if (args.filter_records or args.drop_records) \
+            and args.message_format != "json":
+        logger.error(
+            "--filter-records / --drop-records require "
+            "--message-format json; raw ASTM and flat LIS2-A "
+            "cannot be re-emitted from a pruned envelope.")
+        return
     if not args.output and not args.url:
         logger.error("No --url or --output provided; nothing to do.")
         return
@@ -284,7 +368,9 @@ def main():
                     rebuild=args.rebuild_checksums,
                     substitutions=args.substitutions,
                     scrub_phi=args.scrub_phi,
-                    phi_extra=args.phi_extra)))
+                    phi_extra=args.phi_extra,
+                    keep_records=args.filter_records,
+                    drop_records=args.drop_records)))
         except Exception as exc:
             logger.error(
                 "Failed to prepare %s as %s: %s",
