@@ -125,6 +125,29 @@ class SessionAuthTest(unittest.TestCase):
             Session(URL).post("push", {"x": 1})
         self.assertEqual(ctx.exception.status_code, 503)
 
+    def test_post_passes_default_timeout(self):
+        """A blocking POST behind a hung Zope worker would pin a
+        thread-pool worker indefinitely. Confirm the session always
+        passes a timeout tuple through to requests."""
+        from senaite.astm.core.lims import DEFAULT_HTTP_TIMEOUT
+        session = Session(URL)
+        with patch.object(session._session, "post") as fake_post:
+            fake_post.return_value = MagicMock(
+                status_code=200, json=lambda: {})
+            session.post("push", {"x": 1})
+        kwargs = fake_post.call_args.kwargs
+        self.assertEqual(kwargs.get("timeout"), DEFAULT_HTTP_TIMEOUT)
+
+    def test_get_passes_default_timeout(self):
+        from senaite.astm.core.lims import DEFAULT_HTTP_TIMEOUT
+        session = Session(URL)
+        with patch.object(session._session, "get") as fake_get:
+            fake_get.return_value = MagicMock(
+                status_code=200, json=lambda: {})
+            session.get("anything")
+        kwargs = fake_get.call_args.kwargs
+        self.assertEqual(kwargs.get("timeout"), DEFAULT_HTTP_TIMEOUT)
+
 
 class PushResultTest(unittest.TestCase):
     """PushResult is the documented return type of post_to_senaite."""
