@@ -56,6 +56,14 @@ def build_arg_parser():
         help="Bind address for the --admin-port endpoint.")
 
     astm_group.add_argument(
+        "--capture-only", action="store_true",
+        help="Accept connections and persist captures, but skip "
+             "the LIMS push step even when --url is given. Useful "
+             "for a hold-and-review workflow where an operator (or "
+             "a UI on top of this server) wants to inspect messages "
+             "before they propagate to the LIMS. Requires --output.")
+
+    astm_group.add_argument(
         "--shutdown-grace-seconds", type=int,
         default=_runtime.DEFAULT_SHUTDOWN_GRACE_SECONDS,
         help="Seconds to wait for in-flight handler tasks to "
@@ -78,7 +86,7 @@ def build_pipeline(args, session):
     handlers = []
     if args.output:
         handlers.append(DiskCaptureHandler(os.path.abspath(args.output)))
-    if session is not None:
+    if session is not None and not getattr(args, "capture_only", False):
         handlers.append(LimsPushHandler(
             session,
             retries=args.retries,
@@ -167,7 +175,15 @@ def main():
 
     _runtime.configure_logging(args)
     _runtime.validate_output(args.output)
-    args.session = _runtime.validate_lims(args.url)
+    if args.capture_only and not args.output:
+        parser.error("--capture-only requires --output")
+    if args.capture_only:
+        logger.info(
+            "Capture-only mode: LIMS push disabled; "
+            "captures persisted to %s", args.output)
+        args.session = None
+    else:
+        args.session = _runtime.validate_lims(args.url)
 
     try:
         asyncio.run(amain(args))
