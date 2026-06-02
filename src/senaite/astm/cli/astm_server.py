@@ -97,15 +97,26 @@ def build_pipeline(args, session):
     return Pipeline(handlers)
 
 
-def make_frame_callback(loop, pipeline, task_set):
+def make_frame_callback(loop, pipeline, task_set, stats=None):
     """ASTM-specific frame callback.
 
     The ASTM transport hands us a *list of frames* per session; we
     wrap them into an :class:`Envelope` before running the pipeline.
+    When `stats` is supplied the wrapper bumps `frames_in()` for
+    every batch the transport delivers, so the admin /stats
+    endpoint reports a live dispatch counter.
     """
-    return _runtime.make_frame_callback(
+    inner = _runtime.make_frame_callback(
         loop, pipeline, task_set,
         to_envelope=lambda frames: Wrapper(frames).to_envelope())
+    if stats is None:
+        return inner
+
+    def _wrapped(client, frames):
+        stats.frames_in()
+        return inner(client, frames)
+
+    return _wrapped
 
 
 async def amain(args, stop_event=None):
@@ -121,10 +132,14 @@ async def amain(args, stop_event=None):
     loop = asyncio.get_running_loop()
     task_set = set()
     pipeline = build_pipeline(args, args.session)
-    frame_callback = make_frame_callback(loop, pipeline, task_set)
+
+    stats = AdminStats() if getattr(args, "admin_port", None) else None
+    frame_callback = make_frame_callback(
+        loop, pipeline, task_set, stats=stats)
 
     server = await loop.create_server(
-        lambda: ASTMProtocol(frame_callback=frame_callback),
+        lambda: ASTMProtocol(
+            frame_callback=frame_callback, stats=stats),
         host=args.listen, port=args.port)
 
     for socket in server.sockets:
@@ -133,11 +148,7 @@ async def amain(args, stop_event=None):
     logger.info("ASTM server ready to handle connections ...")
 
     admin_server = None
-    if getattr(args, "admin_port", None):
-        stats = AdminStats()
-        # When stats hooks are wired into the protocol /
-        # pipeline, this is where the wrapping happens. The
-        # current minimum is to surface uptime + last_dispatch.
+    if stats is not None:
         admin_server = await start_admin_server(
             args.admin_listen, args.admin_port, stats)
 

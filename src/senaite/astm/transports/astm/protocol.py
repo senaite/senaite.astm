@@ -38,10 +38,20 @@ class ASTMProtocol(asyncio.Protocol):
     bytes in arrival order.
     """
 
-    def __init__(self, frame_callback=None, timeout=TIMEOUT):
+    def __init__(self, frame_callback=None, timeout=TIMEOUT,
+                 stats=None):
+        """
+        :param stats: Optional :class:`senaite.astm.admin.AdminStats`
+            counter bag. When supplied, the protocol calls
+            `stats.session_opened()` on connect and
+            `stats.session_closed()` on disconnect. None is the
+            documented default — the protocol works standalone in
+            tests that don't care about admin metrics.
+        """
         logger.debug("ASTMProtocol:constructor")
         self.frame_callback = frame_callback
         self.timeout = timeout
+        self.stats = stats
 
         self.loop = None
         self.transport = None
@@ -69,6 +79,8 @@ class ASTMProtocol(asyncio.Protocol):
         self.transport = transport
         self.client = self.get_client_key(transport)
         logger.debug("Connection from {!s}".format(self.client))
+        if self.stats is not None:
+            self.stats.session_opened()
 
     def connection_lost(self, ex):
         # Distinguish "client closed without sending data" (typical
@@ -82,6 +94,8 @@ class ASTMProtocol(asyncio.Protocol):
         else:
             logger.warning(
                 "Lost connection for %s", self.client)
+        if self.stats is not None:
+            self.stats.session_closed()
         self.close_connection()
 
     def _session_was_empty(self):
