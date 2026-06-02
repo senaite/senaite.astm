@@ -9,7 +9,7 @@ Changelog
 - #66 admin: bound /stats request reads with a 5s timeout + 2 KiB cap and narrow except blocks to drop slowloris peers
 - #67 senaite-astm-server: reject --capture-only combined with --url so a misconfigured systemd unit fails loudly
 - #65 senaite-astm-send: switch --scrub-phi to a redact-by-allowlist policy so unknown P-record fields no longer leak
-- senaite-astm-server: wire AdminStats into ASTMProtocol and the frame callback so /stats reports real session and dispatch counts
+- #68 senaite-astm-server: wire AdminStats into ASTMProtocol and the frame callback so /stats reports real session and dispatch counts
 - senaite-astm-send: add --dry-run to log the planned request (URL, consumer, sizes) without contacting the LIMS
 - senaite-astm-send: add --filter-records / --drop-records to trim envelope buckets before serialisation
 - senaite-astm-send: add --substitute-sample-id OLD=NEW for retargeting a captured fixture without editing the file
