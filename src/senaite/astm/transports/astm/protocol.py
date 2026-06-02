@@ -265,7 +265,15 @@ class ASTMProtocol(asyncio.Protocol):
             logger.debug("No frame_callback registered; dropping %d frames",
                          len(frames))
             return
+        # Bare-Exception catch on purpose: the frame_callback is
+        # caller-supplied, so any error there must not propagate
+        # up to the asyncio Protocol layer and tear the transport
+        # down for unrelated future sessions. We log type + repr
+        # so the operator can tell apart a programming error from
+        # a downstream LIMS / disk error.
         try:
             self.frame_callback(self.client, frames)
         except Exception as exc:
-            logger.error("frame_callback raised %r; frames dropped", exc)
+            logger.error(
+                "frame_callback raised %s: %r; frames dropped",
+                type(exc).__name__, exc)

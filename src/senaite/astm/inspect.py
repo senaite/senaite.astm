@@ -69,7 +69,12 @@ def cmd_instrument(args, stream):
         try:
             _env, frames = _read_envelope(path)
         except Exception as exc:
-            stream.write("%s: ERROR %s\n" % (path, exc))
+            # Inspection should report any failure mode rather
+            # than aborting the whole batch; logging the exception
+            # type lets the operator distinguish "file not found"
+            # from "checksum mismatch" from "decoder asserted".
+            stream.write("%s: ERROR %s: %s\n" % (
+                path, type(exc).__name__, exc))
             continue
         stream.write("%s: %s\n" % (path, _resolve_instrument(frames)))
     return 0
@@ -80,7 +85,12 @@ def cmd_summary(args, stream):
         try:
             env, frames = _read_envelope(path)
         except Exception as exc:
-            stream.write("%s: ERROR %s\n" % (path, exc))
+            # Inspection should report any failure mode rather
+            # than aborting the whole batch; logging the exception
+            # type lets the operator distinguish "file not found"
+            # from "checksum mismatch" from "decoder asserted".
+            stream.write("%s: ERROR %s: %s\n" % (
+                path, type(exc).__name__, exc))
             continue
         counts = _bucket_counts(env)
         parts = ["%s=%d" % (rt, counts[rt]) for rt in RECORD_TYPES]

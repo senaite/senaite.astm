@@ -354,13 +354,23 @@ def main():
 
     logger.setLevel(
         logging.DEBUG if args.verbose else logging.INFO)
-    logger.addHandler(logging.StreamHandler())
+    # Idempotent: avoid stacking duplicate StreamHandlers when the
+    # CLI is invoked repeatedly under one Python process (test
+    # suites, supervisord short-restart cycles).
+    if not any(isinstance(h, logging.StreamHandler)
+               and not isinstance(h, logging.FileHandler)
+               for h in logger.handlers):
+        logger.addHandler(logging.StreamHandler())
 
     if not args.infile:
         return
 
     if args.validate_only:
-        sys.exit(_validate_only(args.infile, args.rebuild_checksums))
+        failures = _validate_only(args.infile, args.rebuild_checksums)
+        # Cap exit code at 1 so it never overflows the 8-bit POSIX
+        # exit-code range. 300 failed fixtures would otherwise wrap
+        # to 44 and a CI step might mis-classify that as success.
+        sys.exit(1 if failures else 0)
 
     if args.scrub_phi and args.message_format != "json":
         logger.error(
