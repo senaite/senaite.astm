@@ -60,6 +60,41 @@ class RenderResponseTest(unittest.TestCase):
         self.assertTrue(raw.startswith(b"HTTP/1.1 404"))
 
 
+class AdminSlowlorisTest(unittest.TestCase):
+    """A peer that opens TCP but never sends `\\r\\n` must not park
+    the handler task indefinitely. The handler enforces a short
+    request timeout."""
+
+    def test_silent_peer_dropped_within_timeout(self):
+        import senaite.astm.admin as admin_mod
+
+        original_timeout = admin_mod.ADMIN_REQUEST_TIMEOUT
+        admin_mod.ADMIN_REQUEST_TIMEOUT = 0.25
+        try:
+            asyncio.run(self._run_silent_peer())
+        finally:
+            admin_mod.ADMIN_REQUEST_TIMEOUT = original_timeout
+
+    async def _run_silent_peer(self):
+        stats = AdminStats()
+        server = await start_admin_server("127.0.0.1", 0, stats)
+        port = server.sockets[0].getsockname()[1]
+        try:
+            reader, writer = await asyncio.open_connection(
+                "127.0.0.1", port)
+            # Send nothing — the handler must time out and close
+            # the connection on its side. If the timeout isn't
+            # enforced this hangs forever.
+            response = await asyncio.wait_for(
+                reader.read(), timeout=2.0)
+            self.assertEqual(response, b"")
+            writer.close()
+            await writer.wait_closed()
+        finally:
+            server.close()
+            await server.wait_closed()
+
+
 class AdminServerIntegrationTest(unittest.TestCase):
     """Boot the admin listener on an ephemeral port, hit /stats
     and /missing, confirm the responses."""
@@ -105,6 +140,8 @@ def test_suite():
     suite = unittest.TestSuite()
     suite.addTests(loader.loadTestsFromTestCase(AdminStatsTest))
     suite.addTests(loader.loadTestsFromTestCase(RenderResponseTest))
+    suite.addTests(
+        loader.loadTestsFromTestCase(AdminSlowlorisTest))
     suite.addTests(
         loader.loadTestsFromTestCase(AdminServerIntegrationTest))
     return suite

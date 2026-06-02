@@ -17,6 +17,7 @@ the server hands to both the pipeline (via callbacks) and the
 admin protocol.
 """
 
+import asyncio
 import json
 import time
 
@@ -81,12 +82,41 @@ def render_not_found():
     return headers.encode("utf-8") + body
 
 
+#: Seconds before a half-open admin connection is dropped.
+#: A peer that opens TCP but never sends `\r\n` would otherwise
+#: park a handler task forever (slowloris-style); 5 seconds is
+#: tight for healthy peers and bounds the resource impact of a
+#: hostile one.
+ADMIN_REQUEST_TIMEOUT = 5
+
+#: Hard cap on the bytes accepted for the request line.
+#: HTTP/1.1 servers commonly cap request lines around 8 KiB; a
+#: 2 KiB cap is more than enough for `GET /stats HTTP/1.1\r\n`
+#: and refuses oversized requests with a clean failure rather
+#: than memory growth.
+ADMIN_REQUEST_LINE_LIMIT = 2048
+
+
 async def _handle(reader, writer, stats):
     """Handle one admin HTTP request. Reads only the request line;
-    ignores headers. Returns either the stats JSON or 404."""
+    ignores headers. Returns either the stats JSON or 404.
+
+    Bounded by :data:`ADMIN_REQUEST_TIMEOUT` and
+    :data:`ADMIN_REQUEST_LINE_LIMIT` so a slow or oversized peer
+    cannot park the handler task indefinitely.
+    """
     try:
-        request_line = await reader.readline()
-    except Exception:
+        request_line = await asyncio.wait_for(
+            reader.readuntil(b"\n"),
+            timeout=ADMIN_REQUEST_TIMEOUT)
+    except (asyncio.TimeoutError, asyncio.IncompleteReadError,
+            asyncio.LimitOverrunError, ConnectionError) as exc:
+        logger.debug("Admin: dropping connection (%s)", exc)
+        writer.close()
+        return
+    if len(request_line) > ADMIN_REQUEST_LINE_LIMIT:
+        logger.debug("Admin: request line over %d bytes; dropping",
+                     ADMIN_REQUEST_LINE_LIMIT)
         writer.close()
         return
     parts = request_line.split()
@@ -96,8 +126,8 @@ async def _handle(reader, writer, stats):
         writer.write(render_not_found())
     try:
         await writer.drain()
-    except Exception:
-        pass
+    except (ConnectionError, BrokenPipeError) as exc:
+        logger.debug("Admin: drain failed (%s)", exc)
     writer.close()
 
 
@@ -107,11 +137,10 @@ async def start_admin_server(host, port, stats):
     The caller is expected to close the server on shutdown
     (`server.close()` + `await server.wait_closed()`).
     """
-    import asyncio
-
     server = await asyncio.start_server(
         lambda r, w: _handle(r, w, stats),
-        host=host, port=port)
+        host=host, port=port,
+        limit=ADMIN_REQUEST_LINE_LIMIT)
     for sock in server.sockets:
         ip, port = sock.getsockname()[:2]
         logger.info("Admin endpoint on http://%s:%s/stats", ip, port)
