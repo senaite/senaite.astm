@@ -43,8 +43,6 @@ class HeaderRecord(records.HeaderRecord):
 class PatientRecord(records.PatientRecord):
     """Patient Information Record (P)
     """
-    unknown_1 = NotUsedField()
-    unknown_2 = NotUsedField()
 
 
 class OrderRecord(records.OrderRecord):
