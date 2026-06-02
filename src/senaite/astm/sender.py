@@ -32,22 +32,30 @@ from senaite.astm.utils import parse_capture
 from senaite.astm.utils import rebuild_checksums
 from senaite.astm.wrapper import Wrapper
 
-# Conservative default set of P-record keys that almost always
-# carry identifying / medical information. The full P record has
-# 30+ fields (see senaite.astm.records.PatientRecord); this set
-# targets the obvious ones. Use --scrub-phi-extra-fields to add
-# vendor-specific keys not covered here.
-PHI_KEYS = (
-    "name",
-    "maiden_name",
-    "birthdate",
-    "address",
-    "phone",
-    "id",
-    "physician_id",
-    "diagnosis",
-    "medication",
-)
+# Allowlist of P-record keys treated as non-PHI under --scrub-phi.
+#
+# The ASTM P record (see senaite.astm.records.PatientRecord) has
+# 30+ fields, most of which carry identifiers, dates, addresses or
+# medical free-text. A redact-by-allowlist policy is the only safe
+# default for a privacy-guarantee flag: a previous version of this
+# module shipped a hand-picked PHI_KEYS list which missed obvious
+# identifiers (practice_id, laboratory_id, admission_date,
+# diagnostic_code, hospital_*) and would have leaked them through.
+#
+# Kept under the allowlist: record metadata (type, seq), clinical
+# demographics typically retained for context (sex, race), and
+# clinical observations (height, weight, diet). The ASTM-reserved
+# placeholder is also kept since it never carries a value.
+PHI_NON_PHI_KEYS = frozenset((
+    "type",
+    "seq",
+    "sex",
+    "race",
+    "height",
+    "weight",
+    "diet",
+    "reserved",
+))
 PHI_REDACTION = "<REDACTED>"
 
 # Record buckets the envelope splits frames into. Used to validate
@@ -59,7 +67,7 @@ RECORD_TYPES = ("H", "P", "O", "R", "C", "M", "L", "Q")
 
 def _file_to_message(fh, message_format, rebuild=False,
                      substitutions=None,
-                     scrub_phi=False, phi_extra=(),
+                     scrub_phi=False, phi_keep=(),
                      keep_records=None, drop_records=None):
     """Read a captured ASTM file and produce one message for
     `post_to_senaite`.
@@ -84,13 +92,18 @@ def _file_to_message(fh, message_format, rebuild=False,
     that changes a frame body invalidates the trailing checksum,
     so the typical companion flag is `--rebuild-checksums`.
 
-    `scrub_phi=True` replaces the values of well-known
-    patient-identifying keys in every P record with `<REDACTED>`
-    before the envelope is serialised. Only the parsed-JSON path
-    can be scrubbed safely; raw ASTM bytes and the flat LIS2-A
-    text in `metadata.*` are not rewritten, so the caller should
-    use `-m json`. `phi_extra` adds vendor-specific keys to the
-    default set (see :data:`PHI_KEYS`).
+    `scrub_phi=True` redacts every P-record value whose key is
+    NOT in the non-PHI allowlist :data:`PHI_NON_PHI_KEYS`. The
+    allowlist policy is the only safe default for a privacy
+    flag — the ASTM P record has 30+ fields and a hand-picked
+    blocklist will almost always miss something (an earlier
+    version of this code did exactly that, missing practice_id,
+    laboratory_id, admission_date, diagnostic_code and several
+    hospital_* fields). Only the parsed-JSON path can be
+    scrubbed safely; raw ASTM bytes and the flat LIS2-A text in
+    `metadata.*` are not rewritten, so the caller should use
+    `-m json`. `phi_keep` extends the allowlist with
+    vendor-specific non-identifying fields.
 
     `keep_records` / `drop_records` (mutually exclusive; pass at
     most one) trim the parsed envelope's per-type buckets before
@@ -111,7 +124,7 @@ def _file_to_message(fh, message_format, rebuild=False,
     frames = parse_capture(raw)
     envelope = Wrapper(frames).to_envelope()
     if scrub_phi:
-        _scrub_envelope_phi(envelope, phi_extra)
+        _scrub_envelope_phi(envelope, phi_keep)
     if keep_records or drop_records:
         _filter_envelope_records(envelope, keep_records, drop_records)
     return serialize_envelope(envelope, message_format)
@@ -148,19 +161,21 @@ def _parse_substitution(value):
     return (old.encode("latin-1"), new.encode("latin-1"))
 
 
-def _scrub_envelope_phi(envelope, extra_keys=()):
-    """Replace the values of PHI keys in every P record of
-    `envelope` with :data:`PHI_REDACTION`, in place.
+def _scrub_envelope_phi(envelope, keep_keys=()):
+    """Redact every P-record value whose key is not in the
+    non-PHI allowlist, in place. The allowlist defaults to
+    :data:`PHI_NON_PHI_KEYS`; `keep_keys` extends it for
+    vendor-specific non-identifying fields.
 
     Also drops the verbatim flat-text payloads in `metadata.astm`
     and `metadata.lis2a` so a JSON-scrubbed message can't be
     pulled back to its un-scrubbed raw form by a downstream
     consumer that only looks at metadata.
     """
-    keys = set(PHI_KEYS) | set(extra_keys)
+    allowed = PHI_NON_PHI_KEYS | frozenset(keep_keys)
     for patient in envelope.P:
         for key in list(patient.keys()):
-            if key in keys and patient[key]:
+            if key not in allowed and patient[key]:
                 patient[key] = PHI_REDACTION
     if envelope.metadata.astm:
         envelope.metadata.astm = ""
@@ -249,11 +264,14 @@ def main():
              "the raw / flat formats cannot be rewritten safely.")
 
     astm_group.add_argument(
-        "--scrub-phi-extra-field", dest="phi_extra",
+        "--scrub-phi-keep-field", dest="phi_keep",
         action="append", default=[], metavar="KEY",
-        help="Additional P-record key to redact under --scrub-phi. "
-             "Repeatable; vendor-specific keys not covered by the "
-             "default set go here.")
+        help="Additional P-record key to KEEP unredacted under "
+             "--scrub-phi (vendor-specific non-identifying field "
+             "that isn't part of the default allowlist). "
+             "Repeatable. The default allowlist is "
+             "type/seq/sex/race/height/weight/diet/reserved; "
+             "everything else in the P record is redacted.")
 
     astm_group.add_argument(
         "--filter-records", type=_parse_record_list, default=None,
@@ -376,7 +394,7 @@ def main():
                     rebuild=args.rebuild_checksums,
                     substitutions=args.substitutions,
                     scrub_phi=args.scrub_phi,
-                    phi_extra=args.phi_extra,
+                    phi_keep=args.phi_keep,
                     keep_records=args.filter_records,
                     drop_records=args.drop_records)))
         except Exception as exc:
