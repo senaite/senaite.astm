@@ -6,7 +6,6 @@ accepts connections, writes captures to disk, and skips the LIMS
 push step even when --url is supplied.
 """
 
-import argparse
 import unittest
 
 from senaite.astm.cli.astm_server import build_arg_parser
