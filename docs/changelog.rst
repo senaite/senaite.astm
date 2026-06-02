@@ -11,6 +11,7 @@ Changelog
 - senaite-astm-server: add --admin-port for a read-only HTTP /stats endpoint (uptime, sessions, dispatches)
 - senaite-astm-send: add --validate-only to parse + envelope-check captures without pushing to a LIMS
 - senaite-astm-send: add --scrub-phi to redact patient identifiers in the JSON envelope before pushing
+- senaite-astm-inspect: new read-only CLI for instrument / summary / diff over captured ASTM files
 - senaite-astm-send: add -o / --output to convert captures to disk or stdout instead of pushing to a LIMS
 - senaite-astm-send: add --rebuild-checksums to repair hand-edited captures before parsing
 - senaite-astm-send: add -m / --message-format (json / astm / lis2a) for replaying captures into a LIMS
