@@ -5,6 +5,7 @@ Changelog
 2.0.0
 -----
 
+- core/lims: enforce a default HTTP timeout on Session.post / .get to prevent thread-pool starvation on a hung LIMS
 - senaite-astm-send: add --dry-run to log the planned request (URL, consumer, sizes) without contacting the LIMS
 - senaite-astm-send: add --filter-records / --drop-records to trim envelope buckets before serialisation
 - senaite-astm-send: add --substitute-sample-id OLD=NEW for retargeting a captured fixture without editing the file

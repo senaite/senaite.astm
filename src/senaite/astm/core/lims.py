@@ -17,6 +17,19 @@ DEFAULT_RETRIES = 3
 DEFAULT_DELAY = 5
 DEFAULT_CONSUMER = "senaite.lis2a.import"
 
+# `requests` timeout tuple: (connect, read).
+#
+# Without an explicit timeout `requests` blocks indefinitely on a
+# stalled response. In a long-running pipeline that means a hung
+# Zope worker on the LIMS side pins an asyncio thread-pool worker
+# per push, `task_set` grows unbounded, and the admin /stats
+# endpoint keeps reporting "healthy" until the process OOMs or
+# saturates its thread pool. 10s to open the socket, 60s for the
+# LIMS to produce a response — generous enough that a busy Zope
+# worker handling a real payload still finishes, tight enough that
+# a wedged worker is recycled within a minute.
+DEFAULT_HTTP_TIMEOUT = (10, 60)
+
 
 class SenaiteError(Exception):
     """Base class for SENAITE LIMS push errors."""
@@ -95,16 +108,22 @@ class Session(object):
         logger.info("Session established ('{}') with '{}'"
                     .format(self.username, self.url))
 
-    def post(self, endpoint, payload):
+    def post(self, endpoint, payload, timeout=DEFAULT_HTTP_TIMEOUT):
         """Send a POST request to SENAITE.
 
+        :param timeout: `requests` timeout passed through to the
+            session. Defaults to :data:`DEFAULT_HTTP_TIMEOUT` —
+            never `None`. A blocking POST behind a wedged Zope
+            worker would otherwise pin a thread-pool worker and
+            grow the pipeline's task set without bound.
         :returns: Parsed JSON response.
         :raises SenaiteUnreachableError: on connection-level failures.
         :raises SenaiteHTTPError: on non-200 responses.
         """
         url = self.get_url(endpoint)
         try:
-            response = self._session.post(url, data=payload)
+            response = self._session.post(
+                url, data=payload, timeout=timeout)
         except requests.RequestException as exc:
             raise SenaiteUnreachableError(
                 "Could not POST to {}: {}".format(url, exc)) from exc
@@ -116,7 +135,7 @@ class Session(object):
 
         return response.json()
 
-    def get(self, endpoint, timeout=60):
+    def get(self, endpoint, timeout=DEFAULT_HTTP_TIMEOUT):
         """Fetch the given endpoint and return parsed JSON.
 
         :raises SenaiteUnreachableError: on connection-level failures.
