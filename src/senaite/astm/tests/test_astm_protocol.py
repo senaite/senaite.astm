@@ -116,3 +116,53 @@ class ASTMProtocolTest(ASTMTestBase):
             self.protocol.connection_lost(None)
 
         self.assertIn("WARNING", [r.levelname for r in cm.records])
+
+    def test_chunked_frame_assembled_across_recvs(self):
+        """A complete ASTM frame split across two TCP segments
+        must be reassembled into a single dispatched message, with
+        the matching ACK going back to the client. Regression test
+        for the production cobas c111 transmission where the R
+        record arrived as two recvs and the continuation bytes
+        were dropped as un-dispatchable."""
+        transport = self.get_mock_transport()
+        self.protocol.connection_made(transport)
+        self.protocol.data_received(ENQ)
+
+        # Hand-crafted R frame split mid-data. The checksum
+        # matches the full frame body once reassembled.
+        frame = (
+            b"\x024R|1|^^^734|3.0|umol/L||N||F||$SYS$||"
+            b"20260603110046\r\x03B2\r\n"
+        )
+        # Split in the middle of the date field, just like the log
+        first, second = frame[:45], frame[45:]
+        self.assertNotIn(b"\x03", first,
+                         "split point must be before the terminator")
+
+        self.protocol.data_received(first)
+        # Nothing dispatched yet — buffer is short.
+        self.assertEqual(len(self.protocol.messages), 0)
+
+        self.protocol.data_received(second)
+        # Now the frame is complete and stored as one message.
+        self.assertEqual(len(self.protocol.messages), 1)
+        # And the response to the (now complete) frame was an ACK.
+        transport.write.assert_called_with(ACK)
+
+    def test_two_full_frames_in_one_recv(self):
+        """When a single TCP segment carries two complete frames
+        back to back, both must be dispatched and ACKed."""
+        transport = self.get_mock_transport()
+        self.protocol.connection_made(transport)
+        self.protocol.data_received(ENQ)
+
+        # Two minimal valid frames concatenated.
+        frame_a = b"\x021H|\\^&\r\x03E5\r\n"
+        frame_b = b"\x022P|1\r\x033F\r\n"
+        self.protocol.data_received(frame_a + frame_b)
+
+        self.assertEqual(len(self.protocol.messages), 2)
+        # Each frame produced an ACK; the last write is the second ACK.
+        self.assertEqual(
+            [c.args[0] for c in transport.write.call_args_list[-2:]],
+            [ACK, ACK])
