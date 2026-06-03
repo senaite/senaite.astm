@@ -1,10 +1,10 @@
 {
   "C": [
     {
-      "ctype": null,
-      "data": null,
+      "ctype": "I",
+      "data": [],
       "seq": "1",
-      "source": null,
+      "source": "I",
       "type": "C"
     }
   ],
@@ -92,13 +92,12 @@
       "laboratory_field_1": null,
       "laboratory_field_2": null,
       "location_ward": null,
-      "modified_at": null,
       "physician": null,
       "physician_phone": null,
       "priority": "S",
       "received_at": null,
       "report_type": null,
-      "reported_at": null,
+      "reported_at": "20230803131713",
       "requested_at": null,
       "reserved": null,
       "sample_id": {
@@ -109,7 +108,7 @@
       "sampled_at": null,
       "seq": "1",
       "specimen_service": null,
-      "test": null,
+      "test": [],
       "type": "O",
       "user_field_1": null,
       "user_field_2": null,
