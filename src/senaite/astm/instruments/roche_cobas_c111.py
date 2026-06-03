@@ -9,6 +9,7 @@ from senaite.astm.fields import ComponentField
 from senaite.astm.fields import ConstantField
 from senaite.astm.fields import DateTimeField
 from senaite.astm.fields import NotUsedField
+from senaite.astm.fields import RepeatedComponentField
 from senaite.astm.fields import SetField
 from senaite.astm.fields import TextField
 from senaite.astm.mapping import Component
@@ -60,6 +61,10 @@ class PatientRecord(records.PatientRecord):
     P|1||[SampleIDpart]
     """
 
+    # 8.1.4: Practice-assigned Patient ID. Carries the manually-entered
+    # Sample ID in NPT mode per spec section 7.2.2.4.
+    laboratory_id = TextField()
+
 
 class OrderRecord(records.OrderRecord):
 
@@ -86,16 +91,44 @@ class OrderRecord(records.OrderRecord):
         )
     )
 
+    # 9.4.5: Universal Test ID. Repeated field carrying up to 60
+    # ordered tests, e.g. ^^^211\^^^100\^^^744. Without this
+    # declaration the base NotUsedField swallows all ordered tests
+    # on host-bound orders.
+    test = RepeatedComponentField(
+        Component.build(
+            NotUsedField(name="_"),
+            NotUsedField(name="__"),
+            NotUsedField(name="___"),
+            TextField(name="test_id"),
+            TextField(name="treatment"),
+        )
+    )
+
     # 9.4.6: Priority
     priority = SetField(values=["R", "S"])
 
     # 9.4.23: Date/Time Reported
-    modified_at = DateTimeField()
+    reported_at = DateTimeField()
 
 
 class CommentRecord(records.CommentRecord):
     """Comment Record (C)
     """
+
+    # Always "I" (instrument).
+    source = TextField()
+
+    # Flag code ^ flag comment, repeated.
+    data = RepeatedComponentField(
+        Component.build(
+            TextField(name="flag_code"),
+            TextField(name="flag_comment"),
+        )
+    )
+
+    # Always "I" (instrument flag comment).
+    ctype = TextField()
 
 
 class ResultRecord(records.ResultRecord):
