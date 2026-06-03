@@ -17,6 +17,8 @@ from senaite.astm import logger
 from senaite.astm.constants import ACK
 from senaite.astm.constants import ENQ
 from senaite.astm.constants import EOT
+from senaite.astm.constants import ETB
+from senaite.astm.constants import ETX
 from senaite.astm.constants import NAK
 from senaite.astm.constants import STX
 from senaite.astm.core.instrument import find_raw_data_handler
@@ -60,6 +62,14 @@ class ASTMProtocol(asyncio.Protocol):
         self.chunks = []
         self.messages = []
         self.in_transfer_state = False
+        # Per-connection input buffer. TCP delivers byte streams,
+        # not framed messages, so a single ASTM frame can arrive
+        # split across multiple `data_received` calls (typically
+        # the large M / R frames). Accumulating into a buffer and
+        # slicing complete units off the front avoids the previous
+        # behaviour where a partial frame would be NAKed and the
+        # continuation bytes would be dropped as un-dispatchable.
+        self.buffer = b""
 
     # ------------------------------------------------------------------
     # asyncio.Protocol callbacks
@@ -108,10 +118,95 @@ class ASTMProtocol(asyncio.Protocol):
         logger.debug("-> Data received from {!s}: {!r}".format(
             self.client, data))
         self.restart_timer()
-        response = self.handle_data(data)
-        if response is not None:
-            logger.debug("<- Sending response: {!r}".format(response))
-            self.transport.write(response)
+        self.buffer += data
+
+        # Non-ASTM wire formats (mini_vidas, spotchem) ship a
+        # single packet that doesn't follow ENQ/STX/EOT framing.
+        # Their `raw_data_regex` matches the full payload, so we
+        # only invoke the raw handler once the buffer holds a
+        # complete match. Until then the bytes stay buffered and
+        # this branch returns; a later `data_received` retries.
+        if not self.in_transfer_state:
+            instrument = find_raw_data_handler(self.buffer)
+            if instrument is not None:
+                payload = self.buffer
+                self.buffer = b""
+                response = instrument.handle_raw_data(self, payload)
+                if response is not None:
+                    logger.debug(
+                        "<- Sending response: {!r}".format(response))
+                    self.transport.write(response)
+                return
+
+        # ASTM framing: peel one logical unit (single-byte signal
+        # or a complete STX..ETX/ETB+checksum frame) off the front
+        # of the buffer at a time, dispatch it, and write whatever
+        # response the dispatch produced. Stop when the buffer no
+        # longer holds a complete unit so the remaining bytes can
+        # be joined with the next `data_received` payload.
+        while True:
+            unit = self._pop_one_unit()
+            if unit is None:
+                return
+            response = self.handle_data(unit)
+            if response is not None:
+                logger.debug(
+                    "<- Sending response: {!r}".format(response))
+                self.transport.write(response)
+
+    def _pop_one_unit(self):
+        """Slice one ASTM unit off the front of :attr:`buffer`.
+
+        Returns the unit bytes (single-byte signal or complete
+        frame) on success. Returns None when the buffer is empty
+        or holds a partial frame whose terminator/checksum has
+        not arrived yet.
+
+        Leading garbage (bytes that are not a known signal byte
+        and not an STX) is skipped one byte at a time with a
+        warning; this matches the previous behaviour where the
+        same bytes would have hit `default_handler` and been
+        logged at ERROR.
+        """
+        if not self.buffer:
+            return None
+
+        first = self.buffer[:1]
+        if first in (ENQ, ACK, NAK, EOT):
+            self.buffer = self.buffer[1:]
+            return first
+
+        if first != STX:
+            logger.warning(
+                "Skipping unexpected byte %r in buffer", first)
+            self.buffer = self.buffer[1:]
+            return self._pop_one_unit()
+
+        # STX-prefixed frame: locate the first ETX or ETB and
+        # require the two checksum bytes that follow.
+        etx = self.buffer.find(ETX, 1)
+        etb = self.buffer.find(ETB, 1)
+        candidates = [c for c in (etx, etb) if c >= 0]
+        if not candidates:
+            return None
+        terminator = min(candidates)
+        end = terminator + 3  # +1 for terminator, +2 for checksum
+        if len(self.buffer) < end:
+            return None
+
+        # Many instruments wrap frames in `\r\n` for serial-line
+        # parity with classic ASTM. Include those trailing bytes
+        # in the returned frame so downstream helpers that key off
+        # the wire shape (notably `is_chunked_message`, which
+        # expects the ETB to sit at `len(frame) - 5`) keep working.
+        tail = end
+        if self.buffer[tail:tail + 1] == b"\r":
+            tail += 1
+        if self.buffer[tail:tail + 1] == b"\n":
+            tail += 1
+        frame = self.buffer[:tail]
+        self.buffer = self.buffer[tail:]
+        return frame
 
     # ------------------------------------------------------------------
     # Timer management
@@ -157,6 +252,7 @@ class ASTMProtocol(asyncio.Protocol):
         self.chunks = []
         self.messages = []
         self.in_transfer_state = False
+        self.buffer = b""
 
     # ------------------------------------------------------------------
     # Byte-level dispatch
