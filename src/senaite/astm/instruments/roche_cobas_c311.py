@@ -7,6 +7,7 @@ from senaite.astm.core.instrument import Instrument
 from senaite.astm.core.instrument import register_instrument
 from senaite.astm.fields import ComponentField
 from senaite.astm.fields import ConstantField
+from senaite.astm.fields import DateField
 from senaite.astm.fields import DateTimeField
 from senaite.astm.fields import RepeatedComponentField
 from senaite.astm.fields import SetField
@@ -49,7 +50,8 @@ class HeaderRecord(records.HeaderRecord):
 class PatientRecord(records.PatientRecord):
     """Patient Information Record (P)
     """
-    birthdate = DateTimeField()
+    # 8.1.8: Date of Birth, DT (YYYYMMDD) per spec E-11.
+    birthdate = DateField()
     sex = TextField()
     special_1 = ComponentField(
         Component.build(
