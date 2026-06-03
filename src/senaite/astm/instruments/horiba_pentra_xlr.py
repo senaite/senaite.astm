@@ -101,7 +101,9 @@ class OrderRecord(records.OrderRecord):
     report_type = SetField(
         field=TextField(),
         length=1,
-        values=("F", "C"))  # F: final; C: correction
+        # F: final; C: correction; I: unvalidated (when
+        # unconditional validation is off, spec 9.4.26)
+        values=("F", "C", "I"))
 
 
 class CommentRecord(records.CommentRecord):
@@ -111,7 +113,7 @@ class CommentRecord(records.CommentRecord):
     source = SetField(
         field=TextField(),
         length=1,
-        values=("I"))
+        values=("I",))
 
     # Text (Refer to Table 23 - Analytical alarms, page 18; Table 24 - Analyzer
     # alarms, page 18; Table 25 - Suspected pathologies, page 18.
