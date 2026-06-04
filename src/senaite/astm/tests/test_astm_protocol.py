@@ -85,3 +85,44 @@ class ASTMProtocolTest(ASTMTestBase):
 
         # Protocol should be no longer in transfer state
         self.assertFalse(self.protocol.in_transfer_state)
+
+    def test_fragmented_frame_reassembly(self):
+        """A single frame split across many reads (as serial-to-LAN gateways
+        do) must be reassembled, not treated as several broken frames.
+        """
+        transport = self.get_mock_transport()
+        self.protocol.transport = transport
+        self.protocol.connection_made(transport)
+
+        # Establish the session
+        self.protocol.data_received(ENQ)
+        transport.write.assert_called_with(ACK)
+
+        # Take a real frame and feed it ONE BYTE AT A TIME
+        path = self.get_instrument_file_path("yumizen_h500.txt")
+        frame = self.read_file_lines(path)[0]
+        transport.write.reset_mock()
+        for i in range(len(frame)):
+            self.protocol.data_received(frame[i:i + 1])
+
+        # Exactly one complete message was collected ...
+        self.assertEqual(len(self.protocol.messages), 1)
+        # ... and the protocol answered with a single ACK (never a NAK)
+        transport.write.assert_called_once_with(ACK)
+
+    def test_multiple_tokens_in_one_read(self):
+        """Several control bytes / frames arriving in a single read must all
+        be dispatched.
+        """
+        transport = self.get_mock_transport()
+        self.protocol.transport = transport
+        self.protocol.connection_made(transport)
+
+        path = self.get_instrument_file_path("yumizen_h500.txt")
+        frames = self.read_file_lines(path)
+        # ENQ + first two frames concatenated into a single chunk
+        blob = ENQ + frames[0] + frames[1]
+        self.protocol.data_received(blob)
+
+        # both frames were collected from the one read
+        self.assertEqual(len(self.protocol.messages), 2)
