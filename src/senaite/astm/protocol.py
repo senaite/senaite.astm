@@ -6,11 +6,14 @@ import os
 from senaite.astm import adapter_registry
 from senaite.astm import logger
 from senaite.astm.constants import ACK
+from senaite.astm.constants import CR
 from senaite.astm.constants import ENQ
 from senaite.astm.constants import EOT
+from senaite.astm.constants import ETB
+from senaite.astm.constants import ETX
+from senaite.astm.constants import LF
 from senaite.astm.constants import NAK
 from senaite.astm.constants import STX
-from senaite.astm.exceptions import InvalidState
 from senaite.astm.exceptions import NotAccepted
 from senaite.astm.interfaces import IDataHandler
 from senaite.astm.utils import is_chunked_message
@@ -41,6 +44,7 @@ class ASTMProtocol(asyncio.Protocol):
         self.transport = None
         self.client = None
         self.timer = None
+        self.buffer = b""
         self.chunks = []
         self.messages = []
         self.in_transfer_state = False
@@ -102,6 +106,14 @@ class ASTMProtocol(asyncio.Protocol):
 
     def data_received(self, data):
         """Called when some data is received.
+
+        TCP does not preserve message boundaries: a single ASTM frame can be
+        split across several reads (common with serial-to-LAN gateways that
+        forward a slow serial stream), and conversely several control bytes
+        and/or frames can arrive in a single read. We therefore accumulate
+        incoming bytes in a buffer and only dispatch *complete* tokens:
+        single control bytes (ENQ/ACK/NAK/EOT), or a full frame terminated by
+        <LF>.
         """
         logger.debug("-> Data received from {!s}: {!r}".format(
             self.client, data))
@@ -110,11 +122,61 @@ class ASTMProtocol(asyncio.Protocol):
         # -> this ensures the next data is received within the timeout
         self.restart_timer()
 
-        # handle the data
-        response = self.handle_data(data)
-        if response is not None:
-            logger.debug("<- Sending response: {!r}".format(response))
-            self.transport.write(response)
+        self.buffer += data
+        for token in self.iter_tokens():
+            # A single malformed/unexpected token must never tear down the
+            # connection: log it and carry on with the next token.
+            try:
+                response = self.handle_data(token)
+            except Exception as exc:
+                logger.error("Error handling token {!r}: {!r}".format(
+                    token, exc))
+                continue
+            if response is not None:
+                logger.debug("<- Sending response: {!r}".format(response))
+                self.transport.write(response)
+
+    def iter_tokens(self):
+        """Yield complete protocol tokens from the receive buffer.
+
+        A token is either a single control byte (<ENQ>/<ACK>/<NAK>/<EOT>) or a
+        whole ASTM frame: ``<STX> FN ... (<ETX>|<ETB>) C1 C2 [<CR><LF>]``. A
+        frame is only emitted once its end marker *and* its two checksum bytes
+        have arrived; partial frames stay in the buffer until the rest comes.
+        The trailing <CR>/<LF> is optional, so this works whether the sender
+        terminates frames with <CR><LF> (real instruments) or not.
+        """
+        while self.buffer:
+            first = self.buffer[:1]
+            if first in (ENQ, ACK, NAK, EOT):
+                self.buffer = self.buffer[1:]
+                yield first
+            elif first == STX:
+                # find the frame end marker (<ETX> final, or <ETB> chunked)
+                markers = [i for i in (self.buffer.find(ETX),
+                                       self.buffer.find(ETB)) if i != -1]
+                if not markers:
+                    return  # no terminator yet, wait for more data
+                end = min(markers)
+                # the 2 checksum bytes follow the end marker
+                if len(self.buffer) < end + 3:
+                    return  # checksum not fully arrived yet
+                frame_end = end + 3
+                # consume an optional trailing <CR> and/or <LF>
+                while (self.buffer[frame_end:frame_end + 1] in (CR, LF)):
+                    frame_end += 1
+                frame, self.buffer = (
+                    self.buffer[:frame_end], self.buffer[frame_end:])
+                yield frame
+            elif first in (CR, LF):
+                # inter-frame whitespace (e.g. a <CR><LF> split from its
+                # frame across reads): ignore silently
+                self.buffer = self.buffer[1:]
+            else:
+                # stray/unexpected leading byte (e.g. line noise): drop it so
+                # we don't stall on it, and keep scanning
+                logger.warning("Discarding unexpected byte: %r", first)
+                self.buffer = self.buffer[1:]
 
     def handle_data(self, data):
         """Process incoming data
@@ -160,20 +222,28 @@ class ASTMProtocol(asyncio.Protocol):
     def on_ack(self, data):
         """Calls on <ACK> message receiving."""
         logger.debug("on_ack: %r", data)
-        raise NotAccepted("Server should not be ACKed.")
+        # We are the receiver and should never be ACKed. Ignore rather than
+        # raise: an exception here would be fatal to the connection.
+        logger.warning("Unexpected ACK received; ignoring")
 
     def on_nak(self, data):
         """Calls on <NAK> message receiving."""
         logger.debug("on_nak: %r", data)
-        raise NotAccepted("Server should not be NAKed.")
+        # As above: ignore an unexpected NAK instead of tearing down the link.
+        logger.warning("Unexpected NAK received; ignoring")
 
     def on_eot(self, data):
         """Calls on <EOT> message receiving."""
         logger.debug("on_eot: %r", data)
 
         if not self.in_transfer_state:
-            self.close_connection()
-            raise InvalidState("Server is not ready to accept EOT message.")
+            # Stray <EOT> outside a transfer: instruments emit these between
+            # sessions (and in <EOT>/<ENQ> bursts while establishing). Ignore
+            # it and stay connected -- raising here is fatal to the asyncio
+            # connection and would force a needless reconnect.
+            logger.warning("Received EOT outside a transfer; ignoring")
+            self.discard_env()
+            return
 
         # stop any running timer
         self.cancel_timer()
