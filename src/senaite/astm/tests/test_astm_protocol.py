@@ -110,6 +110,32 @@ class ASTMProtocolTest(ASTMTestBase):
         # ... and the protocol answered with a single ACK (never a NAK)
         transport.write.assert_called_once_with(ACK)
 
+    def test_stray_eot_does_not_drop_connection(self):
+        """A stray EOT (and EOT/ENQ bursts) outside a transfer must be
+        ignored, not raise -- raising is fatal to the asyncio connection.
+        """
+        transport = self.get_mock_transport()
+        self.protocol.transport = transport
+        self.protocol.connection_made(transport)
+
+        # EOT before any ENQ: must not raise, must not enter transfer state
+        self.protocol.data_received(EOT)
+        self.assertFalse(self.protocol.in_transfer_state)
+
+        # an EOT/ENQ/EOT burst must not raise either; the ENQ still
+        # establishes and gets ACKed
+        self.protocol.data_received(EOT + ENQ + EOT)
+        transport.write.assert_called_with(ACK)
+
+    def test_unexpected_ack_nak_ignored(self):
+        """Unexpected ACK/NAK (we are the receiver) are ignored, not raised."""
+        transport = self.get_mock_transport()
+        self.protocol.transport = transport
+        self.protocol.connection_made(transport)
+        # neither of these should raise
+        self.protocol.data_received(ACK)
+        self.protocol.data_received(NAK)
+
     def test_multiple_tokens_in_one_read(self):
         """Several control bytes / frames arriving in a single read must all
         be dispatched.
