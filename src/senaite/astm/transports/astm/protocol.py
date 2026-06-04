@@ -22,7 +22,6 @@ from senaite.astm.constants import ETX
 from senaite.astm.constants import NAK
 from senaite.astm.constants import STX
 from senaite.astm.core.instrument import find_raw_data_handler
-from senaite.astm.exceptions import InvalidState
 from senaite.astm.exceptions import NotAccepted
 from senaite.astm.transports.astm.framing import is_chunked_message
 from senaite.astm.transports.astm.framing import join
@@ -148,7 +147,14 @@ class ASTMProtocol(asyncio.Protocol):
             unit = self._pop_one_unit()
             if unit is None:
                 return
-            response = self.handle_data(unit)
+            # A single malformed/unexpected unit must never tear down the
+            # connection: log it and carry on with the next unit.
+            try:
+                response = self.handle_data(unit)
+            except Exception as exc:
+                logger.error(
+                    "Error handling unit {!r}: {!r}".format(unit, exc))
+                continue
             if response is not None:
                 logger.debug(
                     "<- Sending response: {!r}".format(response))
@@ -290,18 +296,27 @@ class ASTMProtocol(asyncio.Protocol):
 
     def on_ack(self, data):
         logger.debug("on_ack: %r", data)
-        raise NotAccepted("Server should not be ACKed.")
+        # We are the receiver and should never be ACKed. Ignore rather than
+        # raise: an exception in data_received() is fatal to the connection.
+        logger.warning("Unexpected ACK received; ignoring")
 
     def on_nak(self, data):
         logger.debug("on_nak: %r", data)
-        raise NotAccepted("Server should not be NAKed.")
+        # As above: ignore an unexpected NAK instead of tearing down the link.
+        logger.warning("Unexpected NAK received; ignoring")
 
     def on_eot(self, data):
         logger.debug("on_eot: %r", data)
 
         if not self.in_transfer_state:
-            self.close_connection()
-            raise InvalidState("Server is not ready to accept EOT message.")
+            # Stray <EOT> outside a transfer: instruments emit these between
+            # sessions (and in <EOT>/<ENQ> bursts while establishing). Ignore
+            # it and stay connected -- raising here is fatal to the asyncio
+            # connection and would force a needless reconnect. Don't call
+            # reset_session_state(): it would clear self.buffer mid-dispatch
+            # and drop any bytes that followed this EOT in the same read.
+            logger.warning("Received EOT outside a transfer; ignoring")
+            return
 
         self.cancel_timer()
 
