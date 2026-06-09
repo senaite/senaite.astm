@@ -166,3 +166,40 @@ class ASTMProtocolTest(ASTMTestBase):
         self.assertEqual(
             [c.args[0] for c in transport.write.call_args_list[-2:]],
             [ACK, ACK])
+
+    def test_stray_eot_does_not_drop_connection(self):
+        """A stray EOT (and EOT/ENQ bursts) outside a transfer must be
+        ignored, not raise -- raising inside data_received is fatal to the
+        asyncio connection. Instruments emit these between sessions."""
+        transport = self.get_mock_transport()
+        self.protocol.connection_made(transport)
+
+        # EOT before any ENQ: must not raise, must not enter transfer state
+        self.protocol.data_received(EOT)
+        self.assertFalse(self.protocol.in_transfer_state)
+
+        # an EOT/ENQ/EOT burst must not raise either; the ENQ still
+        # establishes and gets ACKed
+        self.protocol.data_received(EOT + ENQ + EOT)
+        transport.write.assert_called_with(ACK)
+
+    def test_stray_eot_preserves_following_bytes(self):
+        """A stray EOT followed by an ENQ in the SAME read must not discard
+        the ENQ. Guards against clearing the buffer mid-dispatch."""
+        transport = self.get_mock_transport()
+        self.protocol.connection_made(transport)
+
+        # EOT (ignored) immediately followed by ENQ, in one recv
+        self.protocol.data_received(EOT + ENQ)
+
+        # the ENQ after the stray EOT was still processed
+        self.assertTrue(self.protocol.in_transfer_state)
+        transport.write.assert_called_with(ACK)
+
+    def test_unexpected_ack_nak_ignored(self):
+        """Unexpected ACK/NAK (we are the receiver) are ignored, not raised."""
+        transport = self.get_mock_transport()
+        self.protocol.connection_made(transport)
+        # neither of these should raise
+        self.protocol.data_received(ACK)
+        self.protocol.data_received(NAK)
