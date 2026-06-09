@@ -98,6 +98,149 @@ def decode_stream(value):
     return list(struct.unpack(fmt, raw))
 
 
+class YumizenFloatleParseError(ValueError):
+    """Raised when a Yumizen FLOATLE stream does not match the
+    documented framing."""
+
+
+def parse_yumizen_floatle(stream, with_scale_ticks=False):
+    """Parse a decoded Yumizen FLOATLE stream into its structured
+    fields.
+
+    Both the `Thresholds` field (14.6) and the `Points` field (14.7)
+    of every Yumizen HISTOGRAM and MATRIX `M` record start with the
+    same 4-float display-bounds prefix, followed by either a list
+    block (Thresholds) or the same list block preceded by optional
+    X / Y scale-tick arrays (Points). The layout is documented in
+    section 3.5 of the
+    `Yumizen H500 Output Format for Host Connection` spec (filed at
+    `instruments/specs/horiba/Yumizen-H500-Comm-Spec.pdf`):
+
+        4f          x_min, x_max, y_min, y_max
+        --- only when `with_scale_ticks` is True (Points field) ---
+        1f          x_scale_nb
+        Nf          x_ticks                (N = x_scale_nb)
+        1f          y_scale_nb
+        Mf          y_ticks                (M = y_scale_nb)
+        --- always ---
+        1f          number_of_list
+        1f          list_length            (= L; may be 0)
+        L*K floats  K parallel lists of L floats
+                    (K = number_of_list)
+
+    Treating the stream as a flat array — as a generic plotter
+    would — picks up the header floats as the first few "bin
+    values" and ends up plotting them as data, which is what made
+    SENAITE-side renderings disagree with the vendor printer.
+
+    The semantic meaning of each parallel list depends on context
+    (HISTOGRAM Points has `X[], Y[]`; MATRIX Points has
+    `X[], Y[], Qty[], Pop[]`); this generic parser surfaces them
+    positionally as `lists` and leaves the naming to the
+    instrument module (see
+    :mod:`senaite.astm.instruments.horiba_yumizen_h5xx`).
+
+    :param stream: list of floats from :func:`decode_stream` (or
+        anything else — None / short / wrong types return None so
+        callers can fall back to the raw stream).
+    :param with_scale_ticks: True for the Points field (14.7),
+        False for the Thresholds field (14.6). The Thresholds
+        variant omits the X and Y scale-tick arrays — the parser
+        would otherwise misread NumberOfList as `x_scale_nb` and
+        chase the wrong layout.
+    :returns: dict with keys `x_min`, `x_max`, `y_min`, `y_max`,
+        `x_ticks` (list, empty when `with_scale_ticks` is False),
+        `y_ticks` (list, ditto), `number_of_list` (int),
+        `list_length` (int), `lists` (list of `number_of_list`
+        lists, each `list_length` floats long). Returns `None`
+        when the stream is too short or non-numeric to be
+        parseable.
+    :raises YumizenFloatleParseError: when the framing reads as
+        plausible numbers but the declared sizes do not add up to
+        the stream length — the only way to surface a genuine
+        format mismatch (e.g. a future firmware variant we don't
+        understand yet) without silently dropping data.
+    """
+    if not isinstance(stream, list) or len(stream) < 6:
+        return None
+    if not all(isinstance(v, (int, float))
+               and not isinstance(v, bool) for v in stream[:6]):
+        return None
+
+    x_min, x_max, y_min, y_max = stream[0:4]
+    pos = 4
+
+    if with_scale_ticks:
+        x_scale_nb = _read_count(stream, pos, "x_scale_nb")
+        pos += 1
+        x_ticks = stream[pos:pos + x_scale_nb]
+        if len(x_ticks) != x_scale_nb:
+            raise YumizenFloatleParseError(
+                "x_ticks: expected %d, got %d"
+                % (x_scale_nb, len(x_ticks)))
+        pos += x_scale_nb
+
+        y_scale_nb = _read_count(stream, pos, "y_scale_nb")
+        pos += 1
+        y_ticks = stream[pos:pos + y_scale_nb]
+        if len(y_ticks) != y_scale_nb:
+            raise YumizenFloatleParseError(
+                "y_ticks: expected %d, got %d"
+                % (y_scale_nb, len(y_ticks)))
+        pos += y_scale_nb
+    else:
+        x_ticks = []
+        y_ticks = []
+
+    number_of_list = _read_count(stream, pos, "number_of_list")
+    pos += 1
+    list_length = _read_count(stream, pos, "list_length")
+    pos += 1
+
+    expected_tail = number_of_list * list_length
+    if len(stream) - pos != expected_tail:
+        raise YumizenFloatleParseError(
+            "lists tail: expected %d floats (%d lists x %d), "
+            "got %d (stream length %d, header consumed %d)"
+            % (expected_tail, number_of_list, list_length,
+               len(stream) - pos, len(stream), pos))
+
+    lists = []
+    for _ in range(number_of_list):
+        lists.append(stream[pos:pos + list_length])
+        pos += list_length
+
+    return {
+        "x_min": x_min,
+        "x_max": x_max,
+        "y_min": y_min,
+        "y_max": y_max,
+        "x_ticks": x_ticks,
+        "y_ticks": y_ticks,
+        "number_of_list": number_of_list,
+        "list_length": list_length,
+        "lists": lists,
+    }
+
+
+def _read_count(stream, pos, name):
+    """Read a count field (declared as FLOATLE in the spec but
+    always an integer) and validate it is non-negative."""
+    if pos >= len(stream):
+        raise YumizenFloatleParseError(
+            "%s: stream ended at offset %d" % (name, pos))
+    raw = stream[pos]
+    if not isinstance(raw, (int, float)) or isinstance(raw, bool):
+        raise YumizenFloatleParseError(
+            "%s: expected number at offset %d, got %r"
+            % (name, pos, raw))
+    count = int(raw)
+    if count < 0 or count != raw:
+        raise YumizenFloatleParseError(
+            "%s: expected non-negative integer, got %r" % (name, raw))
+    return count
+
+
 def _decode_encoding(encoding, payload):
     if encoding == "base64":
         try:

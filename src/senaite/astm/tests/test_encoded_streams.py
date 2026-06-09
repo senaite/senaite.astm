@@ -15,6 +15,8 @@ import zlib
 
 from senaite.astm.encoded_streams import decode_stream
 from senaite.astm.encoded_streams import is_encoded_stream
+from senaite.astm.encoded_streams import parse_yumizen_floatle
+from senaite.astm.encoded_streams import YumizenFloatleParseError
 
 
 def _encode(values, dtype="<f", compression="deflate"):
@@ -145,9 +147,133 @@ class EncodedStreamFieldTest(unittest.TestCase):
         self.assertEqual(self.field._set_value(rep), rep)
 
 
+class ParseYumizenFloatleTest(unittest.TestCase):
+    """The Yumizen H500/H550 frames its Thresholds and Points
+    FLOATLE streams as documented in section 3.5 of the H500
+    Communication Spec (filed at
+    `instruments/specs/horiba/Yumizen-H500-Comm-Spec.pdf`).
+    Parsing the structured framing is the only way to plot the
+    same curve the vendor's own printer produces — a generic
+    flat-array plotter reads the display bounds and scale ticks
+    as the first few "bin values"."""
+
+    def test_thresholds_layout_no_scale_ticks(self):
+        # 6-float header followed by 2 lists of length 3.
+        # NumberOfList = 2, ListLength = 3 ->
+        # X = [50, 100, 150], ThrsID = [0, 1, 2].
+        stream = [
+            0.0, 200.0, 0.0, 100.0,    # display bounds
+            2.0, 3.0,                  # NumberOfList=2, ListLength=3
+            50.0, 100.0, 150.0,        # X
+            0.0, 1.0, 2.0,             # ThrsID
+        ]
+        out = parse_yumizen_floatle(stream)
+        self.assertEqual(out["x_min"], 0.0)
+        self.assertEqual(out["x_max"], 200.0)
+        self.assertEqual(out["y_min"], 0.0)
+        self.assertEqual(out["y_max"], 100.0)
+        self.assertEqual(out["x_ticks"], [])
+        self.assertEqual(out["y_ticks"], [])
+        self.assertEqual(out["number_of_list"], 2)
+        self.assertEqual(out["list_length"], 3)
+        self.assertEqual(out["lists"],
+                         [[50.0, 100.0, 150.0], [0.0, 1.0, 2.0]])
+
+    def test_points_layout_with_scale_ticks(self):
+        # Points field carries X and Y scale-tick arrays between
+        # the display bounds and NumberOfList.
+        stream = [
+            0.0, 278.0, 0.0, 700.0,     # bounds
+            3.0, 50.0, 100.0, 150.0,    # x_scale_nb=3 + 3 ticks
+            0.0,                        # y_scale_nb=0
+            2.0, 2.0,                   # NumberOfList=2, ListLength=2
+            5.0, 6.0,                   # X
+            10.0, 20.0,                 # Y
+        ]
+        out = parse_yumizen_floatle(stream, with_scale_ticks=True)
+        self.assertEqual(out["x_ticks"], [50.0, 100.0, 150.0])
+        self.assertEqual(out["y_ticks"], [])
+        self.assertEqual(out["lists"], [[5.0, 6.0], [10.0, 20.0]])
+
+    def test_matrix_points_four_parallel_lists(self):
+        # MATRIX rows pack X, Y, Qty, Pop (NumberOfList = 4).
+        # Pop is the population ID per event so the printer can
+        # colour the scatter cloud.
+        stream = [
+            0.0, 2047.0, 0.0, 2047.0,
+            0.0, 0.0,             # no X/Y scale ticks for LMNE
+            4.0, 2.0,             # NumberOfList=4, ListLength=2
+            100.0, 200.0,         # X
+            150.0, 250.0,         # Y
+            1.0, 1.0,             # Qty
+            0.0, 2.0,             # Pop (LYM, NEU)
+        ]
+        out = parse_yumizen_floatle(stream, with_scale_ticks=True)
+        self.assertEqual(out["lists"],
+                         [[100.0, 200.0], [150.0, 250.0],
+                          [1.0, 1.0], [0.0, 2.0]])
+
+    def test_empty_list_length_is_legal(self):
+        # ListLength = 0 is the documented marker for "no data"
+        # (matrix thresholds always send this).
+        stream = [0.0, 1.0, 0.0, 1.0, 2.0, 0.0]
+        out = parse_yumizen_floatle(stream)
+        self.assertEqual(out["list_length"], 0)
+        self.assertEqual(out["lists"], [[], []])
+
+    def test_short_stream_returns_none(self):
+        self.assertIsNone(parse_yumizen_floatle([1.0, 2.0]))
+
+    def test_none_stream_returns_none(self):
+        # REAGENT rows leave the field as None.
+        self.assertIsNone(parse_yumizen_floatle(None))
+
+    def test_non_numeric_header_returns_none(self):
+        self.assertIsNone(
+            parse_yumizen_floatle(
+                ["not", "a", "header", "here", 0.0, 0.0]))
+
+    def test_inconsistent_tail_raises(self):
+        # Declared NumberOfList * ListLength exceeds the stream:
+        # do not silently truncate, raise so the operator sees it.
+        stream = [
+            0.0, 1.0, 0.0, 1.0,
+            2.0, 5.0,           # 2 lists of length 5 -> need 10 more
+            1.0, 2.0, 3.0,      # only 3 floats follow
+        ]
+        with self.assertRaises(YumizenFloatleParseError):
+            parse_yumizen_floatle(stream)
+
+    def test_fractional_count_raises(self):
+        # Counts are stored as FLOATLE but the spec requires them
+        # to be whole numbers. A fractional value means we are
+        # misaligned in the stream.
+        stream = [
+            0.0, 1.0, 0.0, 1.0,
+            1.5, 0.0,
+        ]
+        with self.assertRaises(YumizenFloatleParseError):
+            parse_yumizen_floatle(stream)
+
+    def test_thresholds_mode_reads_pos_5_as_list_length(self):
+        # Regression test for the original bug: passing a 6-float
+        # Thresholds stream with the Points reader would consume
+        # stream[4] as x_scale_nb and chase the wrong layout.
+        stream = [0.0, 1.0, 0.0, 1.0, 2.0, 0.0]
+        # Thresholds mode (with_scale_ticks=False) gives 2 empty
+        # parallel lists; Points mode would raise on the inferred
+        # tail length.
+        self.assertEqual(
+            parse_yumizen_floatle(
+                stream, with_scale_ticks=False)["lists"],
+            [[], []])
+        with self.assertRaises(YumizenFloatleParseError):
+            parse_yumizen_floatle(stream, with_scale_ticks=True)
+
+
 def test_suite():
     suite = unittest.TestSuite()
     for cls in (IsEncodedStreamTest, DecodeStreamTest,
-                EncodedStreamFieldTest):
+                EncodedStreamFieldTest, ParseYumizenFloatleTest):
         suite.addTest(unittest.makeSuite(cls))
     return suite

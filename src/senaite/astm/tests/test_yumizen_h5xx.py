@@ -215,3 +215,68 @@ class ASTMProtocolTest(ASTMTestBase):
         data = wrapper.to_dict()
         results = data.get("R")
         result = results[0]
+
+    def test_histogram_row_decodes_points_and_thresholds(self):
+        """HISTOGRAM rows must surface a `points` dict with X / Y
+        curve coordinates (the explicit per-point form the vendor
+        printer uses), plus the display bounds and X tick labels
+        from the spec's Points framing."""
+        self.test_communication()
+        env = Wrapper(self.protocol.messages).to_dict()
+        hists = [row for row in env.get("M") or ()
+                 if row.get("kind") == "HISTOGRAM"]
+        self.assertTrue(hists, "fixture has no HISTOGRAM rows")
+
+        for row in hists:
+            for key in ("x_min", "x_max", "y_min", "y_max"):
+                self.assertIsInstance(row[key], (int, float))
+            self.assertIsInstance(row["x_ticks"], list)
+            self.assertIsInstance(row["y_ticks"], list)
+            pts = row["points"]
+            self.assertIsNotNone(pts)
+            self.assertEqual(set(pts.keys()), {"X", "Y"})
+            self.assertEqual(len(pts["X"]), len(pts["Y"]))
+            self.assertGreater(len(pts["X"]), 0)
+            ths = row["thresholds"]
+            if ths is not None:
+                self.assertEqual(set(ths.keys()), {"X", "ThrsID"})
+                self.assertEqual(len(ths["X"]), len(ths["ThrsID"]))
+
+    def test_matrix_row_decodes_four_parallel_lists(self):
+        """MATRIX rows must surface a `points` dict with X / Y /
+        Qty / Pop — the four parallel lists the spec pins for
+        LMNE. Pop is the population ID per event so a downstream
+        renderer can colour the scatter to match the printer."""
+        self.test_communication()
+        env = Wrapper(self.protocol.messages).to_dict()
+        mats = [row for row in env.get("M") or ()
+                if row.get("kind") == "MATRIX"]
+        self.assertTrue(mats, "fixture has no MATRIX rows")
+
+        for row in mats:
+            pts = row["points"]
+            self.assertIsNotNone(pts)
+            self.assertEqual(
+                set(pts.keys()), {"X", "Y", "Qty", "Pop"})
+            n = len(pts["X"])
+            self.assertEqual(len(pts["Y"]), n)
+            self.assertEqual(len(pts["Qty"]), n)
+            self.assertEqual(len(pts["Pop"]), n)
+            # PopulationID is documented as a small non-negative
+            # integer (legend: 0..8, 11..14). Anything else means
+            # we are reading the wrong slice of the stream.
+            for pop in pts["Pop"]:
+                self.assertGreaterEqual(int(pop), 0)
+                self.assertLess(int(pop), 100)
+
+    def test_reagent_row_carries_no_decoded_sections(self):
+        """REAGENT rows do not carry FLOATLE streams and must
+        not pick up bogus `points` / `thresholds` keys."""
+        self.test_communication()
+        env = Wrapper(self.protocol.messages).to_dict()
+        for row in env.get("M") or ():
+            if row.get("kind") != "REAGENT":
+                continue
+            self.assertNotIn("points", row)
+            self.assertNotIn("thresholds", row)
+            self.assertNotIn("x_min", row)
