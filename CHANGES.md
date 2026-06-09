@@ -2,6 +2,7 @@
 
 ## 2.0.0
 
+- Parse the documented Yumizen FLOATLE framing into structured points and populations
 - astm transport: buffer data_received across TCP segments so chunked ASTM frames are reassembled instead of NAKed
 - horiba_pentra_xlr: widen OrderRecord.report_type to accept the spec value 'I' (unvalidated) and fix CommentRecord.source values to be a 1-tuple
 - roche_cobas_c111: declare Order test (repeated), Patient laboratory_id and Comment source/data/ctype, rename Order modified_at to reported_at
