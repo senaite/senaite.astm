@@ -4,12 +4,12 @@
 
 - #80 Parse the documented Yumizen FLOATLE framing into structured points and populations
 - #79 Fix stray control bytes tearing down the ASTM connection
-- astm transport: buffer data_received across TCP segments so chunked ASTM frames are reassembled instead of NAKed
-- horiba_pentra_xlr: widen OrderRecord.report_type to accept the spec value 'I' (unvalidated) and fix CommentRecord.source values to be a 1-tuple
-- roche_cobas_c111: declare Order test (repeated), Patient laboratory_id and Comment source/data/ctype, rename Order modified_at to reported_at
-- roche_cobas_c311: use DateField for PatientRecord.birthdate to match the spec DT (YYYYMMDD) type
-- senaite-astm-send: auto-detect ASTM vs HL7 v2 inputs so HL7 captures can be replayed with the same CLI
-- core: include CHANGES.md in setup.py long_description and add MANIFEST.in so the changelog ships in the sdist and renders on PyPI
+- #77 astm transport: buffer data_received across TCP segments so chunked ASTM frames are reassembled instead of NAKed
+- #75 horiba_pentra_xlr: widen report_type to accept 'I' and fix CommentRecord.source tuple syntax
+- #74 roche_cobas_c311: use DateField for PatientRecord.birthdate (spec DT, YYYYMMDD)
+- #73 roche_cobas_c111: declare missing OrderRecord.test, Patient.laboratory_id, Comment fields and rename modified_at to reported_at
+- #72 senaite-astm-send: auto-detect ASTM vs HL7 v2 inputs so HL7 captures can be replayed with the same CLI
+- #71 core: include CHANGES.md in setup.py long_description and add MANIFEST.in so the changelog ships in the sdist and renders on PyPI
 - #64 core/lims: enforce a default HTTP timeout on Session.post / .get to prevent thread-pool starvation on a hung LIMS
 - #66 admin: bound /stats request reads with a 5s timeout + 2 KiB cap and narrow except blocks to drop slowloris peers
 - #67 senaite-astm-server: reject --capture-only combined with --url so a misconfigured systemd unit fails loudly
