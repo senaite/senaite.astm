@@ -128,7 +128,7 @@ class Hitachi7600Test(ASTMTestBase):
 
         results = [
             "133", "4.44", "97.3", "93", "22.06",
-            "34.0", "22.3", "18,2", "2,2", "5,60",
+            "34.0", "22.3", "18.2", "2.2", "5.60",
             "210", "1.21", "3.88", "71.8", "6.3",
             "1.58", "262", "8", "2", "1",
             "55", "38"
@@ -138,7 +138,7 @@ class Hitachi7600Test(ASTMTestBase):
             "mmol/l", "mmol/l", "mmol/l", "U/l", "mmol/l",
             "g/l", "U/l", "U/l", "umol/l", "mmol/l",
             "U/l", "mmol/l", "mmol/l", "g/l", "umol/l",
-            "mmol/l", "umol/l", "", "", "",
+            "mmol/l", "umol/l", None, None, None,
             "umol/l", "g/L"
         ]
 

@@ -15,7 +15,7 @@ from senaite.astm.fields import TextField
 from senaite.astm.mapping import Component
 
 VERSION = "1.0.0"
-HEADER_RX = re.compile(rb"H7600\^")
+HEADER_RX = re.compile(rb".*H7600\^")
 
 ABNORMAL_FLAGS = ["L", "H", "LL", "HH", "N", "A",]
 ACTION_CODES = ["N", "Q", "A", "C",]
