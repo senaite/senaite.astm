@@ -4,7 +4,7 @@ from setuptools import find_packages
 from setuptools import setup
 
 
-version = "1.0.0"
+version = "2.0.0"
 
 setup(
     name="senaite.astm",
@@ -29,8 +29,8 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
+        "pydantic>=2",
         "requests",
-        "zope.interface",
     ],
     test_suite='senaite.astm.tests',
     # List additional groups of dependencies here (e.g. development

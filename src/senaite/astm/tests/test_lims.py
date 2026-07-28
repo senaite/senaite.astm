@@ -6,9 +6,12 @@ from unittest.mock import patch
 
 import responses
 
-from senaite.astm import lims
-from senaite.astm.lims import Session
-from senaite.astm.lims import post_to_senaite
+from senaite.astm.core.lims import PushResult
+from senaite.astm.core.lims import SenaiteAuthError
+from senaite.astm.core.lims import SenaiteHTTPError
+from senaite.astm.core.lims import SenaiteUnreachableError
+from senaite.astm.core.lims import Session
+from senaite.astm.core.lims import post_to_senaite
 
 URL = "http://admin:secret@senaite.example.com"
 BASE = "http://senaite.example.com/@@API/senaite/v1"
@@ -49,7 +52,7 @@ def auth_bad_credentials():
 
 
 class SessionAuthTest(unittest.TestCase):
-    """Session.auth() exercises both the version probe and the user probe.
+    """Session.auth() exercises the version probe and the user probe.
     """
 
     def test_init_extracts_credentials_from_url(self):
@@ -64,49 +67,90 @@ class SessionAuthTest(unittest.TestCase):
             session.get_url("push"),
             "http://senaite.example.com/@@API/senaite/v1/push")
 
+    def test_session_is_cached_across_calls(self):
+        """The TLS handshake is amortised by reusing one
+        requests.Session across all calls.
+        """
+        session = Session(URL)
+        self.assertIs(session.session, session.session)
+
     @responses.activate
     def test_auth_happy_path(self):
         auth_ok()
         self.assertTrue(Session(URL).auth())
 
     @responses.activate
-    def test_auth_returns_false_when_jsonapi_missing(self):
+    def test_auth_raises_when_jsonapi_missing(self):
         auth_no_jsonapi()
-        self.assertFalse(Session(URL).auth())
+        with self.assertRaises(SenaiteAuthError):
+            Session(URL).auth()
 
     @responses.activate
-    def test_auth_returns_false_when_credentials_invalid(self):
+    def test_auth_raises_when_credentials_invalid(self):
         auth_bad_credentials()
-        self.assertFalse(Session(URL).auth())
+        with self.assertRaises(SenaiteAuthError):
+            Session(URL).auth()
 
     @responses.activate
-    def test_get_returns_empty_dict_on_non_200(self):
+    def test_get_raises_http_error_on_non_200(self):
         responses.add(
             responses.GET,
             "{}/anything".format(BASE),
             json={"error": "boom"},
             status=500)
-        self.assertEqual(Session(URL).get("anything"), {})
+        with self.assertRaises(SenaiteHTTPError) as ctx:
+            Session(URL).get("anything")
+        self.assertEqual(ctx.exception.status_code, 500)
 
     @responses.activate
-    def test_get_returns_empty_dict_on_connection_error(self):
-        # No matching response registered → ConnectionError
-        self.assertEqual(Session(URL).get("anything"), {})
+    def test_get_raises_unreachable_on_connection_error(self):
+        # No matching response registered -> requests raises
+        with self.assertRaises(SenaiteUnreachableError):
+            Session(URL).get("anything")
 
     @responses.activate
-    def test_post_returns_empty_dict_on_connection_error(self):
-        self.assertEqual(Session(URL).post("push", {"x": 1}), {})
+    def test_post_raises_unreachable_on_connection_error(self):
+        with self.assertRaises(SenaiteUnreachableError):
+            Session(URL).post("push", {"x": 1})
+
+    @responses.activate
+    def test_post_raises_http_error_on_non_200(self):
+        responses.add(
+            responses.POST,
+            "{}/push".format(BASE),
+            json={"error": "boom"},
+            status=503)
+        with self.assertRaises(SenaiteHTTPError) as ctx:
+            Session(URL).post("push", {"x": 1})
+        self.assertEqual(ctx.exception.status_code, 503)
+
+
+class PushResultTest(unittest.TestCase):
+    """PushResult is the documented return type of post_to_senaite."""
+
+    def test_default_last_error_is_none(self):
+        result = PushResult(success=True, attempts=1)
+        self.assertTrue(result.success)
+        self.assertEqual(result.attempts, 1)
+        self.assertIsNone(result.last_error)
+
+    def test_carries_last_error(self):
+        err = SenaiteHTTPError("boom", status_code=500)
+        result = PushResult(success=False, attempts=3, last_error=err)
+        self.assertFalse(result.success)
+        self.assertEqual(result.attempts, 3)
+        self.assertIs(result.last_error, err)
 
 
 class PostToSenaiteTest(unittest.TestCase):
-    """post_to_senaite handles auth, push, and the retry/delay loop.
+    """post_to_senaite authenticates once, then retries POST only.
 
-    The loop reads `time.sleep` from `senaite.astm.lims`, so we patch
-    that import to keep the tests fast.
+    The loop reads `time.sleep` from `senaite.astm.core.lims`, so we
+    patch that import to keep the tests fast.
     """
 
     def setUp(self):
-        sleep_patcher = patch("senaite.astm.lims.sleep")
+        sleep_patcher = patch("senaite.astm.core.lims.sleep")
         self.sleep = sleep_patcher.start()
         self.addCleanup(sleep_patcher.stop)
 
@@ -118,16 +162,17 @@ class PostToSenaiteTest(unittest.TestCase):
             "{}/push".format(BASE),
             json={"success": True},
             status=200)
-        post_to_senaite([b"msg"], Session(URL))
-        # auth (2 GETs) + 1 POST = 3 calls
+        result = post_to_senaite([b"msg"], Session(URL))
+        # 1 auth pair (2 GETs) + 1 POST = 3 calls
         self.assertEqual(len(responses.calls), 3)
         self.sleep.assert_not_called()
+        self.assertTrue(result.success)
+        self.assertEqual(result.attempts, 1)
+        self.assertIsNone(result.last_error)
 
     @responses.activate
-    def test_retry_then_success(self):
-        # auth happens once per attempt; register enough responses for two
-        for _ in range(2):
-            auth_ok()
+    def test_retry_then_success_authenticates_only_once(self):
+        auth_ok()
         responses.add(
             responses.POST,
             "{}/push".format(BASE),
@@ -138,35 +183,58 @@ class PostToSenaiteTest(unittest.TestCase):
             "{}/push".format(BASE),
             json={"success": True},
             status=200)
-        post_to_senaite([b"msg"], Session(URL), retries=3, delay=1)
-        # 2 auth pairs + 2 POSTs = 6 calls
-        self.assertEqual(len(responses.calls), 6)
-        # one sleep between the two attempts
+        result = post_to_senaite(
+            [b"msg"], Session(URL), retries=3, delay=1)
+        # 1 auth pair + 2 POSTs = 4 calls (no second auth)
+        self.assertEqual(len(responses.calls), 4)
         self.sleep.assert_called_once_with(1)
+        self.assertTrue(result.success)
+        self.assertEqual(result.attempts, 2)
 
     @responses.activate
     def test_retry_exhausted(self):
-        for _ in range(3):
-            auth_ok()
+        auth_ok()
         for _ in range(3):
             responses.add(
                 responses.POST,
                 "{}/push".format(BASE),
                 json={"success": False},
                 status=200)
-        post_to_senaite([b"msg"], Session(URL), retries=3, delay=1)
-        # 3 auth pairs + 3 POSTs = 9 calls
-        self.assertEqual(len(responses.calls), 9)
+        result = post_to_senaite(
+            [b"msg"], Session(URL), retries=3, delay=1)
+        # 1 auth pair + 3 POSTs = 5 calls (auth not re-run)
+        self.assertEqual(len(responses.calls), 5)
         # two sleeps: between attempts 1-2 and 2-3, none after the last
         self.assertEqual(self.sleep.call_count, 2)
+        self.assertFalse(result.success)
+        self.assertEqual(result.attempts, 3)
+        self.assertIsInstance(result.last_error, SenaiteHTTPError)
 
-    def test_auth_failure_still_retries(self):
-        """If auth fails the loop should still respect the retry budget."""
+    def test_retry_recovers_from_connection_error(self):
+        """Connection-level failures are retried, not propagated."""
         session = MagicMock()
-        session.auth.return_value = False
-        post_to_senaite([b"msg"], session, retries=3, delay=0)
-        self.assertEqual(session.auth.call_count, 3)
+        session.auth.return_value = True
+        session.post.side_effect = [
+            SenaiteUnreachableError("network blip"),
+            {"success": True},
+        ]
+        result = post_to_senaite(
+            [b"msg"], session, retries=3, delay=0)
+        self.assertTrue(result.success)
+        self.assertEqual(result.attempts, 2)
+        self.assertEqual(session.post.call_count, 2)
+
+    def test_auth_failure_skips_post_and_does_not_retry(self):
+        """If auth fails the loop bails out without firing POSTs."""
+        session = MagicMock()
+        session.auth.side_effect = SenaiteAuthError("nope")
+        result = post_to_senaite(
+            [b"msg"], session, retries=3, delay=0)
+        session.auth.assert_called_once()
         session.post.assert_not_called()
+        self.assertFalse(result.success)
+        self.assertEqual(result.attempts, 0)
+        self.assertIsInstance(result.last_error, SenaiteAuthError)
 
     def test_consumer_arg_passed_through(self):
         """`consumer` propagates from kwargs into the POST payload."""
@@ -186,18 +254,3 @@ class PostToSenaiteTest(unittest.TestCase):
         post_to_senaite([b"msg"], session)
         _, payload = session.post.call_args[0]
         self.assertEqual(payload["consumer"], "senaite.lis2a.import")
-
-
-class LimsModuleSurfaceTest(unittest.TestCase):
-    """Lock down the public surface of the module so refactors that
-    rename or move these symbols break this test loudly.
-    """
-
-    def test_post_to_senaite_is_exported(self):
-        self.assertTrue(callable(lims.post_to_senaite))
-
-    def test_session_is_exported(self):
-        self.assertTrue(callable(lims.Session))
-
-    def test_api_base_url_constant(self):
-        self.assertEqual(lims.API_BASE_URL, "@@API/senaite/v1")

@@ -7,9 +7,9 @@ import logging
 import os
 import sys
 
-from senaite.astm import lims
 from senaite.astm import logger
-from senaite.astm.lims import post_to_senaite
+from senaite.astm.core import lims
+from senaite.astm.core.lims import post_to_senaite
 from senaite.astm.protocol import ASTMProtocol
 from senaite.astm.utils import write_message
 
@@ -140,7 +140,10 @@ def main():
     if url:
         session = lims.Session(url)
         logger.info('Checking connection to SENAITE ...')
-        if not session.auth():
+        try:
+            session.auth()
+        except lims.SenaiteError as exc:
+            logger.error('Could not connect to SENAITE: {}'.format(exc))
             return sys.exit(-1)
 
     def dispatch_astm_message(message):

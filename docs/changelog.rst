@@ -5,6 +5,13 @@ Changelog
 1.0.0 (unreleased)
 ------------------
 
+- #31 Migrate every instrument to the registry (PR-E2)
+- #30 Introduce the instrument registry (PR-E1)
+- #29 Make field descriptors quiet and tolerant (PR-D)
+- #28 Define a typed Envelope schema for Wrapper.to_dict() (PR-C)
+- #27 Lift LIMS push into core/ with typed errors and PushResult (PR-B)
+- #26 Drop Python 2 compatibility shims (PR-A)
+- #25 Add test scaffold for the ASTM pipeline
 - #23 Add Cepheid GeneXpert import schema
 - #22 Add Horiba Pentra XLR import schema
 - #21 Add Biomérieux MINI VIDAS® import schema

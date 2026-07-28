@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import re
+
 from datetime import datetime
 
 from senaite.astm import records
+from senaite.astm.core.instrument import Instrument
+from senaite.astm.core.instrument import register_instrument
 from senaite.astm.fields import ComponentField
 from senaite.astm.fields import DateTimeField
 from senaite.astm.fields import RepeatedComponentField
@@ -19,7 +23,7 @@ VERSION = "1.0.0"
 # - GeneXpert Xpress 5.1 and above
 # - Infinity Xpertise v6.4b and above
 # - Cepheid OS 1.0 (GeneXpert® System with Touchscreen) and above
-HEADER_RX = r".*(GeneXpert)\^"
+HEADER_RX = re.compile(rb".*(GeneXpert)\^")
 
 PRIORITIES = (
     "S",  # S: Stat
@@ -77,32 +81,6 @@ COMMENT_TYPES = (
     "I",  # I: Notes,
     "N",  # N: Error
 )
-
-
-def get_metadata(wrapper):
-    """Additional metadata
-    :param wrapper: The wrapper instance
-    :returns: dictionary of additional metadata
-    """
-    return {
-        "version": VERSION,
-        "header_rx": HEADER_RX,
-    }
-
-
-def get_mapping():
-    """Returns the wrappers for this instrument
-    """
-    return {
-        "H": HeaderRecord,
-        "P": PatientRecord,
-        "O": OrderRecord,
-        "R": ResultRecord,
-        "C": CommentRecord,
-        "Q": RequestInformationRecord,
-        "M": ManufacturerInfoRecord,
-        "L": TerminatorRecord,
-    }
 
 
 class HeaderRecord(records.HeaderRecord):
@@ -301,3 +279,26 @@ class ManufacturerInfoRecord(records.ManufacturerInfoRecord):
 class TerminatorRecord(records.TerminatorRecord):
     """Message Termination Record (L)
     """
+
+
+@register_instrument
+class GeneXpert(Instrument):
+    name = "genexpert"
+    header_regex = HEADER_RX
+    record_map = {
+        "H": HeaderRecord,
+        "P": PatientRecord,
+        "O": OrderRecord,
+        "R": ResultRecord,
+        "C": CommentRecord,
+        "Q": RequestInformationRecord,
+        "M": ManufacturerInfoRecord,
+        "L": TerminatorRecord,
+    }
+
+    def get_metadata(self, wrapper):
+        return {"version": VERSION,
+                "header_rx": HEADER_RX.pattern.decode()}
+
+
+INSTRUMENT = GeneXpert()
