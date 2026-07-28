@@ -2,6 +2,7 @@
 
 ## 2.0.0
 
+- #82 Added schema for Hitachi Chemistry Analyzer H7600
 - #80 Parse the documented Yumizen FLOATLE framing into structured points and populations
 - #79 Fix stray control bytes tearing down the ASTM connection
 - #77 astm transport: buffer data_received across TCP segments so chunked ASTM frames are reassembled instead of NAKed

@@ -1,0 +1,938 @@
+{
+  "C": [
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    },
+    {
+      "ctype": null,
+      "data": null,
+      "seq": "1",
+      "source": null,
+      "type": "C"
+    }
+  ],
+  "H": [
+    {
+      "address": null,
+      "caps": null,
+      "comments": {
+        "meaning_of_message": "RSUPL",
+        "mode_of_message": "BATCH"
+      },
+      "delimeter": [
+        {
+          "_": "",
+          "__": null
+        },
+        {
+          "_": "",
+          "__": "&"
+        }
+      ],
+      "message_id": null,
+      "password": null,
+      "phone": null,
+      "processing_id": "P",
+      "receiver": "host",
+      "reserved": null,
+      "sender": {
+        "name": "H7600",
+        "version": "1"
+      },
+      "timestamp": "<volatile>",
+      "type": "H",
+      "version": "1"
+    }
+  ],
+  "L": [
+    {
+      "code": "N",
+      "seq": "1",
+      "type": "L"
+    }
+  ],
+  "M": [],
+  "O": [
+    {
+      "action_code": "N",
+      "biomaterial": "SC",
+      "clinical_info": null,
+      "collected_at": null,
+      "collector": null,
+      "danger_code": null,
+      "infection_flag": null,
+      "instrument": {
+        "container_type": null,
+        "position_number": null,
+        "rack_id": null,
+        "sample_type": null,
+        "sequence_number": "R1"
+      },
+      "instrument_charge": null,
+      "instrument_section": null,
+      "laboratory": null,
+      "laboratory_field_1": null,
+      "laboratory_field_2": null,
+      "location_ward": null,
+      "physician": null,
+      "physician_phone": null,
+      "priority": "R",
+      "received_at": null,
+      "report_type": "F",
+      "reported_at": "20260609095815",
+      "requested_at": null,
+      "reserved": null,
+      "sample_id": {
+        "_": null,
+        "sample_count": "1",
+        "sample_daily_counter": "006",
+        "sample_id": "                     6",
+        "sample_total_counter": "0"
+      },
+      "sampled_at": null,
+      "seq": "1",
+      "specimen_service": null,
+      "test": [
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "989/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "990/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "991/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "683/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "717/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "760/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "685/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "687/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "734/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "798/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "220/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "454/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "552/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "678/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "299/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "781/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "700/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "992/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "993/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "994/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "690/",
+          "dilution": null
+        },
+        {
+          "_": null,
+          "__": null,
+          "___": null,
+          "application_code": "961/",
+          "dilution": null
+        }
+      ],
+      "type": "O",
+      "user_field_1": null,
+      "user_field_2": null,
+      "volume": null
+    }
+  ],
+  "P": [
+    {
+      "address": null,
+      "admission_date": null,
+      "admission_status": null,
+      "birthdate": null,
+      "diagnosis": null,
+      "diagnostic_code": null,
+      "diagnostic_code_nature": null,
+      "diet": null,
+      "dosage_category": null,
+      "height": null,
+      "hospital_institution": null,
+      "hospital_service": null,
+      "id": null,
+      "isolation_status": null,
+      "laboratory_id": null,
+      "language": null,
+      "location": null,
+      "maiden_name": null,
+      "martial_status": null,
+      "medication": null,
+      "name": null,
+      "phone": null,
+      "physician_id": null,
+      "practice_field_1": null,
+      "practice_field_2": null,
+      "practice_id": null,
+      "race": null,
+      "religion": null,
+      "reserved": null,
+      "seq": "1",
+      "sex": null,
+      "special_1": {
+        "age": null,
+        "unit": null
+      },
+      "special_2": null,
+      "type": "P",
+      "weight": null
+    }
+  ],
+  "Q": [],
+  "R": [
+    {
+      "abnormal_flag": "N",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "ISE1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "1",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "989/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": "mmol/l",
+      "value": "133"
+    },
+    {
+      "abnormal_flag": "N",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "ISE1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "2",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "990/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": "mmol/l",
+      "value": "4.44"
+    },
+    {
+      "abnormal_flag": "N",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "ISE1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "3",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "991/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": "mmol/l",
+      "value": "97.3"
+    },
+    {
+      "abnormal_flag": "N",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "P1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "4",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "683/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": "U/l",
+      "value": "93"
+    },
+    {
+      "abnormal_flag": "N",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "P1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "5",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "717/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": "mmol/l",
+      "value": "22.06"
+    },
+    {
+      "abnormal_flag": "N",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "P1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "6",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "760/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": "g/l",
+      "value": "34.0"
+    },
+    {
+      "abnormal_flag": "N",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "P1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "7",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "685/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": "U/l",
+      "value": "22.3"
+    },
+    {
+      "abnormal_flag": "N",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "P1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "8",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "687/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": "U/l",
+      "value": "18.2"
+    },
+    {
+      "abnormal_flag": "N",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "P1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "9",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "734/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": "umol/l",
+      "value": "2.2"
+    },
+    {
+      "abnormal_flag": "N",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "P1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "10",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "798/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": "mmol/l",
+      "value": "5.60"
+    },
+    {
+      "abnormal_flag": "N",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "P1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "11",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "220/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": "U/l",
+      "value": "210"
+    },
+    {
+      "abnormal_flag": "N",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "P1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "12",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "454/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": "mmol/l",
+      "value": "1.21"
+    },
+    {
+      "abnormal_flag": "N",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "P1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "13",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "552/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": "mmol/l",
+      "value": "3.88"
+    },
+    {
+      "abnormal_flag": "N",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "P1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "14",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "678/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": "g/l",
+      "value": "71.8"
+    },
+    {
+      "abnormal_flag": "N",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "P1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "15",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "299/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": "umol/l",
+      "value": "6.3"
+    },
+    {
+      "abnormal_flag": "N",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "P1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "16",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "781/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": "mmol/l",
+      "value": "1.58"
+    },
+    {
+      "abnormal_flag": "N",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "P1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "17",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "700/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": "umol/l",
+      "value": "262"
+    },
+    {
+      "abnormal_flag": "N",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "P1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "18",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "992/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": null,
+      "value": "8"
+    },
+    {
+      "abnormal_flag": "N",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "P1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "19",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "993/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": null,
+      "value": "2"
+    },
+    {
+      "abnormal_flag": "N",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "P1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "20",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "994/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": null,
+      "value": "1"
+    },
+    {
+      "abnormal_flag": "N",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": "P1",
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "21",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "690/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": "umol/l",
+      "value": "55"
+    },
+    {
+      "abnormal_flag": "N",
+      "abnormality_nature": null,
+      "completed_at": null,
+      "instrument": null,
+      "norms_changed_at": null,
+      "operator": null,
+      "references": null,
+      "seq": "22",
+      "started_at": null,
+      "status": "F",
+      "test": {
+        "_": null,
+        "__": null,
+        "___": null,
+        "application_code": "961/",
+        "dilution": null
+      },
+      "type": "R",
+      "units": "g/L",
+      "value": "38"
+    }
+  ],
+  "metadata": {
+    "astm": "\u00021H|\\^&|||H7600^1|||||host|RSUPL^BATCH|P|1\rP|1\rO|1|0^                     6^1^^006|R1|^^^989/\\^^^990/\\^^^991/\\^^^683/\\^^^717/\\^^^760/\\^^^685/\\^^^687/\\^^^734/\\^^^798/\\^^^220/\\^^^454/\\^^^552/\\^^^678/\\^^^299/\\^^^781/\\^^^700/\\^^^992/\\^^^993/\\^^^994/\\^^^690/\\^^^961/|R||||||N||^^||SC|||labg  |graciel h                     ^                         ^                    ^               ^          |||20260609095815|||F\rR|1|^^^989/|133|mmol/l||N||F|||||ISE1\rC|1|I|0|I\rR|2|^^^990/|4.44|mmol/l||N||F|||||ISE1\rC|1|I|0|I\rR|3|^^^991/|97.3|mmol/l||N||F|||||ISE1\rC|1|I|0|I\rR|4|^^^683/|93|U/l||N||F|||||P1\rC|1|I|0|I\rR|5|^^^717/|22.06|mmol/l||N||F|||||P1\rC|1|I|0|I\rR|6|^^^760/|34.0|g/l||N||F|||||P1\rC|1|I|0|I\rR|7|^^^685/|22.3|U/l||N||F|||||P1\rC|1|I|0|I\rR|8|^^^687/|18.2|U/l||N||F|||||P1\rC|1|I|0|I\rR|9|^^^734/|2.2|umol/l||N||F|||||P1\rC|1|I|0|I\rR|10|^^^798/|5.60|mmol/l||N||F|||||P1\rC|1|I|0|I\rR|11|^^^220/|210|U/l||N||F|||||P1\rC|1|I|0|I\rR|12|^^^454/|1.21|mmol/l||N||F|||||P1\rC|1|I|0|I\rR|13|^^^552/|3.88|mmol/l||N||F|||||P1\rC|1|I|0|I\rR|14|^^^678/|71.8|g/l||N||F|||||P1\rC|1|I|0|I\rR|15|^^^299/|6.3|umol/l||N||F|||||P1\rC|1|I|0|I\rR|16|^^^781/|1.58|mmol/l||N||F|||||P1\rC|1|I|0|I\rR|17|^^^700/|262|umol/l||N||F|||||P1\rC|1|I|0|I\rR|18|^^^992/|8|||N||F|||||P1\rC|1|I|0|I\rR|19|^^^993/|2|||N||F|||||P1\rC|1|I|0|I\rR|20|^^^994/|1|||N||F|||||P1\rC|1|I|0|I\rR|21|^^^690/|55|umol/l||N||F|||||P1\rC|1|I|0|I\rR|22|^^^961/|38|g/L||N||F|||||\rC|1|I|0|I\rL|1|N\r\u0003D5\r",
+    "envelope_version": "1.1",
+    "header_rx": ".*H7600\\^",
+    "hl7": "",
+    "lis2a": "H|\\^&|||H7600^1|||||host|RSUPL^BATCH|P|1\rP|1\rO|1|0^                     6^1^^006|R1|^^^989/\\^^^990/\\^^^991/\\^^^683/\\^^^717/\\^^^760/\\^^^685/\\^^^687/\\^^^734/\\^^^798/\\^^^220/\\^^^454/\\^^^552/\\^^^678/\\^^^299/\\^^^781/\\^^^700/\\^^^992/\\^^^993/\\^^^994/\\^^^690/\\^^^961/|R||||||N||^^||SC|||labg  |graciel h                     ^                         ^                    ^               ^          |||20260609095815|||F\rR|1|^^^989/|133|mmol/l||N||F|||||ISE1\rC|1|I|0|I\rR|2|^^^990/|4.44|mmol/l||N||F|||||ISE1\rC|1|I|0|I\rR|3|^^^991/|97.3|mmol/l||N||F|||||ISE1\rC|1|I|0|I\rR|4|^^^683/|93|U/l||N||F|||||P1\rC|1|I|0|I\rR|5|^^^717/|22.06|mmol/l||N||F|||||P1\rC|1|I|0|I\rR|6|^^^760/|34.0|g/l||N||F|||||P1\rC|1|I|0|I\rR|7|^^^685/|22.3|U/l||N||F|||||P1\rC|1|I|0|I\rR|8|^^^687/|18.2|U/l||N||F|||||P1\rC|1|I|0|I\rR|9|^^^734/|2.2|umol/l||N||F|||||P1\rC|1|I|0|I\rR|10|^^^798/|5.60|mmol/l||N||F|||||P1\rC|1|I|0|I\rR|11|^^^220/|210|U/l||N||F|||||P1\rC|1|I|0|I\rR|12|^^^454/|1.21|mmol/l||N||F|||||P1\rC|1|I|0|I\rR|13|^^^552/|3.88|mmol/l||N||F|||||P1\rC|1|I|0|I\rR|14|^^^678/|71.8|g/l||N||F|||||P1\rC|1|I|0|I\rR|15|^^^299/|6.3|umol/l||N||F|||||P1\rC|1|I|0|I\rR|16|^^^781/|1.58|mmol/l||N||F|||||P1\rC|1|I|0|I\rR|17|^^^700/|262|umol/l||N||F|||||P1\rC|1|I|0|I\rR|18|^^^992/|8|||N||F|||||P1\rC|1|I|0|I\rR|19|^^^993/|2|||N||F|||||P1\rC|1|I|0|I\rR|20|^^^994/|1|||N||F|||||P1\rC|1|I|0|I\rR|21|^^^690/|55|umol/l||N||F|||||P1\rC|1|I|0|I\rR|22|^^^961/|38|g/L||N||F|||||\rC|1|I|0|I\rL|1|N\r\u0003",
+    "version": "1.0.0"
+  }
+}
