@@ -17,10 +17,13 @@ from senaite.astm.mapping import Component
 
 VERSION = "1.0.0"
 
-# Supports XN-550, XN-530, XN-450, XN-430, XN-350, XN-330, XN-150, XN-110
+# Supports XN-550, XN-530, XN-450, XN-430, XN-350, XN-330, XN-150, XN-110,
+# XN-1000 (or XN-10, as the Sysmex XN-1000 is not a standalone analytical
+# module, but a system configuration name. The physical benchtop unit is
+# comprised of a Sampler section, SA-10, and an XN-10 analytical core module)
 # Sysmex Corporation, Automated Hematology Analyzer XN-L series ASTM Host
 # Interface Specifications, Revision 6, 2017
-HEADER_RX = re.compile(rb".*XN-(550|530|450|430|350|330|150|110)\^")
+HEADER_RX = re.compile(rb".*XN-(550|530|450|430|350|330|150|110|10|1000)\^")
 
 PATIENT_SEXES = (
     "M",  # M: male
