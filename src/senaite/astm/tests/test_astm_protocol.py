@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import sys
+
 from unittest.mock import MagicMock
 from unittest.mock import Mock
 
@@ -203,3 +205,45 @@ class ASTMProtocolTest(ASTMTestBase):
         # neither of these should raise
         self.protocol.data_received(ACK)
         self.protocol.data_received(NAK)
+
+    def test_long_garbage_run_does_not_exhaust_the_stack(self):
+        """An unframed stream must not take the process down.
+
+        Discarding unexpected bytes used to recurse once per byte, so a
+        single read carrying more bytes than the recursion limit raised a
+        RecursionError inside data_received. Seen in production with an
+        analyzer sending records without STX: the server aborted and every
+        instrument lost its connection.
+        """
+        transport = self.get_mock_transport()
+        self.protocol.connection_made(transport)
+        self.protocol.data_received(ENQ)
+
+        # a full ASTM record, unframed, ten times longer than the limit
+        garbage = b"R|1|^^^^WBC^1|17.45|10*9/L||H||F||||20260728102411\r"
+        garbage = garbage * (10 * sys.getrecursionlimit() // len(garbage))
+        self.assertGreater(len(garbage), sys.getrecursionlimit())
+
+        # a valid frame right after the garbage is still dispatched
+        frame = b"\x021H|\\^&\r\x03E5\r\n"
+        self.protocol.data_received(garbage + frame)
+
+        self.assertEqual(len(self.protocol.messages), 1)
+        transport.write.assert_called_with(ACK)
+
+    def test_garbage_run_is_reported_once(self):
+        """The discarded run is reported with a single warning.
+
+        One warning per byte flooded the log file and made the logging
+        machinery itself recurse.
+        """
+        transport = self.get_mock_transport()
+        self.protocol.connection_made(transport)
+        self.protocol.data_received(ENQ)
+
+        with self.assertLogs("senaite.astm", level="WARNING") as ctx:
+            self.protocol.data_received(b"garbage bytes" + ENQ)
+
+        skipped = [r for r in ctx.records if "Skipping" in r.getMessage()]
+        self.assertEqual(len(skipped), 1)
+        self.assertIn("13 unexpected bytes", skipped[0].getMessage())

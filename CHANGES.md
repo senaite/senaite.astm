@@ -2,6 +2,7 @@
 
 ## 2.0.0
 
+- #84 astm transport: drop a run of unexpected bytes in one pass instead of recursing per byte, which exhausted the stack and aborted the server on unframed streams
 - #82 Added schema for Hitachi Chemistry Analyzer H7600
 - #80 Parse the documented Yumizen FLOATLE framing into structured points and populations
 - #79 Fix stray control bytes tearing down the ASTM connection
