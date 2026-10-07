@@ -6,6 +6,7 @@
 from itertools import zip_longest
 from operator import itemgetter
 
+from senaite.astm import logger
 from senaite.astm.fields import Field
 
 
@@ -56,7 +57,18 @@ class Mapping(_MappingProxy):
             else:
                 setattr(self, attrname, attrval)
         if values:
-            raise ValueError('Unexpected kwargs found: %r' % values)
+            # `zip_longest` collects the components that go beyond the ones
+            # declared by the record under a `None` key. An analyzer sending
+            # more than the schema knows about -- a firmware revision that
+            # appends a field, or just a trailing field separator -- must not
+            # invalidate the whole message
+            extra = values.pop(None, None)
+            if extra is not None:
+                logger.warning(
+                    "%s: ignoring %r, record holds more components than "
+                    "declared", type(self).__name__, extra)
+            if values:
+                raise ValueError('Unexpected kwargs found: %r' % values)
 
     @classmethod
     def build(cls, *a):
