@@ -270,7 +270,6 @@ class GeneXpert(ASTMTestBase):
         self.assertEqual(rec["instrument"]["expiration_date"], None)
 
 
-
 class GeneXpertEscapedRecords(ASTMTestBase):
     """The GeneXpert declares `|@^\\` in its header: `@` is the repeat
     delimiter and `\\` the escape one. The decoder reads every message with
