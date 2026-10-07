@@ -279,8 +279,8 @@ class GeneXpertEscapedRecords(ASTMTestBase):
     component leaves the record longer than the schema declares. Neither may
     cost the whole message.
 
-    `genexpert_escaped.txt` carries both, as reported from a site whose
-    analyzer could not deliver a single result.
+    `genexpert_escaped.txt` carries both, as captured from an analyzer that
+    could not deliver a single result.
     """
 
     async def asyncSetUp(self):
@@ -298,7 +298,7 @@ class GeneXpertEscapedRecords(ASTMTestBase):
         """Raised "String value expected, got [['john '], ['R'], ['doe']]".
         The text is kept as it travelled on the wire
         """
-        self.assertEqual(self.data["R"][0]["operator"], r"john \R\doe")
+        self.assertEqual(self.data["R"][0]["operator"], r"John \R\Doe")
 
     def test_escape_sequence_in_set_field(self):
         """Raised "TypeError: unhashable type: 'list'" on the vocabulary
@@ -329,5 +329,5 @@ class GeneXpertEscapedRecords(ASTMTestBase):
         """The records around the offending ones are unaffected
         """
         self.assertEqual(
-            self.data["P"][0]["name"]["family_name"], "jennie moresby")
-        self.assertEqual(self.data["O"][0]["sample_id"], "TV26A0042")
+            self.data["P"][0]["name"]["family_name"], "Jane Doe")
+        self.assertEqual(self.data["O"][0]["sample_id"], "PR26A0042")
