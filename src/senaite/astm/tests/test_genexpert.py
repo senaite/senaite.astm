@@ -268,3 +268,66 @@ class GeneXpert(ASTMTestBase):
         self.assertEqual(rec["instrument"]["cartridge"], None)
         self.assertEqual(rec["instrument"]["reagent_lot"], None)
         self.assertEqual(rec["instrument"]["expiration_date"], None)
+
+
+
+class GeneXpertEscapedRecords(ASTMTestBase):
+    """The GeneXpert declares `|@^\\` in its header: `@` is the repeat
+    delimiter and `\\` the escape one. The decoder reads every message with
+    the ASTM default delimiters instead, so an escape sequence such as `\\R\\`
+    is split as if it were a repeat, and a firmware revision that appends a
+    component leaves the record longer than the schema declares. Neither may
+    cost the whole message.
+
+    `genexpert_escaped.txt` carries both, as reported from a site whose
+    analyzer could not deliver a single result.
+    """
+
+    async def asyncSetUp(self):
+        path = self.get_instrument_file_path("genexpert_escaped.txt")
+        self.lines = self.read_file_lines(path)
+        self.data = Wrapper(self.lines).to_dict()
+
+    def test_message_is_wrapped(self):
+        """The whole message used to be rejected
+        """
+        self.assertEqual(self.data["H"][0]["sender"]["name"], "GeneXpert")
+        self.assertEqual(len(self.data["R"]), 4)
+
+    def test_escape_sequence_in_text_field(self):
+        """Raised "String value expected, got [['john '], ['R'], ['doe']]".
+        The text is kept as it travelled on the wire
+        """
+        self.assertEqual(self.data["R"][0]["operator"], r"john \R\doe")
+
+    def test_escape_sequence_in_set_field(self):
+        """Raised "TypeError: unhashable type: 'list'" on the vocabulary
+        lookup of the abnormal flag
+        """
+        record = self.data["R"][1]
+        self.assertEqual(record["abnormal_flag"], r"A\R\B")
+        self.assertEqual(record["status"], "F")
+
+    def test_undeclared_component_is_ignored(self):
+        """Raised "Could not wrap 'R' record". The components the schema does
+        know about are kept
+        """
+        record = self.data["R"][2]
+        self.assertEqual(
+            record["instrument"]["system_name"], "Cepheid-44413S0")
+        self.assertEqual(record["status"], "F")
+
+    def test_trailing_separator_is_ignored(self):
+        """Same failure, for a record padded with an empty field
+        """
+        record = self.data["R"][3]
+        self.assertEqual(
+            record["instrument"]["system_name"], "Cepheid-44413S0")
+        self.assertEqual(record["status"], "F")
+
+    def test_patient_and_order_are_intact(self):
+        """The records around the offending ones are unaffected
+        """
+        self.assertEqual(
+            self.data["P"][0]["name"]["family_name"], "jennie moresby")
+        self.assertEqual(self.data["O"][0]["sample_id"], "TV26A0042")

@@ -10,6 +10,8 @@ import json
 from itertools import islice
 
 from senaite.astm import logger
+from senaite.astm.constants import COMPONENT_SEP
+from senaite.astm.constants import REPEAT_SEP
 
 
 class Field(object):
@@ -99,10 +101,41 @@ class DecimalField(Field):
         return super(DecimalField, self)._set_value(value)
 
 
+def join_repeated(value):
+    """Rebuilds the text of a field that was decoded as a list
+
+    Reverses `codec.decode_repeated_component`: components are joined back
+    with the component delimiter and the repeats with the repeat delimiter.
+    The text comes back as it travelled on the wire, escape sequences
+    included -- resolving those is a matter for the decoder, not for a field
+    """
+    component_sep = COMPONENT_SEP.decode()
+    repeat_sep = REPEAT_SEP.decode()
+
+    def to_text(item):
+        if item is None:
+            return ""
+        if isinstance(item, bytes):
+            return item.decode("utf-8")
+        if isinstance(item, list):
+            return component_sep.join(map(to_text, item))
+        return str(item)
+
+    return repeat_sep.join(to_text(item) for item in value)
+
+
 class TextField(Field):
     """Mapping field for string values.
     """
     def _set_value(self, value):
+        if isinstance(value, list):
+            # decoded as a list because the field holds the repeat delimiter;
+            # keep the text rather than refuse the whole record
+            joined = join_repeated(value)
+            logger.warning(
+                "Field %r holds the repeat delimiter, read as text: %r",
+                self.name, joined)
+            value = joined
         if not isinstance(value, (str, bytes)):
             raise TypeError("String value expected, got %r" % value)
         return super(TextField, self)._set_value(value)
@@ -329,6 +362,9 @@ class SetField(Field):
         return self.field._get_value(value)
 
     def _set_value(self, value):
+        if isinstance(value, list):
+            # see TextField._set_value
+            value = join_repeated(value)
         value = self.field._get_value(value)
         if value not in self.values:
             if self.strict:
