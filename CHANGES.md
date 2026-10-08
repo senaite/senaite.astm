@@ -2,6 +2,7 @@
 
 ## 2.0.0
 
+- #XX Add a transport for the Abbott CELL-DYN Emerald hematology analyzers (`senaite-emerald-server`)
 - #84 Fix unframed input aborting the server through unbounded recursion
 - #82 Added schema for Hitachi Chemistry Analyzer H7600
 - #80 Parse the documented Yumizen FLOATLE framing into structured points and populations

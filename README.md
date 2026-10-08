@@ -147,6 +147,89 @@ Worked fixtures live under `src/senaite/astm/tests/data/hl7/` and
 are exercised by `tests/test_hl7_parser.py`.
 
 
+## CELL-DYN Emerald transport
+
+The Abbott CELL-DYN Emerald hematology analyzers (Emerald 18, Emerald 22
+and Emerald 22 AL) speak neither ASTM nor HL7, but a proprietary,
+text-oriented protocol over TCP/IP, as described in the *CELL-DYN Emerald
+22 AL Laboratory Information System Interface Specification* (Abbott part
+no. 9159915). The instrument is the TCP client: it connects to the host IP
+address and port configured in its COMMUNICATION / NET. PARAM. menu
+(protocol must be set to TCP/IP, the default is UDP/IP).
+
+The `senaite-emerald-server` script is the listener the instruments connect
+to. It drives the handshake of the protocol, checks the control sum
+(CRC-16) of each frame, and turns each result into the same envelope shape
+the ASTM transport produces:
+
+    $ senaite-emerald-server --help
+
+    usage: senaite-emerald-server [-h] [-l LISTEN] [-p PORT] [-o OUTPUT]
+                                  [--shutdown-grace-seconds SECONDS]
+                                  [-u URL] [-c CONSUMER] [-m MESSAGE_FORMAT]
+                                  [-r RETRIES] [-d DELAY] [-v]
+                                  [--logfile LOGFILE]
+
+    CELL-DYN EMERALD SERVER:
+      -l LISTEN             Listen IP address (default: 0.0.0.0)
+      -p PORT               Port to listen on. The default is the default
+                            host port of the instrument (default: 1200)
+      -o OUTPUT             Output directory to write captured frames
+
+    SENAITE LIMS:
+      -u URL                SENAITE URL with credentials. Without --url the
+                            server runs in capture-only mode.
+      -c CONSUMER           SENAITE push consumer interface
+                            (default: senaite.core.lis2a.import)
+      -m MESSAGE_FORMAT     Format sent to SENAITE: "json" or "emerald"
+                            (default: json)
+
+The handshake is:
+
+| Instrument                            | Host                         |
+| ------------------------------------- | ---------------------------- |
+| `CONNECT;<serial>;<version>`          | `ACK_CONNECT;<version>`      |
+| `[header] RESULT_READY;<size>`        | `ACK_RESULT_READY`           |
+| `[header] RESULT ... END_RESULT;<crc>` | `ACK_RESULT;OK`            |
+| `[header] CALIBRATION ... END_CALI`   | `ACK_CALI;<lot>;OK`          |
+| `DISCONNECT;<serial>`                 |                              |
+
+A frame is only acknowledged once it has been written to `--output`. In
+handshake mode, the instrument does not tag as sent the results that were
+not acknowledged, and proposes to send them again at next login. Frames
+with a wrong control sum are acknowledged with `ACK_RESULT;CRC_ERROR`. The
+push to the LIMS runs afterwards, in the background, and only for the
+results of samples: QC, calibration, repeatability and start-up frames are
+captured, but not pushed.
+
+### Envelope mapping
+
+| Frame                      | Envelope bucket                              |
+| -------------------------- | -------------------------------------------- |
+| frame header               | H (`sender`: machine name, number, serial)   |
+| patient information        | P                                            |
+| sample information         | O (`sample_id` from `SID`)                   |
+| hematological parameters   | R (one per parameter)                        |
+| alarms and messages        | C                                            |
+
+Parameters are decoded by their token (`WBC`, `NEU%`, ...), since the order
+of the lines differs among the instruments of the family. Each result
+record holds the value (`+++++` if over range, `-----` if invalid), the
+flags in `abnormal_flag` and the limits in `references`. The units are not
+sent by the instrument per parameter, but the unit system of the frame is
+available in `envelope.metadata.unit_system`.
+
+The sender name of the header (e.g. `EMD22AL`) is the one the push consumer
+of SENAITE uses to resolve the importer, the same way as for the ASTM
+transport. The original frame is preserved verbatim in the `emerald` extra
+of the envelope metadata.
+
+The files exported by the instrument to a USB drive use the same format, so
+they can be parsed the same way. A worked fixture lives under
+`src/senaite/astm/tests/data/emerald/` and is exercised by
+`tests/test_emerald.py`.
+
+
 ## Custom push consumer
 
 A push consumer is registered as an adapter in `configure.zcml`:
