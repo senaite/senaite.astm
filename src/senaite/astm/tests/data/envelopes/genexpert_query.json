@@ -1,0 +1,61 @@
+{
+  "C": [],
+  "H": [
+    {
+      "address": null,
+      "caps": null,
+      "comments": null,
+      "delimeter": "@^\\",
+      "message_id": "GXM-73805556054",
+      "password": null,
+      "phone": null,
+      "processing_id": "P",
+      "receiver": "SENAITE",
+      "reserved": null,
+      "sender": {
+        "id": "GeneXpert PC",
+        "name": "GeneXpert",
+        "software_version": "6.4"
+      },
+      "timestamp": "<volatile>",
+      "type": "H",
+      "version": "1394-97"
+    }
+  ],
+  "L": [
+    {
+      "code": "N",
+      "seq": "1",
+      "type": "L"
+    }
+  ],
+  "M": [],
+  "O": [],
+  "P": [],
+  "Q": [
+    {
+      "beginning_results": null,
+      "ending_range": null,
+      "ending_results": null,
+      "physician_name": null,
+      "physician_telephone": null,
+      "seq": "1",
+      "starting_range": null,
+      "status_code": null,
+      "test_id": null,
+      "time_limits": null,
+      "type": "Q",
+      "user_field_1": null,
+      "user_field_2": null
+    }
+  ],
+  "R": [],
+  "metadata": {
+    "astm": "\u00021H|@^\\|GXM-73805556054||GeneXpert PC^GeneXpert^6.4|||||SENAITE||P|1394-97|20251105152033\rQ|1|ALL||||||||||O@N\rL|1|N\r\u0003BD\r",
+    "envelope_version": "1.2",
+    "header_rx": ".*(GeneXpert)\\^",
+    "hl7": "",
+    "lis2a": "H|@^\\|GXM-73805556054||GeneXpert PC^GeneXpert^6.4|||||SENAITE||P|1394-97|20251105152033\rQ|1|ALL||||||||||O@N\rL|1|N\r\u0003",
+    "version": "1.0.0"
+  }
+}

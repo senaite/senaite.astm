@@ -6,6 +6,7 @@ from senaite.astm import codec
 from senaite.astm import instruments  # noqa: F401  (triggers registry)
 from senaite.astm import records
 from senaite.astm.constants import ENCODING
+from senaite.astm.constants import STX
 from senaite.astm.core.envelope import Envelope
 from senaite.astm.core.envelope import Metadata
 from senaite.astm.core.instrument import find_instrument
@@ -30,6 +31,25 @@ class Wrapper(object):
         self.messages = messages
         self.instrument = None
         self.mapping = self.get_mapping(messages)
+        self.delimiters = self.get_delimiters()
+
+    def get_delimiters(self):
+        """Return the delimiters this transmission declared
+
+        ASTM fixes them in field 2 of the (H)eader record, and they hold for
+        the whole transmission, so they are read once from the first message
+        and used for every record after it. Only the first frame carries the
+        (H)eader
+        """
+        if not self.messages:
+            return codec.DEFAULT_DELIMITERS
+        message = self.messages[0]
+        try:
+            seq, msg, cs = split_message(message)
+        except (ValueError, IndexError):
+            # Not a framed message: the record may be raw already
+            msg = message.lstrip(STX)
+        return codec.get_delimiters(msg)
 
     def get_mapping(self, messages):
         """Return the record mapping for the message.
@@ -73,7 +93,7 @@ class Wrapper(object):
 
         buckets = defaultdict(list)
         for message in self.messages:
-            for record in codec.decode(message):
+            for record in codec.decode(message, delimiters=self.delimiters):
                 rtype = record[0]
                 if rtype not in self.mapping:
                     continue

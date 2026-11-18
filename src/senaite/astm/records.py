@@ -18,9 +18,7 @@ from senaite.astm.fields import ConstantField
 from senaite.astm.fields import DateTimeField
 from senaite.astm.fields import IntegerField
 from senaite.astm.fields import NotUsedField
-from senaite.astm.fields import RepeatedComponentField
 from senaite.astm.fields import TextField
-from senaite.astm.mapping import Component
 from senaite.astm.mapping import Record
 
 __all__ = ["HeaderRecord", "PatientRecord", "OrderRecord",
@@ -60,12 +58,11 @@ __all__ = ["HeaderRecord", "PatientRecord", "OrderRecord",
 #:
 HeaderRecord = Record.build(
     ConstantField(name="type", default="H"),
-    RepeatedComponentField(Component.build(
-        ConstantField(name="_", default=""),
-        TextField(name="__")
-    ), name="delimeter", default=[[], ["", "&"]]),
-    # ^^^ workaround to define field:
-    # ConstantField(name="delimeter", default="\^&"),
+    # The delimiter definition, kept exactly as it travelled.
+    # `decode_record` never splits this field, so what arrives here is
+    # the raw text: `\^&` for an analyzer using the ASTM defaults,
+    # `@^\` for one that does not
+    TextField(name="delimeter", default="\\^&"),
     NotUsedField(name="message_id"),
     NotUsedField(name="password"),
     NotUsedField(name="sender"),

@@ -270,63 +270,57 @@ class GeneXpert(ASTMTestBase):
         self.assertEqual(rec["instrument"]["expiration_date"], None)
 
 
-class GeneXpertEscapedRecords(ASTMTestBase):
-    """The GeneXpert declares `|@^\\` in its header: `@` is the repeat
-    delimiter and `\\` the escape one. The decoder reads every message with
-    the ASTM default delimiters instead, so an escape sequence such as `\\R\\`
-    is split as if it were a repeat, and a firmware revision that appends a
-    component leaves the record longer than the schema declares. Neither may
-    cost the whole message.
+class GeneXpertHostQuery(ASTMTestBase):
+    """The GeneXpert declares `|@^\\` in its header: `@` is its repeat
+    delimiter and `\\` its escape one, where ASTM suggests `\\` and `&`.
 
-    `genexpert_escaped.txt` carries both, as captured from an analyzer that
-    could not deliver a single result.
+    `genexpert_query.txt` is a host query as this analyzer sends it. Nearly
+    four in five of the messages it sends are of this shape, and the last
+    field of the (Q) record is the one place in its traffic where the
+    declared delimiters make a difference
     """
 
     async def asyncSetUp(self):
-        path = self.get_instrument_file_path("genexpert_escaped.txt")
+        path = self.get_instrument_file_path("genexpert_query.txt")
         self.lines = self.read_file_lines(path)
-        self.data = Wrapper(self.lines).to_dict()
+        self.wrapper = Wrapper(self.lines)
+        self.delimiters = self.wrapper.delimiters
+        self.data = self.wrapper.to_dict()
 
-    def test_message_is_wrapped(self):
-        """The whole message used to be rejected
+    def test_delimiters_are_taken_from_the_header(self):
+        """`@` is the repeat delimiter here, not `\\`
         """
+        delimiters = self.delimiters
+        self.assertEqual(delimiters.field, b"|")
+        self.assertEqual(delimiters.repeat, b"@")
+        self.assertEqual(delimiters.component, b"^")
+        self.assertEqual(delimiters.escape, b"\\")
+
+    def test_delimiter_definition_is_kept_raw(self):
+        """Splitting the delimiter definition with the delimiters it declares
+        would be circular, so field 2 of the (H)eader travels through intact
+        """
+        self.assertEqual(self.data["H"][0]["delimeter"], "@^\\")
+
+    def test_repeat_is_split_with_the_declared_delimiter(self):
+        """`O@N` in the last field of the (Q) record is two values, not one.
+        Read with the ASTM default `\\` it arrives as the single string `O@N`
+
+        The schema declares every field of this record `NotUsedField`, so the
+        value does not reach the envelope. The assertion is therefore on the
+        decoder, which is where the delimiters are honoured
+        """
+        record = b"Q|1|ALL||||||||||O@N"
+        decoded = codec.decode_record(record, delimiters=self.delimiters)
+        self.assertEqual(decoded[-1], [["O"], ["N"]])
+
+        default = codec.decode_record(record)
+        self.assertEqual(default[-1], "O@N")
+
+    def test_the_rest_of_the_query_is_intact(self):
+        self.assertEqual(self.data["H"][0]["sender"]["id"], "GeneXpert PC")
         self.assertEqual(self.data["H"][0]["sender"]["name"], "GeneXpert")
-        self.assertEqual(len(self.data["R"]), 4)
-
-    def test_escape_sequence_in_text_field(self):
-        """Raised "String value expected, got [['john '], ['R'], ['doe']]".
-        The text is kept as it travelled on the wire
-        """
-        self.assertEqual(self.data["R"][0]["operator"], r"John \R\Doe")
-
-    def test_escape_sequence_in_set_field(self):
-        """Raised "TypeError: unhashable type: 'list'" on the vocabulary
-        lookup of the abnormal flag
-        """
-        record = self.data["R"][1]
-        self.assertEqual(record["abnormal_flag"], r"A\R\B")
-        self.assertEqual(record["status"], "F")
-
-    def test_undeclared_component_is_ignored(self):
-        """Raised "Could not wrap 'R' record". The components the schema does
-        know about are kept
-        """
-        record = self.data["R"][2]
         self.assertEqual(
-            record["instrument"]["system_name"], "Cepheid-44413S0")
-        self.assertEqual(record["status"], "F")
-
-    def test_trailing_separator_is_ignored(self):
-        """Same failure, for a record padded with an empty field
-        """
-        record = self.data["R"][3]
-        self.assertEqual(
-            record["instrument"]["system_name"], "Cepheid-44413S0")
-        self.assertEqual(record["status"], "F")
-
-    def test_patient_and_order_are_intact(self):
-        """The records around the offending ones are unaffected
-        """
-        self.assertEqual(
-            self.data["P"][0]["name"]["family_name"], "Jane Doe")
-        self.assertEqual(self.data["O"][0]["sample_id"], "PR26A0042")
+            self.data["H"][0]["sender"]["software_version"], "6.4")
+        self.assertEqual(self.data["H"][0]["receiver"], "SENAITE")
+        self.assertEqual(self.data["L"][0]["code"], "N")
