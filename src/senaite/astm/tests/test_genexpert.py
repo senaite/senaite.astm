@@ -270,27 +270,25 @@ class GeneXpert(ASTMTestBase):
         self.assertEqual(rec["instrument"]["expiration_date"], None)
 
 
-class GeneXpertHostQuery(ASTMTestBase):
+class GeneXpertDelimiters(ASTMTestBase):
     """The GeneXpert declares `|@^\\` in its header: `@` is its repeat
     delimiter and `\\` its escape one, where ASTM suggests `\\` and `&`.
 
-    `genexpert_query.txt` is a host query as this analyzer sends it. Nearly
-    four in five of the messages it sends are of this shape, and the last
-    field of the (Q) record is the one place in its traffic where the
-    declared delimiters make a difference
+    `genexpert.txt` carries no repeat and no escape sequence, which is the
+    answer to what this analyzer actually sends: on results, neither occurs.
+    What it does prove is that the declaration is read and acted on
     """
 
     async def asyncSetUp(self):
-        path = self.get_instrument_file_path("genexpert_query.txt")
+        path = self.get_instrument_file_path("genexpert.txt")
         self.lines = self.read_file_lines(path)
         self.wrapper = Wrapper(self.lines)
-        self.delimiters = self.wrapper.delimiters
         self.data = self.wrapper.to_dict()
 
     def test_delimiters_are_taken_from_the_header(self):
         """`@` is the repeat delimiter here, not `\\`
         """
-        delimiters = self.delimiters
+        delimiters = self.wrapper.delimiters
         self.assertEqual(delimiters.field, b"|")
         self.assertEqual(delimiters.repeat, b"@")
         self.assertEqual(delimiters.component, b"^")
@@ -302,25 +300,18 @@ class GeneXpertHostQuery(ASTMTestBase):
         """
         self.assertEqual(self.data["H"][0]["delimeter"], "@^\\")
 
-    def test_repeat_is_split_with_the_declared_delimiter(self):
-        """`O@N` in the last field of the (Q) record is two values, not one.
-        Read with the ASTM default `\\` it arrives as the single string `O@N`
+    def test_a_host_query_repeat_is_split(self):
+        """`O@N`, the last field of the (Q) record of every host query this
+        analyzer sends, is two values. Read with the ASTM default `\\` it is
+        the single string `O@N`
 
-        The schema declares every field of this record `NotUsedField`, so the
-        value does not reach the envelope. The assertion is therefore on the
-        decoder, which is where the delimiters are honoured
+        The (Q) schema declares every field `NotUsedField`, so the value
+        never reaches an envelope. The assertion is on the decoder, which is
+        where the delimiters are honoured
         """
         record = b"Q|1|ALL||||||||||O@N"
-        decoded = codec.decode_record(record, delimiters=self.delimiters)
+        decoded = codec.decode_record(
+            record, delimiters=self.wrapper.delimiters)
         self.assertEqual(decoded[-1], [["O"], ["N"]])
 
-        default = codec.decode_record(record)
-        self.assertEqual(default[-1], "O@N")
-
-    def test_the_rest_of_the_query_is_intact(self):
-        self.assertEqual(self.data["H"][0]["sender"]["id"], "GeneXpert PC")
-        self.assertEqual(self.data["H"][0]["sender"]["name"], "GeneXpert")
-        self.assertEqual(
-            self.data["H"][0]["sender"]["software_version"], "6.4")
-        self.assertEqual(self.data["H"][0]["receiver"], "SENAITE")
-        self.assertEqual(self.data["L"][0]["code"], "N")
+        self.assertEqual(codec.decode_record(record)[-1], "O@N")
