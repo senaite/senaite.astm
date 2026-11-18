@@ -169,24 +169,38 @@ class ASTMProtocol(asyncio.Protocol):
         not arrived yet.
 
         Leading garbage (bytes that are not a known signal byte
-        and not an STX) is skipped one byte at a time with a
-        warning; this matches the previous behaviour where the
-        same bytes would have hit `default_handler` and been
-        logged at ERROR.
+        and not an STX) is discarded; this matches the previous
+        behaviour where the same bytes would have hit
+        `default_handler` and been logged at ERROR.
+
+        The whole run of garbage is dropped in a single pass and
+        reported with a single warning. Skipping it one byte at a
+        time used to recurse once per byte, so an unframed stream
+        (an instrument that sends records without STX, or a frame
+        whose STX was lost) exhausted the stack and took the
+        server process down with it.
         """
-        if not self.buffer:
-            return None
+        while True:
+            if not self.buffer:
+                return None
 
-        first = self.buffer[:1]
-        if first in (ENQ, ACK, NAK, EOT):
-            self.buffer = self.buffer[1:]
-            return first
+            first = self.buffer[:1]
+            if first in (ENQ, ACK, NAK, EOT):
+                self.buffer = self.buffer[1:]
+                return first
 
-        if first != STX:
+            if first == STX:
+                break
+
+            # Drop everything up to the next byte we know how to
+            # handle, or the whole buffer if there is none
+            positions = [p for p in map(self.buffer.find,
+                                        (STX, ENQ, ACK, NAK, EOT)) if p > 0]
+            end = min(positions) if positions else len(self.buffer)
             logger.warning(
-                "Skipping unexpected byte %r in buffer", first)
-            self.buffer = self.buffer[1:]
-            return self._pop_one_unit()
+                "Skipping %d unexpected bytes in buffer: %r",
+                end, self.buffer[:end][:64])
+            self.buffer = self.buffer[end:]
 
         # STX-prefixed frame: locate the first ETX or ETB and
         # require the two checksum bytes that follow.
