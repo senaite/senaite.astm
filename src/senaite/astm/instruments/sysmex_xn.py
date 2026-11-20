@@ -17,10 +17,19 @@ from senaite.astm.mapping import Component
 
 VERSION = "1.0.0"
 
-# Supports XN-550, XN-530, XN-450, XN-430, XN-350, XN-330, XN-150, XN-110
-# Sysmex Corporation, Automated Hematology Analyzer XN-L series ASTM Host
-# Interface Specifications, Revision 6, 2017
-HEADER_RX = re.compile(rb".*XN-(550|530|450|430|350|330|150|110)\^")
+# XN-L series: XN-550, XN-530, XN-450, XN-430, XN-350, XN-330, XN-150,
+# XN-110. Sysmex Corporation, Automated Hematology Analyzer XN-L series
+# ASTM Host Interface Specifications, Revision 6, 2017
+#
+# XN series: XN-1000. That is a system configuration rather than an
+# analytical module, so its header names the measuring hardware inside it,
+# XN-10, or XN-20 when the white precursor channel module is fitted.
+# Sysmex Corporation, Automated Hematology Analyzer XN series ASTM Host
+# Interface Specifications, R314185, Revision 27, 2021
+#
+# Longest first: `10` would otherwise be tried against `XN-1000` before
+# `1000` is, and the alternation is only saved by backtracking
+HEADER_RX = re.compile(rb".*XN-(1000|550|530|450|430|350|330|150|110|10|20)\^")
 
 PATIENT_SEXES = (
     "M",  # M: male
