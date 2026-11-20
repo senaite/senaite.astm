@@ -9,7 +9,6 @@ from senaite.astm.core.instrument import Instrument
 from senaite.astm.core.instrument import register_instrument
 from senaite.astm.fields import ComponentField
 from senaite.astm.fields import DateTimeField
-from senaite.astm.fields import RepeatedComponentField
 from senaite.astm.fields import SetField
 from senaite.astm.fields import TextField
 from senaite.astm.mapping import Component
@@ -92,12 +91,7 @@ class HeaderRecord(records.HeaderRecord):
     # - Component delimiter – caret (ASCII 94)( ^ ) Latin-1 (94)
     # - Escape delimiter – backslash (ASCII 92)( \ ) Latin-1 (92)
     # E.g. H|@^\|12X||GeneXpert PC^Xpert^6.1|||||LIS||P|1394-97|20190521100245
-    delimeter = RepeatedComponentField(
-        Component.build(
-            TextField(name="_", default=""),
-            TextField(name="__")
-        ), default=[[], ["@", ""]]
-    )
+    delimeter = TextField(default="@^\\")
 
     # Message ID: Uniquely identifies the message
     message_id = TextField()
