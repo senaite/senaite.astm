@@ -2,6 +2,7 @@
 
 ## 2.0.0
 
+- #88 Run the tests on Python 3.10 to 3.12
 - #85 Honour the delimiters and escape sequences declared in the (H)eader record
 - #84 Fix unframed input aborting the server through unbounded recursion
 - #82 Added schema for Hitachi Chemistry Analyzer H7600
