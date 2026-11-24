@@ -54,8 +54,7 @@ import re
 
 from senaite.astm.core.envelope import Envelope
 from senaite.astm.core.envelope import Metadata
-
-DEFAULT_ENCODING = "utf-8"
+from senaite.astm.transports.emerald.framing import ENCODING
 
 # Modes of the result frames that are not about a sample
 NON_SAMPLE_MODES = ("QC", "CALIBRATION", "REPEATABILITY")
@@ -82,7 +81,7 @@ SEX = {"0": "U", "1": "M", "2": "F"}
 def _decode(raw):
     """Return ``raw`` as a string regardless of input type."""
     if isinstance(raw, bytes):
-        return raw.decode(DEFAULT_ENCODING, errors="replace")
+        return raw.decode(ENCODING, errors="replace")
     return raw
 
 

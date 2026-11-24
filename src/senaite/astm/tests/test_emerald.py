@@ -175,6 +175,16 @@ class ParserTest(unittest.TestCase):
         values = [(r["test"]["name"], r["value"]) for r in envelope.R]
         self.assertEqual(values, [("WBC", "+++++"), ("RBC", "-----")])
 
+    def test_utf8_fields(self):
+        frame = (
+            u"EMD22AL;1;250207-000451;JOSÉ\r"
+            u"RESULT\rDATE;13/05/2008\rTIME;15:04:05\rMODE;NORMAL\r"
+            u"SID;1\rID;MÜLLER^ZOË\rOPERATOR;JOSÉ\r"
+            u"WBC;6.9;;;3.7;3.7;10.1;10.1\r").encode("utf-8")
+        envelope = parse(with_control_sum(frame))
+        self.assertEqual(envelope.P[0]["name"], u"MÜLLER^ZOË")
+        self.assertEqual(envelope.H[0]["operator"], u"JOSÉ")
+
     def test_not_a_frame(self):
         with self.assertRaises(ValueError):
             parse(b"GARBAGE")
@@ -230,6 +240,16 @@ class ProtocolTest(unittest.TestCase):
         self.assertEqual(self.frames, [frame])
         self.assertEqual(self.transport.written,
                          [b"ACK_CALI;LOT123;OK\r"])
+
+    def test_calibration_lot_is_echoed_as_sent(self):
+        lot = u"LOTÉ12".encode("utf-8")
+        frame = HEADER + (
+            b"CALIBRATION;1;30/10/2003;15:36:38;" + lot + b";01/01/2004;"
+            b"01/01/2003;10:00:00;1;1.0;1.0;1.0;1.0;1.0;0\r"
+            b"WBC;11.0;0.5\r")
+        self.protocol.data_received(with_control_sum(frame, "END_CALI"))
+        self.assertEqual(self.transport.written,
+                         [b"ACK_CALI;" + lot + b";OK\r"])
 
     def test_startup_is_dispatched_without_acknowledge(self):
         self.protocol.data_received(

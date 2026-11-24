@@ -23,6 +23,11 @@ Provided helpers:
 - :func:`build_line` builds a line to be sent to the instrument.
 """
 
+# Frames are ASCII, but the SID, PID, ID (patient name), operator, user
+# login and lot number fields are UTF-8 encoded (LIS specification,
+# "Data Representation")
+ENCODING = "utf-8"
+
 CR = b"\r"
 LF = b"\n"
 
@@ -80,6 +85,6 @@ def build_line(*fields):
     values = []
     for field in fields:
         if isinstance(field, bytes):
-            field = field.decode("ascii", errors="replace")
+            field = field.decode(ENCODING, errors="replace")
         values.append(str(field))
-    return ";".join(values).encode("ascii", errors="replace") + CR
+    return ";".join(values).encode(ENCODING) + CR

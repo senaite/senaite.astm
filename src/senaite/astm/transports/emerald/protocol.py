@@ -31,6 +31,7 @@ import asyncio
 import inspect
 
 from senaite.astm import logger
+from senaite.astm.transports.emerald.framing import ENCODING
 from senaite.astm.transports.emerald.framing import build_line
 from senaite.astm.transports.emerald.framing import crc16
 from senaite.astm.transports.emerald.framing import extract_lines
@@ -52,7 +53,7 @@ MAX_FRAME_SIZE = 1024 * 1024
 def get_fields(line):
     """Returns the fields of the line, stripped
     """
-    text = line.decode("latin-1").strip("\r\n")
+    text = line.decode(ENCODING, errors="replace").strip("\r\n")
     return [field.strip() for field in text.split(";")]
 
 
@@ -94,7 +95,7 @@ class EmeraldProtocol(asyncio.Protocol):
                 "incomplete frame", self.client,
                 len(self.frame) + len(self.buffer))
         else:
-            logger.info("Emerald connection closed for %s", self.client)
+            logger.debug("Emerald connection closed for %s", self.client)
         self.buffer = b""
         self.frame = b""
         self.transport = None
