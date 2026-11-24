@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import re
+
 from senaite.astm import records
+from senaite.astm.core.instrument import Instrument
+from senaite.astm.core.instrument import register_instrument
 from senaite.astm.fields import ComponentField
 from senaite.astm.fields import DateField
 from senaite.astm.fields import DateTimeField
@@ -13,10 +17,19 @@ from senaite.astm.mapping import Component
 
 VERSION = "1.0.0"
 
-# Supports XN-550, XN-530, XN-450, XN-430, XN-350, XN-330, XN-150, XN-110
-# Sysmex Corporation, Automated Hematology Analyzer XN-L series ASTM Host
-# Interface Specifications, Revision 6, 2017
-HEADER_RX = r".*XN-(550|530|450|430|350|330|150|110)\^"
+# XN-L series: XN-550, XN-530, XN-450, XN-430, XN-350, XN-330, XN-150,
+# XN-110. Sysmex Corporation, Automated Hematology Analyzer XN-L series
+# ASTM Host Interface Specifications, Revision 6, 2017
+#
+# XN series: XN-1000. That is a system configuration rather than an
+# analytical module, so its header names the measuring hardware inside it,
+# XN-10, or XN-20 when the white precursor channel module is fitted.
+# Sysmex Corporation, Automated Hematology Analyzer XN series ASTM Host
+# Interface Specifications, R314185, Revision 27, 2021
+#
+# Longest first: `10` would otherwise be tried against `XN-1000` before
+# `1000` is, and the alternation is only saved by backtracking
+HEADER_RX = re.compile(rb".*XN-(1000|550|530|450|430|350|330|150|110|10|20)\^")
 
 PATIENT_SEXES = (
     "M",  # M: male
@@ -74,33 +87,6 @@ STATUS_CODES = (
     "N",  # N: Real-time inquiry (sampler analysis) for initial analysis
     "C",  # C: Real-time inquiry (sampler analysis) for re-analysis
 )
-
-
-def get_metadata(wrapper):
-    """Additional metadata
-
-    :param wrapper: The wrapper instance
-    :returns: dictionary of additional metadata
-    """
-    return {
-        "version": VERSION,
-        "header_rx": HEADER_RX,
-    }
-
-
-def get_mapping():
-    """Returns the wrappers for this instrument
-    """
-    return {
-        "H": HeaderRecord,
-        "P": PatientRecord,
-        "O": OrderRecord,
-        "R": ResultRecord,
-        "C": CommentRecord,
-        "Q": RequestInformationRecord,
-        "M": ManufacturerInfoRecord,
-        "L": TerminatorRecord,
-    }
 
 
 class HeaderRecord(records.HeaderRecord):
@@ -231,3 +217,23 @@ class ManufacturerInfoRecord(records.ManufacturerInfoRecord):
 class TerminatorRecord(records.TerminatorRecord):
     """Message Termination Record (L)
     """
+
+
+@register_instrument
+class SysmexXN(Instrument):
+    name = "sysmex_xn"
+    header_regex = HEADER_RX
+    version = VERSION
+    record_map = {
+        "H": HeaderRecord,
+        "P": PatientRecord,
+        "O": OrderRecord,
+        "R": ResultRecord,
+        "C": CommentRecord,
+        "Q": RequestInformationRecord,
+        "M": ManufacturerInfoRecord,
+        "L": TerminatorRecord,
+    }
+
+
+INSTRUMENT = SysmexXN()
