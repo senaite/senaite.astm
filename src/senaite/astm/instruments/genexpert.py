@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 
+import re
+
 from datetime import datetime
 
 from senaite.astm import records
+from senaite.astm.core.instrument import Instrument
+from senaite.astm.core.instrument import register_instrument
 from senaite.astm.fields import ComponentField
 from senaite.astm.fields import DateTimeField
-from senaite.astm.fields import RepeatedComponentField
 from senaite.astm.fields import SetField
 from senaite.astm.fields import TextField
 from senaite.astm.mapping import Component
@@ -19,7 +22,7 @@ VERSION = "1.0.0"
 # - GeneXpert Xpress 5.1 and above
 # - Infinity Xpertise v6.4b and above
 # - Cepheid OS 1.0 (GeneXpert® System with Touchscreen) and above
-HEADER_RX = r".*(GeneXpert)\^"
+HEADER_RX = re.compile(rb".*(GeneXpert)\^")
 
 PRIORITIES = (
     "S",  # S: Stat
@@ -79,32 +82,6 @@ COMMENT_TYPES = (
 )
 
 
-def get_metadata(wrapper):
-    """Additional metadata
-    :param wrapper: The wrapper instance
-    :returns: dictionary of additional metadata
-    """
-    return {
-        "version": VERSION,
-        "header_rx": HEADER_RX,
-    }
-
-
-def get_mapping():
-    """Returns the wrappers for this instrument
-    """
-    return {
-        "H": HeaderRecord,
-        "P": PatientRecord,
-        "O": OrderRecord,
-        "R": ResultRecord,
-        "C": CommentRecord,
-        "Q": RequestInformationRecord,
-        "M": ManufacturerInfoRecord,
-        "L": TerminatorRecord,
-    }
-
-
 class HeaderRecord(records.HeaderRecord):
     """Message Header Record (H)
     """
@@ -114,12 +91,7 @@ class HeaderRecord(records.HeaderRecord):
     # - Component delimiter – caret (ASCII 94)( ^ ) Latin-1 (94)
     # - Escape delimiter – backslash (ASCII 92)( \ ) Latin-1 (92)
     # E.g. H|@^\|12X||GeneXpert PC^Xpert^6.1|||||LIS||P|1394-97|20190521100245
-    delimeter = RepeatedComponentField(
-        Component.build(
-            TextField(name="_", default=""),
-            TextField(name="__")
-        ), default=[[], ["@", ""]]
-    )
+    delimeter = TextField(default="@^\\")
 
     # Message ID: Uniquely identifies the message
     message_id = TextField()
@@ -301,3 +273,23 @@ class ManufacturerInfoRecord(records.ManufacturerInfoRecord):
 class TerminatorRecord(records.TerminatorRecord):
     """Message Termination Record (L)
     """
+
+
+@register_instrument
+class GeneXpert(Instrument):
+    name = "genexpert"
+    header_regex = HEADER_RX
+    version = VERSION
+    record_map = {
+        "H": HeaderRecord,
+        "P": PatientRecord,
+        "O": OrderRecord,
+        "R": ResultRecord,
+        "C": CommentRecord,
+        "Q": RequestInformationRecord,
+        "M": ManufacturerInfoRecord,
+        "L": TerminatorRecord,
+    }
+
+
+INSTRUMENT = GeneXpert()

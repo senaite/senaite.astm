@@ -7,7 +7,7 @@ from senaite.astm import codec
 from senaite.astm.constants import ACK
 from senaite.astm.constants import ENQ
 from senaite.astm.instruments import sysmex_xn
-from senaite.astm.protocol import ASTMProtocol
+from senaite.astm.transports.astm.protocol import ASTMProtocol
 from senaite.astm.tests.base import ASTMTestBase
 from senaite.astm.wrapper import Wrapper
 
@@ -27,7 +27,7 @@ class SysmexXN550(ASTMTestBase):
         # Mock transport and protocol objects
         self.transport = self.get_mock_transport()
         self.protocol.transport = self.transport
-        self.mapping = sysmex_xn.get_mapping()
+        self.mapping = sysmex_xn.INSTRUMENT.record_map
 
     def get_mock_transport(self, ip="127.0.0.1", port=12345):
         transport = MagicMock()
@@ -155,10 +155,12 @@ class SysmexXN550(ASTMTestBase):
             "57.4", "12.8", "7.3", "22.1", "0.4", "4.67", "1.04", "0.59",
             "1.80", "0.03", "0.2", "0.02", "47.5", "14.8", "8.1", "", "", "40",
             "0", "10", "0", "70", "90", "80", "80", "0", "0", "", "",
-            "PNG&R&20240628&R&2024_06_27_13_54_27_WDF.PNG",
-            "PNG&R&20240628&R&2024_06_27_13_54_27_WDF_CBC.PNG",
-            "PNG&R&20240628&R&2024_06_27_13_54_27_RBC.PNG",
-            "PNG&R&20240628&R&2024_06_27_13_54_27_PLT.PNG",
+            # `&R&` is the escape sequence for the repeat delimiter, which
+            # this analyzer uses as the separator of a file path
+            "PNG\\20240628\\2024_06_27_13_54_27_WDF.PNG",
+            "PNG\\20240628\\2024_06_27_13_54_27_WDF_CBC.PNG",
+            "PNG\\20240628\\2024_06_27_13_54_27_RBC.PNG",
+            "PNG\\20240628\\2024_06_27_13_54_27_PLT.PNG",
         ]
         for idx, record in enumerate(records):
             self.assertEqual(record.get("value"), results[idx])

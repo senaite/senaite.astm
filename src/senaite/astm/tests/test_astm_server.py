@@ -6,7 +6,7 @@ import os
 from senaite.astm import logger
 from senaite.astm.constants import ACK
 from senaite.astm.constants import ENQ
-from senaite.astm.protocol import ASTMProtocol
+from senaite.astm.transports.astm.protocol import ASTMProtocol
 from senaite.astm.tests.base import ASTMTestBase
 
 

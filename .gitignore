@@ -4,4 +4,6 @@
 /astm_messages/
 /test_messages/
 /out/
+*.log
+*.log.*
 .python-version

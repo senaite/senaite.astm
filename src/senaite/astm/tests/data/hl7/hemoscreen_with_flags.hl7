@@ -1,0 +1,33 @@
+MSH|^~\&|HemoScreen|PixCell|||20231224172621||ORU^R01|0|P|2.4
+PID||35
+OBR||||OBS|||20231210111800
+OBX|0|NM|WBC||11.7|10*3/uL|||||F|||20231210111800|0000000-0001-HS
+OBX|1|NM|RBC||4.04|10*6/uL|||||F|||20231210111800|0000000-0001-HS
+OBX|2|ST|HGB||LL|g/dL|||||F|||20231210111800|0000000-0001-HS
+OBX|3|NM|HCT||3.44|%|||||F|||20231210111800|0000000-0001-HS
+OBX|4|NM|MCV||5.25|fL|||||F|||20231210111800|0000000-0001-HS
+OBX|5|NM|MCH||5.21|pg|||||F|||20231210111800|0000000-0001-HS
+OBX|6|NM|MCHC||0.00|g/dL|||||F|||20231210111800|0000000-0001-HS
+OBX|7|NM|RDW||12.8|%|||||F|||20231210111800|0000000-0001-HS
+OBX|8|ST|PLT||LL|10*3/uL|||||F|||20231210111800|0000000-0001-HS
+OBX|9|ST|MPV||---|fL|||||F|||20231210111800|0000000-0001-HS
+OBX|10|NM|NEU#||8.02|10*3/uL||*|||F|||20231210111800|0000000-0001-HS
+NTE|||Abnormal cells may affect marked results
+OBX|11|NM|LYM#||2.28|10*3/uL||*|||F|||20231210111800|0000000-0001-HS
+NTE|||Abnormal cells may affect marked results
+OBX|12|NM|MON#||1.25|10*3/uL||*|||F|||20231210111800|0000000-0001-HS
+NTE|||Abnormal cells may affect marked results
+OBX|13|NM|EOS#||0.14|10*3/uL||*|||F|||20231210111800|0000000-0001-HS
+NTE|||Abnormal cells may affect marked results
+OBX|14|NM|BAS#||0.00|10*3/uL||*|||F|||20231210111800|0000000-0001-HS
+NTE|||Abnormal cells may affect marked results
+OBX|15|NM|NEU%||68.6|%||*|||F|||20231210111800|0000000-0001-HS
+NTE|||Abnormal cells may affect marked results
+OBX|16|NM|LYM%||19.5|%||*|||F|||20231210111800|0000000-0001-HS
+NTE|||Abnormal cells may affect marked results
+OBX|17|NM|MON%||10.7|%||*|||F|||20231210111800|0000000-0001-HS
+NTE|||Abnormal cells may affect marked results
+OBX|18|NM|EOS%||1.20|%||*|||F|||20231210111800|0000000-0001-HS
+NTE|||Abnormal cells may affect marked results
+OBX|19|NM|BAS%||0.00|%||*|||F|||20231210111800|0000000-0001-HS
+NTE|||Abnormal cells may affect marked results

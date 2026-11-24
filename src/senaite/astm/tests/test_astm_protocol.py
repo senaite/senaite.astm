@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import sys
+
 from unittest.mock import MagicMock
 from unittest.mock import Mock
 
@@ -8,7 +10,7 @@ from senaite.astm.constants import CRLF
 from senaite.astm.constants import ENQ
 from senaite.astm.constants import EOT
 from senaite.astm.constants import NAK
-from senaite.astm.protocol import ASTMProtocol
+from senaite.astm.transports.astm.protocol import ASTMProtocol
 from senaite.astm.tests.base import ASTMTestBase
 
 
@@ -85,3 +87,163 @@ class ASTMProtocolTest(ASTMTestBase):
 
         # Protocol should be no longer in transfer state
         self.assertFalse(self.protocol.in_transfer_state)
+
+    def test_empty_session_disconnect_logs_at_debug(self):
+        """A TCP probe (connect + close, no data) must not fire a
+        WARNING — it's routine noise from Zabbix / load balancers."""
+        transport = self.get_mock_transport()
+        self.protocol.connection_made(transport)
+
+        with self.assertLogs("senaite.astm", level="DEBUG") as cm:
+            self.protocol.connection_lost(None)
+
+        levels = [r.levelname for r in cm.records]
+        messages = [r.getMessage() for r in cm.records]
+        self.assertNotIn("WARNING", levels)
+        self.assertTrue(
+            any("without data" in m for m in messages),
+            "expected an empty-session debug line, got %r" % messages,
+        )
+
+    def test_mid_session_disconnect_logs_at_warning(self):
+        """A real session cut mid-message stays at WARNING so it
+        remains visible in operational logs."""
+        transport = self.get_mock_transport()
+        self.protocol.connection_made(transport)
+        # Simulate a partial session: ENQ received, frames buffered.
+        self.protocol.in_transfer_state = True
+        self.protocol.messages = [b"1H|"]
+
+        with self.assertLogs("senaite.astm", level="DEBUG") as cm:
+            self.protocol.connection_lost(None)
+
+        self.assertIn("WARNING", [r.levelname for r in cm.records])
+
+    def test_chunked_frame_assembled_across_recvs(self):
+        """A complete ASTM frame split across two TCP segments
+        must be reassembled into a single dispatched message, with
+        the matching ACK going back to the client. Regression test
+        for the production cobas c111 transmission where the R
+        record arrived as two recvs and the continuation bytes
+        were dropped as un-dispatchable."""
+        transport = self.get_mock_transport()
+        self.protocol.connection_made(transport)
+        self.protocol.data_received(ENQ)
+
+        # Hand-crafted R frame split mid-data. The checksum
+        # matches the full frame body once reassembled.
+        frame = (
+            b"\x024R|1|^^^734|3.0|umol/L||N||F||$SYS$||"
+            b"20260603110046\r\x03B2\r\n"
+        )
+        # Split in the middle of the date field, just like the log
+        first, second = frame[:45], frame[45:]
+        self.assertNotIn(b"\x03", first,
+                         "split point must be before the terminator")
+
+        self.protocol.data_received(first)
+        # Nothing dispatched yet — buffer is short.
+        self.assertEqual(len(self.protocol.messages), 0)
+
+        self.protocol.data_received(second)
+        # Now the frame is complete and stored as one message.
+        self.assertEqual(len(self.protocol.messages), 1)
+        # And the response to the (now complete) frame was an ACK.
+        transport.write.assert_called_with(ACK)
+
+    def test_two_full_frames_in_one_recv(self):
+        """When a single TCP segment carries two complete frames
+        back to back, both must be dispatched and ACKed."""
+        transport = self.get_mock_transport()
+        self.protocol.connection_made(transport)
+        self.protocol.data_received(ENQ)
+
+        # Two minimal valid frames concatenated.
+        frame_a = b"\x021H|\\^&\r\x03E5\r\n"
+        frame_b = b"\x022P|1\r\x033F\r\n"
+        self.protocol.data_received(frame_a + frame_b)
+
+        self.assertEqual(len(self.protocol.messages), 2)
+        # Each frame produced an ACK; the last write is the second ACK.
+        self.assertEqual(
+            [c.args[0] for c in transport.write.call_args_list[-2:]],
+            [ACK, ACK])
+
+    def test_stray_eot_does_not_drop_connection(self):
+        """A stray EOT (and EOT/ENQ bursts) outside a transfer must be
+        ignored, not raise -- raising inside data_received is fatal to the
+        asyncio connection. Instruments emit these between sessions."""
+        transport = self.get_mock_transport()
+        self.protocol.connection_made(transport)
+
+        # EOT before any ENQ: must not raise, must not enter transfer state
+        self.protocol.data_received(EOT)
+        self.assertFalse(self.protocol.in_transfer_state)
+
+        # an EOT/ENQ/EOT burst must not raise either; the ENQ still
+        # establishes and gets ACKed
+        self.protocol.data_received(EOT + ENQ + EOT)
+        transport.write.assert_called_with(ACK)
+
+    def test_stray_eot_preserves_following_bytes(self):
+        """A stray EOT followed by an ENQ in the SAME read must not discard
+        the ENQ. Guards against clearing the buffer mid-dispatch."""
+        transport = self.get_mock_transport()
+        self.protocol.connection_made(transport)
+
+        # EOT (ignored) immediately followed by ENQ, in one recv
+        self.protocol.data_received(EOT + ENQ)
+
+        # the ENQ after the stray EOT was still processed
+        self.assertTrue(self.protocol.in_transfer_state)
+        transport.write.assert_called_with(ACK)
+
+    def test_unexpected_ack_nak_ignored(self):
+        """Unexpected ACK/NAK (we are the receiver) are ignored, not raised."""
+        transport = self.get_mock_transport()
+        self.protocol.connection_made(transport)
+        # neither of these should raise
+        self.protocol.data_received(ACK)
+        self.protocol.data_received(NAK)
+
+    def test_long_garbage_run_does_not_exhaust_the_stack(self):
+        """An unframed stream must not take the process down.
+
+        Discarding unexpected bytes used to recurse once per byte, so a
+        single read carrying more bytes than the recursion limit raised a
+        RecursionError inside data_received. Seen in production with an
+        analyzer sending records without STX: the server aborted and every
+        instrument lost its connection.
+        """
+        transport = self.get_mock_transport()
+        self.protocol.connection_made(transport)
+        self.protocol.data_received(ENQ)
+
+        # a full ASTM record, unframed, ten times longer than the limit
+        garbage = b"R|1|^^^^WBC^1|17.45|10*9/L||H||F||||20260728102411\r"
+        garbage = garbage * (10 * sys.getrecursionlimit() // len(garbage))
+        self.assertGreater(len(garbage), sys.getrecursionlimit())
+
+        # a valid frame right after the garbage is still dispatched
+        frame = b"\x021H|\\^&\r\x03E5\r\n"
+        self.protocol.data_received(garbage + frame)
+
+        self.assertEqual(len(self.protocol.messages), 1)
+        transport.write.assert_called_with(ACK)
+
+    def test_garbage_run_is_reported_once(self):
+        """The discarded run is reported with a single warning.
+
+        One warning per byte flooded the log file and made the logging
+        machinery itself recurse.
+        """
+        transport = self.get_mock_transport()
+        self.protocol.connection_made(transport)
+        self.protocol.data_received(ENQ)
+
+        with self.assertLogs("senaite.astm", level="WARNING") as ctx:
+            self.protocol.data_received(b"garbage bytes" + ENQ)
+
+        skipped = [r for r in ctx.records if "Skipping" in r.getMessage()]
+        self.assertEqual(len(skipped), 1)
+        self.assertIn("13 unexpected bytes", skipped[0].getMessage())

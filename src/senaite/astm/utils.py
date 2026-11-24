@@ -3,6 +3,7 @@
 import os
 import time
 from datetime import datetime
+from itertools import zip_longest
 from pathlib import Path
 
 from senaite.astm import logger
@@ -12,11 +13,6 @@ from senaite.astm.constants import ETB
 from senaite.astm.constants import ETX
 from senaite.astm.constants import LF
 from senaite.astm.constants import STX
-
-try:
-    from itertools import izip_longest
-except ImportError:  # Python 3
-    from itertools import zip_longest as izip_longest
 
 
 def u(s):
@@ -34,8 +30,14 @@ def f(s, e="utf-8", **kw):
                        CRLF=u(CRLF), **kw).encode(e)
 
 
-def write_message(message, path, dateformat="%Y-%m-%d_%H:%M:%S", ext=".txt"):
+def write_message(message, path, dateformat="%Y-%m-%d_%H:%M:%S.%f",
+                  ext=".txt"):
     """Write ASTM Message to file
+
+    The default ``dateformat`` includes microseconds so two messages
+    that arrive within the same second do not silently overwrite
+    each other on disk. The HemoScreen HL7 instrument, for example,
+    pushes its OBS/LQC/PRF triplet within a few hundred milliseconds.
     """
     path = Path(path)
     if not path.exists():
@@ -49,6 +51,95 @@ def write_message(message, path, dateformat="%Y-%m-%d_%H:%M:%S", ext=".txt"):
         message = bytes(message, "utf-8")
     with open(os.path.join(path, filename), "wb") as f:
         f.write(message)
+
+
+def parse_capture(raw):
+    """Split a captured ASTM byte stream into individual frames.
+
+    Capture files contain raw bytes off the wire — STX + sequence
+    + record + (possibly embedded CR) + ETX-or-ETB + 2-byte
+    checksum + CRLF — repeated for every frame, plus the leading
+    ENQ and trailing EOT. Naive line splitting falls apart
+    because record-terminator CRs land mid-frame.
+
+    Each frame returned starts at STX and ends right after the
+    two checksum bytes, ready for :class:`senaite.astm.wrapper.Wrapper`
+    to consume. Both ETX-terminated (final) and ETB-terminated
+    (intermediate, chunked) frames are recognised.
+
+    :param raw: full file bytes
+    :returns: list of frame bytes (one per ASTM frame in the file)
+    """
+    frames = []
+    pos = 0
+    while True:
+        stx = raw.find(STX, pos)
+        if stx < 0:
+            break
+        # ASTM final frames terminate with ETX; chunked frames
+        # terminate with ETB. Pick whichever marker comes first
+        # after the STX.
+        etx = raw.find(ETX, stx)
+        etb = raw.find(ETB, stx)
+        candidates = [c for c in (etx, etb) if c >= 0]
+        if not candidates:
+            break
+        terminator = min(candidates)
+        # terminator byte + 2-byte hex checksum
+        end = terminator + 3
+        frames.append(raw[stx:end])
+        pos = end
+    return frames
+
+
+def rebuild_checksums(raw):
+    """Return a copy of `raw` with every ASTM frame's 2-byte
+    checksum recomputed against the (possibly edited) frame body.
+
+    Captured files often need light edits to be useful in tests —
+    sample-id swaps to retarget an existing sample, PHI scrubbing,
+    bin-value tweaks for renderer smoke tests. Each edit
+    invalidates the trailing 2-byte ASTM checksum of the affected
+    frame, and the codec's `decode()` then asserts at parse time
+    (`Checksum wrong: expected ..., got ...`).
+
+    This helper walks the byte stream the same way
+    :func:`parse_capture` does — STX -> ETX or ETB -> rewrite the
+    next 2 bytes with the fresh checksum. Non-frame bytes (ENQ,
+    EOT, CRLF separators, leading/trailing junk) pass through
+    untouched.
+
+    :param raw: full file bytes
+    :returns: bytes, same length as input (checksums are 2-byte
+        hex strings, so no size change)
+    """
+    out = bytearray()
+    pos = 0
+    while True:
+        stx = raw.find(STX, pos)
+        if stx < 0:
+            out.extend(raw[pos:])
+            break
+        # bytes between the previous frame and this STX (ENQ, EOT,
+        # separators) carry through unchanged
+        out.extend(raw[pos:stx])
+        etx = raw.find(ETX, stx)
+        etb = raw.find(ETB, stx)
+        ends = [e for e in (etx, etb) if e >= 0]
+        if not ends:
+            # truncated frame at the tail — pass through as-is
+            out.extend(raw[stx:])
+            break
+        terminator = min(ends)
+        # body is STX + seq + record + terminator (no leading STX
+        # in the hashed slice; matches the codec's checksum scope)
+        body = raw[stx + 1:terminator + 1]
+        new_cs = make_checksum(body)
+        out.extend(raw[stx:terminator + 1])
+        out.extend(new_cs)
+        # skip past the old 2-byte checksum in the input
+        pos = terminator + 3
+    return bytes(out)
 
 
 def is_chunked_message(message):
@@ -97,7 +188,7 @@ def validate_checksum(message):
     # generate the checksum for the frame
     ccs = make_checksum(frame)
     if cs != ccs:
-        logger.warn("Expected checksum '%s', got '%s'" % (cs, ccs))
+        logger.warning("Expected checksum '%s', got '%s'" % (cs, ccs))
         return False
     return True
 
@@ -166,7 +257,7 @@ def split(msg, size):
 def make_chunks(s, n):
     iter_bytes = (s[i:i + 1] for i in range(len(s)))
     return [b''.join(item)
-            for item in izip_longest(*[iter_bytes] * n, fillvalue=b'')]
+            for item in zip_longest(*[iter_bytes] * n, fillvalue=b'')]
 
 
 class CleanupDict(dict):
