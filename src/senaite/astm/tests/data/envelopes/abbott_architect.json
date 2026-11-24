@@ -13,16 +13,7 @@
       "address": null,
       "caps": null,
       "comments": null,
-      "delimeter": [
-        {
-          "_": "",
-          "__": null
-        },
-        {
-          "_": "",
-          "__": "&"
-        }
-      ],
+      "delimeter": "\\^&",
       "message_id": null,
       "password": null,
       "phone": null,
@@ -47,6 +38,7 @@
       "type": "L"
     }
   ],
+  "M": [],
   "O": [
     {
       "action_code": null,
@@ -137,6 +129,7 @@
       "weight": null
     }
   ],
+  "Q": [],
   "R": [
     {
       "abnormal_flag": [
@@ -241,6 +234,10 @@
   ],
   "metadata": {
     "astm": "\u00021H|\\^&|||ARCHITECT^1.00^123456789^H1P1O1R1C1Q1L1|||||||P|1|19930330133346\rP|1|||PIDSID13|Patient^Im^A||19320122|F|||||Dr.Amesbury||||||||||||ParkClinic\rO|1|SID13|SID3^A123^5|^^^123^Assay1^UNDILUTED^P|R||20010223081223||||||||||||||||||F\rR|1|^^^0021^B-hCG^UNDILUTED^P^47331M100^00788^^F|< 1.20|mIU/mL|0.35 TO 4.94|EXP^<||F||||19990715081030|I20100\rC|1|I|Example Result Comment|G\rR|2|^^^0021^B-hCG^UNDILUTED^P^47331M100^00788^^I|NEGATIVE|||||F||||19990715081030|I20100\rR|3|^^^0021^B-hCG^UNDILUTED^P^47331M100^00788^^P|9245|RLU||||F||||19990715081030|I20100\rL|1|N\r\u000302\r",
-    "lis2a": "H|\\^&|||ARCHITECT^1.00^123456789^H1P1O1R1C1Q1L1|||||||P|1|19930330133346\rP|1|||PIDSID13|Patient^Im^A||19320122|F|||||Dr.Amesbury||||||||||||ParkClinic\rO|1|SID13|SID3^A123^5|^^^123^Assay1^UNDILUTED^P|R||20010223081223||||||||||||||||||F\rR|1|^^^0021^B-hCG^UNDILUTED^P^47331M100^00788^^F|< 1.20|mIU/mL|0.35 TO 4.94|EXP^<||F||||19990715081030|I20100\rC|1|I|Example Result Comment|G\rR|2|^^^0021^B-hCG^UNDILUTED^P^47331M100^00788^^I|NEGATIVE|||||F||||19990715081030|I20100\rR|3|^^^0021^B-hCG^UNDILUTED^P^47331M100^00788^^P|9245|RLU||||F||||19990715081030|I20100\rL|1|N\r\u0003"
+    "envelope_version": "1.2",
+    "header_rx": ".*ARCHITECT\\^",
+    "hl7": "",
+    "lis2a": "H|\\^&|||ARCHITECT^1.00^123456789^H1P1O1R1C1Q1L1|||||||P|1|19930330133346\rP|1|||PIDSID13|Patient^Im^A||19320122|F|||||Dr.Amesbury||||||||||||ParkClinic\rO|1|SID13|SID3^A123^5|^^^123^Assay1^UNDILUTED^P|R||20010223081223||||||||||||||||||F\rR|1|^^^0021^B-hCG^UNDILUTED^P^47331M100^00788^^F|< 1.20|mIU/mL|0.35 TO 4.94|EXP^<||F||||19990715081030|I20100\rC|1|I|Example Result Comment|G\rR|2|^^^0021^B-hCG^UNDILUTED^P^47331M100^00788^^I|NEGATIVE|||||F||||19990715081030|I20100\rR|3|^^^0021^B-hCG^UNDILUTED^P^47331M100^00788^^P|9245|RLU||||F||||19990715081030|I20100\rL|1|N\r\u0003",
+    "version": "1.0.0"
   }
 }
