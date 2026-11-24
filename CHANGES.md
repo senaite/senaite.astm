@@ -2,6 +2,7 @@
 
 ## 2.0.0
 
+- #24 Add Abbott ARCHITECT System import schema
 - #88 Run the tests on Python 3.10 to 3.12
 - #83 Added schema support for Sysmex XN-1000 (XN-10, XN-20)
 - #85 Honour the delimiters and escape sequences declared in the (H)eader record
