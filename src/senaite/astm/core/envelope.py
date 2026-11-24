@@ -27,7 +27,7 @@ from typing import Any, Dict, List
 
 from pydantic import BaseModel, ConfigDict
 
-ENVELOPE_VERSION = "1.1"
+ENVELOPE_VERSION = "1.2"
 
 
 class Metadata(BaseModel):

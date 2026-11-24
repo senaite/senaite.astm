@@ -3,12 +3,16 @@
 # Credits to Alexander Shorin:
 # https://github.com/kxepal/python-astm
 
+import logging
+import re
+from collections import namedtuple
 from collections.abc import Iterable
 
 from senaite.astm.constants import COMPONENT_SEP
 from senaite.astm.constants import CR
 from senaite.astm.constants import CRLF
 from senaite.astm.constants import ENCODING
+from senaite.astm.constants import ESCAPE_SEP
 from senaite.astm.constants import ETB
 from senaite.astm.constants import ETX
 from senaite.astm.constants import FIELD_SEP
@@ -19,13 +23,107 @@ from senaite.astm.constants import STX
 from senaite.astm.utils import make_checksum
 from senaite.astm.utils import split
 
+logger = logging.getLogger(__name__)
+
+
+# #############################################################################
+# DELIMITERS
+# #############################################################################
+
+#: The four delimiters that govern a transmission. ASTM E1394 fixes them in
+#: field 2 of the (H)eader record and they hold until the (L) record, so they
+#: are a property of the transmission and not of the library.
+Delimiters = namedtuple("Delimiters", "field repeat component escape")
+
+#: What ASTM suggests, and what most analyzers use.
+DEFAULT_DELIMITERS = Delimiters(
+    FIELD_SEP, REPEAT_SEP, COMPONENT_SEP, ESCAPE_SEP)
+
+#: Escape sequences that stand for a delimiter, by the name of the delimiter
+#: they stand for.
+ESCAPES = {
+    b"F": "field",
+    b"S": "component",
+    b"R": "repeat",
+    b"E": "escape",
+}
+
+
+def get_delimiters(record):
+    """Return the delimiters declared by a (H)eader record
+
+    The four characters following the record type ID are, in order, the
+    field, repeat, component and escape delimiters. Anything that is not a
+    header, or too short to carry them, keeps the defaults
+
+    :param record: a raw record, with no frame number
+    :type record: bytes
+    :rtype: Delimiters
+    """
+    if not isinstance(record, bytes):
+        raise TypeError("bytes expected, got %r" % record)
+    if not record.startswith(b"H") or len(record) < 5:
+        return DEFAULT_DELIMITERS
+
+    # The character right after the record type ID is the field delimiter,
+    # and the three before its next occurrence are the other three. Reading
+    # the span rather than four fixed positions is what tells a declaration
+    # apart from a malformed one
+    field = record[1:2]
+    declared = record[2:].split(field)[0]
+    if len(declared) != 3:
+        logger.warning("Malformed delimiter definition %r, using the "
+                       "defaults", record[1:record.find(field, 2)])
+        return DEFAULT_DELIMITERS
+
+    delimiters = Delimiters(field, *[declared[i:i + 1] for i in range(3)])
+    if len(set(delimiters)) != 4:
+        logger.warning("Delimiters are not distinct: %r, using the defaults",
+                       delimiters)
+        return DEFAULT_DELIMITERS
+    return delimiters
+
+
+def unescape_sequence(code, delimiters):
+    """Resolve a single escape sequence, given without the escape characters
+
+    `&F&`, `&S&`, `&R&` and `&E&` stand for the delimiters themselves and
+    `&Xhh&` for arbitrary bytes. The highlighting sequences (`&H&`, `&N&`)
+    and the sequences an analyzer defines for itself have no meaning here,
+    so they are kept as they travelled
+    """
+    if code in ESCAPES:
+        return getattr(delimiters, ESCAPES[code])
+    if code[:1] == b"X":
+        try:
+            return bytes.fromhex(code[1:].decode("ascii"))
+        except (UnicodeDecodeError, ValueError):
+            logger.warning("Malformed hex escape sequence %r", code)
+    return delimiters.escape + code + delimiters.escape
+
+
+def unescape(value, delimiters):
+    """Resolve the escape sequences of a single leaf value
+
+    Called after splitting, never before: an escaped delimiter never travels
+    raw, so splitting first is safe. The other way round, `&R&` would become
+    a repeat delimiter and be split a second time
+    """
+    escape = delimiters.escape
+    if escape not in value:
+        return value
+    quoted = re.escape(escape)
+    pattern = quoted + b"([^" + quoted + b"]*)" + quoted
+    return re.sub(
+        pattern, lambda m: unescape_sequence(m.group(1), delimiters), value)
+
 
 # #############################################################################
 # ASTM DECODE
 # #############################################################################
 
 
-def decode(data, encoding=ENCODING):
+def decode(data, encoding=ENCODING, delimiters=DEFAULT_DELIMITERS):
     """Common ASTM decoding function that tries to guess which kind of data it
     handles.
 
@@ -47,22 +145,26 @@ def decode(data, encoding=ENCODING):
     :param encoding: Data encoding.
     :type encoding: str
 
+    :param delimiters: The delimiters this transmission declared.
+    :type delimiters: Delimiters
+
     :return: List of ASTM records with unicode data.
     :rtype: list
     """
     if not isinstance(data, bytes):
         raise TypeError("bytes expected, got %r" % data)
     if data.startswith(STX):  # may be decode message \x02...\x03CS\r\n
-        seq, records, cs = decode_message(data, encoding)
+        seq, records, cs = decode_message(data, encoding, delimiters)
         return records
     byte = data[:1].decode()
     if byte.isdigit():
-        seq, records = decode_frame(data, encoding)
+        seq, records = decode_frame(data, encoding, delimiters)
         return records
-    return [decode_record(data, encoding)]
+    return [decode_record(data, encoding, delimiters)]
 
 
-def decode_message(message, encoding=ENCODING):
+def decode_message(message, encoding=ENCODING,
+                   delimiters=DEFAULT_DELIMITERS):
     """Decodes complete ASTM message that is sent or received due
     communication routines.
 
@@ -93,11 +195,11 @@ def decode_message(message, encoding=ENCODING):
     # validate the checksum
     ccs = make_checksum(frame)
     assert cs.upper() == ccs, "Checksum wrong: expected %r, got %r" % (cs, ccs)
-    seq, records = decode_frame(frame, encoding)
+    seq, records = decode_frame(frame, encoding, delimiters)
     return seq, records, cs.decode()
 
 
-def decode_frame(frame, encoding=ENCODING):
+def decode_frame(frame, encoding=ENCODING, delimiters=DEFAULT_DELIMITERS):
     """Decodes ASTM frame: list of records followed by sequence number.
     """
     if not isinstance(frame, bytes):
@@ -114,38 +216,53 @@ def decode_frame(frame, encoding=ENCODING):
         raise ValueError("Malformed ASTM frame. Expected leading seq number %r"
                          "" % frame)
     seq, records = int(seq), frame[1:]
-    return seq, [decode_record(record, encoding)
+    return seq, [decode_record(record, encoding, delimiters)
                  for record in records.split(RECORD_SEP)]
 
 
-def decode_record(record, encoding=ENCODING):
+def decode_record(record, encoding=ENCODING, delimiters=DEFAULT_DELIMITERS):
     """Decodes ASTM record message
+
+    Field 2 of an (H)eader record is the delimiter definition itself. It is
+    kept exactly as it travelled: splitting it with the very delimiters it
+    declares, or resolving escape sequences in it, would be circular
     """
+    is_header = record.startswith(b"H")
     fields = []
-    for item in record.split(FIELD_SEP):
-        if REPEAT_SEP in item:
-            item = decode_repeated_component(item, encoding)
-        elif COMPONENT_SEP in item:
-            item = decode_component(item, encoding)
-        else:
+    for pos, item in enumerate(record.split(delimiters.field)):
+        if is_header and pos == 1:
             item = item.decode(encoding)
+        elif delimiters.repeat in item:
+            item = decode_repeated_component(item, encoding, delimiters)
+        elif delimiters.component in item:
+            item = decode_component(item, encoding, delimiters)
+        else:
+            item = decode_value(item, encoding, delimiters)
         # default `None` if item evalualtes to `False`
         fields.append([None, item][bool(item)])
     return fields
 
 
-def decode_component(field, encoding=ENCODING):
+def decode_value(value, encoding=ENCODING, delimiters=DEFAULT_DELIMITERS):
+    """Decodes a single leaf value, resolving its escape sequences
+    """
+    return unescape(value, delimiters).decode(encoding)
+
+
+def decode_component(field, encoding=ENCODING,
+                     delimiters=DEFAULT_DELIMITERS):
     """Decodes ASTM field component
     """
-    return [[None, item.decode(encoding)][bool(item)]
-            for item in field.split(COMPONENT_SEP)]
+    return [[None, decode_value(item, encoding, delimiters)][bool(item)]
+            for item in field.split(delimiters.component)]
 
 
-def decode_repeated_component(component, encoding=ENCODING):
+def decode_repeated_component(component, encoding=ENCODING,
+                              delimiters=DEFAULT_DELIMITERS):
     """Decodes ASTM field repeated component
     """
-    return [decode_component(item, encoding)
-            for item in component.split(REPEAT_SEP)]
+    return [decode_component(item, encoding, delimiters)
+            for item in component.split(delimiters.repeat)]
 
 
 # #############################################################################
