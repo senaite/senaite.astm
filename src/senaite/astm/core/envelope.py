@@ -87,7 +87,9 @@ def serialize_envelope(envelope, message_format="json"):
     :param message_format: One of ``"json"`` (the typed envelope as
         JSON), ``"astm"`` (the original framed bytes from
         ``metadata.astm``) or ``"lis2a"`` (the LIS2-A flat string
-        from ``metadata.lis2a``).
+        from ``metadata.lis2a``), ``"hl7"`` (the HL7 message from
+        ``metadata.hl7``) or ``"emerald"`` (the CELL-DYN Emerald frame,
+        carried as the ``emerald`` extra of the metadata).
 
     :returns: A string ready for downstream consumption.
     :raises ValueError: when the format is unknown.
@@ -100,4 +102,6 @@ def serialize_envelope(envelope, message_format="json"):
         return envelope.metadata.lis2a or ""
     if message_format == "hl7":
         return envelope.metadata.hl7 or ""
+    if message_format == "emerald":
+        return getattr(envelope.metadata, "emerald", None) or ""
     raise ValueError("Unknown message_format: %r" % message_format)
