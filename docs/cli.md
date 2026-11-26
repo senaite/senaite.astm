@@ -28,6 +28,19 @@ captures, and forwards parsed envelopes to a SENAITE LIMS.
   but skip the LIMS push step. Useful for a hold-and-review
   workflow when commissioning a new instrument. Requires
   `--output`; mutually exclusive with `--url`.
+- `--connect HOST:PORT` — client mode: connect out to an
+  instrument or serial-to-LAN gateway at `HOST:PORT` instead of
+  listening. Use it when the device is a passive TCP server that
+  expects the LIS to initiate the connection (e.g. a Lantronix
+  gateway with "Accept Incoming = Yes" and "Active Connect =
+  None"). `--listen` and `--port` are then ignored. TCP
+  keepalive is enabled on the connection, so that a connection
+  that died silently (e.g. the gateway was restarted, or the
+  network dropped) is detected within about 2 minutes and opened
+  again.
+- `--reconnect-delay N` — seconds to wait before connecting
+  again in `--connect` mode, after a failed attempt or a lost
+  connection. Defaults to `5`.
 
 ### Admin endpoint
 
