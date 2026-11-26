@@ -21,7 +21,10 @@ Provided helpers:
   complete line found and the unconsumed tail.
 - :func:`crc16` computes the control sum of the frame.
 - :func:`build_line` builds a line to be sent to the instrument.
+- :func:`is_result_frame` tells whether some bytes are a result frame.
 """
+
+import re
 
 # Frames are ASCII, but the SID, PID, ID (patient name), operator, user
 # login and lot number fields are UTF-8 encoded (LIS specification,
@@ -30,6 +33,19 @@ ENCODING = "utf-8"
 
 CR = b"\r"
 LF = b"\n"
+
+# Machine names of the frame header ([MACHINE_NAME], LIS specification,
+# table 4 "Instruments"). The specification of the Emerald 22 AL lists
+# this one only: add the names of other models as their specification
+# confirms them
+MACHINE_NAMES = (b"EMD22AL",)
+
+# Frame header: [MACHINE_NAME];W;X;Y, where W is the instrument number (2
+# characters maximum), X the serial number (13 characters, including the
+# '-', e.g. 312108-000014) and Y the user login
+HEADER_RX = re.compile(
+    rb"^(?:" + b"|".join(re.escape(name) for name in MACHINE_NAMES) +
+    rb");[^;]{1,2};\d{6}-\d{6}(?:;|$)")
 
 # Seek table of the CRC-16 computed per 4 bits, as given in the spec
 CRC_TABLE = (
@@ -88,3 +104,20 @@ def build_line(*fields):
             field = field.decode(ENCODING, errors="replace")
         values.append(str(field))
     return ";".join(values).encode(ENCODING) + CR
+
+
+def is_result_frame(raw):
+    """Returns whether ``raw`` is a result frame, as sent by the instrument
+    or exported by it to a USB drive: a frame header with a known machine
+    name and a serial number, followed by the frame ID ``RESULT``. The
+    control sum line is optional, as frames are captured without it
+
+    :param raw: the bytes to check
+    """
+    text = raw.replace(CR + LF, CR).replace(LF, CR)
+    lines = [line.strip() for line in text.split(CR) if line.strip()]
+    if len(lines) < 2:
+        return False
+    if not HEADER_RX.match(lines[0]):
+        return False
+    return lines[1].upper() == b"RESULT"

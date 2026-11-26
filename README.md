@@ -202,6 +202,14 @@ push to the LIMS runs afterwards, in the background, and only for the
 results of samples: QC, calibration, repeatability and start-up frames are
 captured, but not pushed.
 
+The captured results, as well as the results the instrument exports to a USB
+drive, can be pushed later with `senaite-astm-send`, that recognises them
+by their frame header, with the machine name (`EMD22AL`) and the serial
+number, followed by the `RESULT` frame ID (e.g. after running capture-only
+until the importer was available in SENAITE):
+
+    $ senaite-astm-send -i captures/*.txt -u <url> -c senaite.core.lis2a.import
+
 ### Envelope mapping
 
 | Frame                      | Envelope bucket                              |

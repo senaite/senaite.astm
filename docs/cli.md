@@ -68,8 +68,13 @@ into a single processing pipeline.
 
 ### Inputs
 
-- `-i, --infile FILE [FILE ...]` — one or more captured ASTM
-  files. Read in order, each producing one message.
+- `-i, --infile FILE [FILE ...]` — one or more captured ASTM,
+  HL7 v2 or CELL-DYN Emerald files. Read in order, each producing
+  one message. The format is detected from the content: HL7
+  messages start with `MSH`, CELL-DYN Emerald result frames start
+  with the frame header of a known machine (`EMD22AL;<number>;
+  <serial>;<login>`) followed by the frame ID `RESULT`, everything
+  else is ASTM.
 
 ### Pre-parse transformations
 
