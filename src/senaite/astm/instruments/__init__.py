@@ -4,6 +4,7 @@ decorators on each Instrument subclass run at package import time.
 """
 
 from senaite.astm.instruments import abbott_afinion2    # noqa: F401
+from senaite.astm.instruments import abbott_architect    # noqa: F401
 from senaite.astm.instruments import biomerieux_mini_vidas  # noqa: F401
 from senaite.astm.instruments import dca_vantage    # noqa: F401
 from senaite.astm.instruments import genexpert    # noqa: F401
