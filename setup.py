@@ -63,6 +63,8 @@ setup(
             "senaite-astm-simulator=senaite.astm.simulator:main",
             "senaite-hl7-server=senaite.astm.cli.hl7_server:main",
             "senaite-hl7-simulator=senaite.astm.cli.hl7_simulator:main",
+            "senaite-emerald-server="
+            "senaite.astm.cli.emerald_server:main",
         ]
     }
 )

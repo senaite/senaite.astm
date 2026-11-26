@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""`senaite-astm-send` CLI — push captured ASTM **or HL7 v2**
-files to a SENAITE LIMS push endpoint without running a TCP
-listener.
+"""`senaite-astm-send` CLI — push captured ASTM, **HL7 v2** or
+**CELL-DYN Emerald** files to a SENAITE LIMS push endpoint without
+running a TCP listener.
 
 Useful for replaying messages from `astm_messages/` or
 `hl7_messages/` directly into a dev / staging SENAITE instance so
@@ -10,7 +10,10 @@ the consumer-side adapter (e.g.
 exercised end-to-end without the device on the wire.
 
 The wire format is auto-detected from the leading bytes (files
-starting with ``MSH`` are HL7; everything else is ASTM). The
+starting with ``MSH`` are HL7; CELL-DYN Emerald result frames start
+with the ``EMD22AL`` frame header and the ``RESULT`` frame ID;
+everything else is ASTM).
+The
 `-m / --message-format` option chooses what the LIMS receives:
 
 - `json`  (default): parse each input file into an :class:`Envelope`
@@ -32,6 +35,8 @@ from senaite.astm import logger
 from senaite.astm.core import lims
 from senaite.astm.core.envelope import serialize_envelope
 from senaite.astm.core.lims import post_to_senaite
+from senaite.astm.transports.emerald.framing import is_result_frame
+from senaite.astm.transports.emerald.parser import parse as parse_emerald
 from senaite.astm.transports.hl7.parser import parse as parse_hl7
 from senaite.astm.utils import parse_capture
 from senaite.astm.utils import rebuild_checksums
@@ -138,16 +143,24 @@ def _file_to_message(fh, message_format, rebuild=False,
 
 def _detect_wire_format(raw):
     """Return ``"hl7"`` when the input is an HL7 v2 message,
+    ``"emerald"`` when it is a CELL-DYN Emerald result frame,
     ``"astm"`` otherwise.
 
     HL7 v2 messages start with an MSH segment (literal ``b"MSH"``).
-    ASTM captures start with ENQ / STX or a leading newline. The
-    sniff is deliberately cheap — no full parse — so a slightly
-    weird input still flows through the existing ASTM path and
-    the parser's own error becomes the failure mode.
+    CELL-DYN Emerald result frames, as captured by
+    `senaite-emerald-server` or exported by the instrument to a USB
+    drive, start with the frame header, with the machine name and the
+    serial number (``EMD22AL;1;310618-000034;<login>``), followed by
+    the frame ID ``RESULT``. ASTM captures start with
+    ENQ / STX or a leading newline. The sniff is deliberately cheap —
+    no full parse — so a slightly weird input still flows through the
+    existing ASTM path and the parser's own error becomes the failure
+    mode.
     """
     if raw.lstrip().startswith(b"MSH"):
         return "hl7"
+    if is_result_frame(raw):
+        return "emerald"
     return "astm"
 
 
@@ -156,6 +169,8 @@ def _parse_envelope(raw, wire):
     appropriate to ``wire``."""
     if wire == "hl7":
         return parse_hl7(raw)
+    if wire == "emerald":
+        return parse_emerald(raw)
     frames = parse_capture(raw)
     return Wrapper(frames).to_envelope()
 
@@ -197,8 +212,10 @@ def _scrub_envelope_phi(envelope, keep_keys=()):
     :data:`PHI_NON_PHI_KEYS`; `keep_keys` extends it for
     vendor-specific non-identifying fields.
 
-    Also drops the verbatim flat-text payloads in `metadata.astm`
-    and `metadata.lis2a` so a JSON-scrubbed message can't be
+    Also drops the verbatim payloads in `metadata.astm`,
+    `metadata.lis2a`, `metadata.hl7` and `metadata.emerald` (the raw
+    CELL-DYN Emerald frame, an extra field of the metadata, that holds
+    the patient's name and ID) so a JSON-scrubbed message can't be
     pulled back to its un-scrubbed raw form by a downstream
     consumer that only looks at metadata.
     """
@@ -213,6 +230,8 @@ def _scrub_envelope_phi(envelope, keep_keys=()):
         envelope.metadata.lis2a = ""
     if envelope.metadata.hl7:
         envelope.metadata.hl7 = ""
+    if getattr(envelope.metadata, "emerald", None):
+        envelope.metadata.emerald = ""
 
 
 def _filter_envelope_records(envelope, keep, drop):
