@@ -14,6 +14,7 @@ Lifecycle helpers (logging, signal handlers, task draining) live in
 import argparse
 import asyncio
 import os
+import socket
 
 from senaite.astm import logger
 from senaite.astm.admin import AdminStats
@@ -26,6 +27,26 @@ from senaite.astm.transports.astm.protocol import ASTMProtocol
 from senaite.astm.wrapper import Wrapper
 
 LOGFILE = "senaite-astm-server.log"
+DEFAULT_RECONNECT_DELAY = 5
+
+# TCP keepalive in client (connect) mode: probe after 60s without traffic,
+# every 10s, and give the connection up after 6 unanswered probes. A
+# connection that died silently (e.g. the gateway was restarted, or the
+# network dropped without a reset) is then detected within ~2 minutes,
+# instead of being waited on forever
+KEEPALIVE_IDLE = 60
+KEEPALIVE_INTERVAL = 10
+KEEPALIVE_COUNT = 6
+
+
+def host_port(value):
+    """Returns the ``(host, port)`` tuple of a ``HOST:PORT`` string
+    """
+    host, sep, port = value.rpartition(":")
+    if not sep or not host or not port.isdigit():
+        raise argparse.ArgumentTypeError(
+            "expected HOST:PORT, got {!r}".format(value))
+    return host, int(port)
 
 
 def build_arg_parser():
@@ -39,6 +60,17 @@ def build_arg_parser():
     astm_group.add_argument(
         "-p", "--port", type=str, default="4010",
         help="Port to connect")
+    astm_group.add_argument(
+        "--connect", type=host_port, default=None, metavar="HOST:PORT",
+        help="Client mode: connect out to an instrument or serial-to-LAN "
+             "gateway at HOST:PORT instead of listening. Use it when the "
+             "device is a passive TCP server that expects the LIS to "
+             "initiate the connection. --listen and --port are then "
+             "ignored.")
+    astm_group.add_argument(
+        "--reconnect-delay", type=int, default=DEFAULT_RECONNECT_DELAY,
+        help="Seconds to wait before connecting again in --connect mode, "
+             "after a failed attempt or a lost connection.")
     astm_group.add_argument(
         "-o", "--output", type=str,
         help="Output directory to write full messages")
@@ -119,11 +151,81 @@ def make_frame_callback(loop, pipeline, task_set, stats=None):
     return _wrapped
 
 
+def enable_keepalive(transport, idle=KEEPALIVE_IDLE,
+                     interval=KEEPALIVE_INTERVAL, count=KEEPALIVE_COUNT):
+    """Enable TCP keepalive on the socket of the transport
+
+    Without it, an idle connection whose peer is gone (no FIN, no RST)
+    stays open forever: the instrument has nothing to send, and we never
+    send anything either. With keepalive, the OS probes the peer when the
+    connection is idle, and closes it when the probes are not answered, so
+    that the client reconnects.
+
+    The idle, interval and count options are set where the platform
+    supports them (Linux; macOS names the idle option `TCP_KEEPALIVE`).
+    """
+    sock = transport.get_extra_info("socket")
+    if sock is None:
+        return
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+    idle_option = getattr(socket, "TCP_KEEPIDLE", None)
+    if idle_option is None:
+        idle_option = getattr(socket, "TCP_KEEPALIVE", None)
+    options = (
+        (idle_option, idle),
+        (getattr(socket, "TCP_KEEPINTVL", None), interval),
+        (getattr(socket, "TCP_KEEPCNT", None), count),
+    )
+    for option, value in options:
+        if option is not None:
+            sock.setsockopt(socket.IPPROTO_TCP, option, value)
+
+
+async def connect_forever(host, port, protocol_factory, reconnect_delay):
+    """Client (connect) mode: keeps a connection open to a passive device
+
+    Connects out to the instrument or serial-to-LAN gateway at
+    ``host:port``, and connects again when the attempt fails or the
+    connection is lost. TCP keepalive is enabled on the connection, so
+    that a connection that died silently is detected as lost too. Runs
+    until cancelled.
+
+    :param protocol_factory: callable that takes the future to resolve
+        when the connection is lost, and returns the protocol.
+    """
+    loop = asyncio.get_running_loop()
+    while True:
+        lost = loop.create_future()
+        try:
+            logger.info("Connecting to {}:{} ...".format(host, port))
+            transport, _ = await loop.create_connection(
+                lambda: protocol_factory(lost), host=host, port=port)
+        except OSError as exc:
+            logger.warning(
+                "Connection to {}:{} failed: {}. Retrying in {}s ...".format(
+                    host, port, exc, reconnect_delay))
+            await asyncio.sleep(reconnect_delay)
+            continue
+
+        enable_keepalive(transport)
+        logger.info("Connected to {}:{}".format(host, port))
+        logger.info("ASTM client ready to receive messages ...")
+        try:
+            await lost
+        finally:
+            transport.close()
+        logger.warning(
+            "Connection to {}:{} lost. Reconnecting in {}s ...".format(
+                host, port, reconnect_delay))
+        await asyncio.sleep(reconnect_delay)
+
+
 async def amain(args, stop_event=None):
     """Async entry point.
 
-    Boots the listener, installs signal handlers, and blocks until a
-    shutdown signal arrives.
+    Boots the listener, or the client loop when ``--connect`` is
+    given, installs signal handlers, and blocks until a shutdown
+    signal arrives.
 
     :param stop_event: Optional pre-created :class:`asyncio.Event`
         used to request shutdown. Tests can drive shutdown via this
@@ -137,15 +239,28 @@ async def amain(args, stop_event=None):
     frame_callback = make_frame_callback(
         loop, pipeline, task_set, stats=stats)
 
-    server = await loop.create_server(
-        lambda: ASTMProtocol(
-            frame_callback=frame_callback, stats=stats),
-        host=args.listen, port=args.port)
+    server = None
+    client = None
+    connect = getattr(args, "connect", None)
+    if connect:
+        host, port = connect
+        delay = getattr(args, "reconnect_delay", DEFAULT_RECONNECT_DELAY)
+        client = loop.create_task(connect_forever(
+            host, port,
+            lambda lost: ASTMProtocol(
+                frame_callback=frame_callback, stats=stats,
+                on_connection_lost=lost),
+            delay))
+    else:
+        server = await loop.create_server(
+            lambda: ASTMProtocol(
+                frame_callback=frame_callback, stats=stats),
+            host=args.listen, port=args.port)
 
-    for socket in server.sockets:
-        ip, port = socket.getsockname()
-        logger.info("Starting server on {}:{}".format(ip, port))
-    logger.info("ASTM server ready to handle connections ...")
+        for sock in server.sockets:
+            ip, port = sock.getsockname()
+            logger.info("Starting server on {}:{}".format(ip, port))
+        logger.info("ASTM server ready to handle connections ...")
 
     admin_server = None
     if stats is not None:
@@ -163,8 +278,15 @@ async def amain(args, stop_event=None):
         if admin_server is not None:
             admin_server.close()
             await admin_server.wait_closed()
-        server.close()
-        await server.wait_closed()
+        if client is not None:
+            client.cancel()
+            try:
+                await client
+            except asyncio.CancelledError:
+                pass
+        if server is not None:
+            server.close()
+            await server.wait_closed()
         await _runtime.drain_tasks(task_set, args.shutdown_grace_seconds)
         logger.info("Server is now down...")
 
