@@ -14,6 +14,7 @@ Lifecycle helpers (logging, signal handlers, task draining) live in
 import argparse
 import asyncio
 import os
+import socket
 
 from senaite.astm import logger
 from senaite.astm.admin import AdminStats
@@ -27,6 +28,15 @@ from senaite.astm.wrapper import Wrapper
 
 LOGFILE = "senaite-astm-server.log"
 DEFAULT_RECONNECT_DELAY = 5
+
+# TCP keepalive in client (connect) mode: probe after 60s without traffic,
+# every 10s, and give the connection up after 6 unanswered probes. A
+# connection that died silently (e.g. the gateway was restarted, or the
+# network dropped without a reset) is then detected within ~2 minutes,
+# instead of being waited on forever
+KEEPALIVE_IDLE = 60
+KEEPALIVE_INTERVAL = 10
+KEEPALIVE_COUNT = 6
 
 
 def host_port(value):
@@ -141,12 +151,44 @@ def make_frame_callback(loop, pipeline, task_set, stats=None):
     return _wrapped
 
 
+def enable_keepalive(transport, idle=KEEPALIVE_IDLE,
+                     interval=KEEPALIVE_INTERVAL, count=KEEPALIVE_COUNT):
+    """Enable TCP keepalive on the socket of the transport
+
+    Without it, an idle connection whose peer is gone (no FIN, no RST)
+    stays open forever: the instrument has nothing to send, and we never
+    send anything either. With keepalive, the OS probes the peer when the
+    connection is idle, and closes it when the probes are not answered, so
+    that the client reconnects.
+
+    The idle, interval and count options are set where the platform
+    supports them (Linux; macOS names the idle option `TCP_KEEPALIVE`).
+    """
+    sock = transport.get_extra_info("socket")
+    if sock is None:
+        return
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+    idle_option = getattr(socket, "TCP_KEEPIDLE", None)
+    if idle_option is None:
+        idle_option = getattr(socket, "TCP_KEEPALIVE", None)
+    options = (
+        (idle_option, idle),
+        (getattr(socket, "TCP_KEEPINTVL", None), interval),
+        (getattr(socket, "TCP_KEEPCNT", None), count),
+    )
+    for option, value in options:
+        if option is not None:
+            sock.setsockopt(socket.IPPROTO_TCP, option, value)
+
+
 async def connect_forever(host, port, protocol_factory, reconnect_delay):
     """Client (connect) mode: keeps a connection open to a passive device
 
     Connects out to the instrument or serial-to-LAN gateway at
     ``host:port``, and connects again when the attempt fails or the
-    connection is lost. Runs until cancelled.
+    connection is lost. TCP keepalive is enabled on the connection, so
+    that a connection that died silently is detected as lost too. Runs
+    until cancelled.
 
     :param protocol_factory: callable that takes the future to resolve
         when the connection is lost, and returns the protocol.
@@ -165,6 +207,7 @@ async def connect_forever(host, port, protocol_factory, reconnect_delay):
             await asyncio.sleep(reconnect_delay)
             continue
 
+        enable_keepalive(transport)
         logger.info("Connected to {}:{}".format(host, port))
         logger.info("ASTM client ready to receive messages ...")
         try:
@@ -214,8 +257,8 @@ async def amain(args, stop_event=None):
                 frame_callback=frame_callback, stats=stats),
             host=args.listen, port=args.port)
 
-        for socket in server.sockets:
-            ip, port = socket.getsockname()
+        for sock in server.sockets:
+            ip, port = sock.getsockname()
             logger.info("Starting server on {}:{}".format(ip, port))
         logger.info("ASTM server ready to handle connections ...")
 

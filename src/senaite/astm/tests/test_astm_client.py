@@ -11,10 +11,12 @@ receiver side of the ASTM handshake.
 
 import argparse
 import asyncio
+import socket
 
 from senaite.astm import logger
 from senaite.astm.cli import astm_server
 from senaite.astm.cli.astm_server import connect_forever
+from senaite.astm.cli.astm_server import enable_keepalive
 from senaite.astm.constants import ACK
 from senaite.astm.constants import ENQ
 from senaite.astm.constants import EOT
@@ -67,8 +69,9 @@ class ASTMClientTest(ASTMTestBase):
         self.sessions.put_nowait(frames)
 
     def protocol_factory(self, lost):
-        return ASTMProtocol(
+        self.protocol = ASTMProtocol(
             frame_callback=self.frame_callback, on_connection_lost=lost)
+        return self.protocol
 
     def start_client(self):
         return asyncio.get_running_loop().create_task(
@@ -125,6 +128,53 @@ class ASTMClientTest(ASTMTestBase):
         finally:
             await self.stop_client(task)
         self.assertTrue(frames)
+
+    async def test_client_enables_keepalive(self):
+        """The connection to the instrument has TCP keepalive on, so that
+        a connection that died silently is detected
+        """
+        connected = asyncio.Event()
+
+        async def idle_handler(reader, writer):
+            # an instrument with nothing to send: keeps the connection open
+            connected.set()
+            await reader.read()
+            writer.close()
+
+        idle = await asyncio.start_server(
+            idle_handler, host=self.HOST, port=self.PORT + 1)
+        task = asyncio.get_running_loop().create_task(
+            connect_forever(self.HOST, self.PORT + 1, self.protocol_factory,
+                            reconnect_delay=1))
+        try:
+            await asyncio.wait_for(connected.wait(), timeout=5)
+            # the instrument may accept before the client sets the options
+            sock = self.protocol.transport.get_extra_info("socket")
+            for _ in range(50):
+                if sock.getsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE):
+                    break
+                await asyncio.sleep(0.02)
+            self.assertTrue(sock.getsockopt(
+                socket.SOL_SOCKET, socket.SO_KEEPALIVE))
+            if hasattr(socket, "TCP_KEEPIDLE"):
+                self.assertEqual(sock.getsockopt(
+                    socket.IPPROTO_TCP, socket.TCP_KEEPIDLE), 60)
+                self.assertEqual(sock.getsockopt(
+                    socket.IPPROTO_TCP, socket.TCP_KEEPINTVL), 10)
+                self.assertEqual(sock.getsockopt(
+                    socket.IPPROTO_TCP, socket.TCP_KEEPCNT), 6)
+        finally:
+            await self.stop_client(task)
+            idle.close()
+            await idle.wait_closed()
+
+    def test_enable_keepalive_without_socket(self):
+        """A transport with no socket is left as is
+        """
+        class Transport(object):
+            def get_extra_info(self, name):
+                return None
+        self.assertIsNone(enable_keepalive(Transport()))
 
     async def test_amain_stops_in_connect_mode(self):
         """`amain` runs the client loop with --connect, and shuts down

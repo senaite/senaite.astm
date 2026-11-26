@@ -33,7 +33,11 @@ captures, and forwards parsed envelopes to a SENAITE LIMS.
   listening. Use it when the device is a passive TCP server that
   expects the LIS to initiate the connection (e.g. a Lantronix
   gateway with "Accept Incoming = Yes" and "Active Connect =
-  None"). `--listen` and `--port` are then ignored.
+  None"). `--listen` and `--port` are then ignored. TCP
+  keepalive is enabled on the connection, so that a connection
+  that died silently (e.g. the gateway was restarted, or the
+  network dropped) is detected within about 2 minutes and opened
+  again.
 - `--reconnect-delay N` — seconds to wait before connecting
   again in `--connect` mode, after a failed attempt or a lost
   connection. Defaults to `5`.
